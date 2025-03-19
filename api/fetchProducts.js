@@ -1,7 +1,7 @@
 // api/fetchProducts.js
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGODB_URI; // Store your MongoDB URI in environment variables
+const uri = process.env.MONGODB_URI; // Access the environment variable
 
 export default async function handler(req, res) {
   const { categoryId } = req.query;
