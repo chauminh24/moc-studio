@@ -22,7 +22,7 @@ const ShopByRoom = () => {
 
   useEffect(() => {
     if (selectedCategory) {
-      fetch(`/api/fetchProducts?categoryId=${selectedCategory._id}`)
+      fetch(`src/api/fetchProducts?categoryId=${selectedCategory._id}`)
         .then((response) => response.json())
         .then((data) => setProducts(data))
         .catch((error) => console.error("Error fetching products:", error));
