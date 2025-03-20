@@ -25,6 +25,11 @@ export default async function handler(req, res) {
     const products = database.collection("products");
     const categories = database.collection("categories");
 
+    // Fetch all products
+    console.log("Fetching products...");
+    const productsTest = await products.find({}).toArray();
+    console.log("Fetched products:", productsTest);
+
     // Fetch all categories
     console.log("Fetching categories...");
     const categoriesResult = await categories.find({}).toArray();
