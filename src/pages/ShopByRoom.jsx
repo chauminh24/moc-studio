@@ -8,11 +8,11 @@ const ShopByRoom = () => {
 
   const subcontent = {
     "Shop by Room": [
-      { name: "Living Room", link: "/shop-by-room/living-room", _id: "60a6ec7e1f0ea3d8ab123b01" },
-      { name: "Bedroom", link: "/shop-by-room/bedroom", _id: "60a6ec7e1f0ea3d8ab123b02" },
-      { name: "Bathroom", link: "/shop-by-room/bathroom", _id: "60a6ec7e1f0ea3d8ab123b03" },
-      { name: "Kitchen", link: "/shop-by-room/kitchen", _id: "60a6ec7e1f0ea3d8ab123b04" },
-      { name: "More", link: "/shop-by-room/more", _id: "60a6ec7e1f0ea3d8ab123b05" },
+      { name: "Living Room", link: "/shop-by-room/living-room" },
+      { name: "Bedroom", link: "/shop-by-room/bedroom" },
+      { name: "Bathroom", link: "/shop-by-room/bathroom" },
+      { name: "Kitchen", link: "/shop-by-room/kitchen" },
+      { name: "More", link: "/shop-by-room/more" },
     ],
   };
 
@@ -23,7 +23,7 @@ const ShopByRoom = () => {
   useEffect(() => {
     if (selectedCategory) {
       console.log(`Fetching products for category: ${selectedCategory.name}`);
-      fetch(`/api/connectDB?categoryId=${selectedCategory._id}`)
+      fetch(`/api/connectDB?categoryName=${selectedCategory.name}`)
         .then((response) => response.json())
         .then((data) => {
           console.log("Fetched products:", data);

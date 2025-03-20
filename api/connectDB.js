@@ -30,17 +30,19 @@ export default async function handler(req, res) {
     const categoriesResult = await categories.find({}).toArray();
     console.log("Fetched categories:", categoriesResult);
 
-    // Fetch products based on the category if categoryId is provided
-    const { categoryId } = req.query;
+    // Fetch products based on the category name if categoryName is provided
+    const { categoryName } = req.query;
     let productsResult = [];
-    if (categoryId) {
-      console.log("Fetching products for categoryId:", categoryId);
-      if (!ObjectId.isValid(categoryId)) {
-        console.error("Invalid categoryId:", categoryId);
-        return res.status(400).json({ error: 'Invalid categoryId' });
+    if (categoryName) {
+      console.log("Fetching category for categoryName:", categoryName);
+      const category = await categories.findOne({ name: categoryName });
+      if (!category) {
+        console.error("Category not found:", categoryName);
+        return res.status(404).json({ error: 'Category not found' });
       }
-      const objectIdCategoryId = new ObjectId(categoryId);
-      productsResult = await products.find({ category_ids: { $in: [objectIdCategoryId] } }).toArray();
+      const categoryId = category._id;
+      console.log("Fetching products for categoryId:", categoryId);
+      productsResult = await products.find({ category_ids: { $in: [categoryId] } }).toArray();
       console.log("Fetched products:", productsResult);
     }
 
