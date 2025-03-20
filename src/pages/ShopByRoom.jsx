@@ -27,7 +27,11 @@ const ShopByRoom = () => {
         .then((response) => response.json())
         .then((data) => {
           console.log("Fetched products:", data);
-          setProducts(data.products);
+          if (data.products) {
+            setProducts(data.products);
+          } else {
+            console.error("No products found for category:", selectedCategory.name);
+          }
         })
         .catch((error) => console.error("Error fetching products:", error));
     }
