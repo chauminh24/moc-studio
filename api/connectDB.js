@@ -15,6 +15,7 @@ export default async function handler(req, res) {
   try {
     // Connect to the MongoDB cluster
     await client.connect();
+    console.log("Connected to MongoDB");
 
     // Access the database
     const database = client.db("moc-studio"); // Replace with your database name
@@ -37,10 +38,11 @@ export default async function handler(req, res) {
     // Send the result back to the client
     res.status(200).json({ categories: categoriesResult, products: productsResult });
   } catch (error) {
-    console.error(error);
+    console.error("Error occurred:", error);
     res.status(500).json({ error: 'Unable to connect to the database' });
   } finally {
     // Close the connection
     await client.close();
+    console.log("MongoDB connection closed");
   }
 }
