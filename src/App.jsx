@@ -55,7 +55,7 @@ const App = () => {
   };
 
   useEffect(() => {
-    fetch("/api/products")
+    fetch("/api/fetchProducts")
       .then((response) => response.json())
       .then((data) => setProducts(data))
       .catch((error) => console.error("Error fetching products:", error));
