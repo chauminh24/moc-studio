@@ -17,11 +17,14 @@ export default async function handler(req, res) {
     await client.connect();
 
     // Access the database
-    const database = client.db("your-database-name"); // Replace with your database name
-    const collection = database.collection("your-collection-name"); // Replace with your collection name
+    const database = client.db("moc-studio"); // Replace with your database name
+    const products = database.collection("products"); // Replace with your collection name
 
-    // Perform a simple operation, e.g., find the first document in the collection
-    const result = await collection.findOne({});
+    // Get the category from the query parameters
+    const { categoryId } = req.query;
+
+    // Fetch products based on the category
+    const result = await products.find({ categoryId }).toArray();
 
     // Send the result back to the client
     res.status(200).json(result);
