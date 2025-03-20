@@ -25,11 +25,6 @@ export default async function handler(req, res) {
     const products = database.collection("products");
     const categories = database.collection("categories");
 
-    // Fetch all products
-    console.log("Fetching products...");
-    const productsTest = await products.find({}).toArray();
-    console.log("Fetched products:", productsTest);
-
     // Fetch all categories
     console.log("Fetching categories...");
     const categoriesResult = await categories.find({}).toArray();
@@ -44,7 +39,8 @@ export default async function handler(req, res) {
         console.error("Invalid categoryId:", categoryId);
         return res.status(400).json({ error: 'Invalid categoryId' });
       }
-      productsResult = await products.find({ category_ids: { $in: [new ObjectId(categoryId)] } }).toArray();
+      const objectIdCategoryId = new ObjectId(categoryId);
+      productsResult = await products.find({ category_ids: { $in: [objectIdCategoryId] } }).toArray();
       console.log("Fetched products:", productsResult);
     }
 
