@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     console.log("Connected to MongoDB");
 
     // Access the database
-    const database = client.db("moc-studio'");
+    const database = client.db("moc-studio");
     console.log("Accessed database:", database.databaseName);
 
     const products = database.collection("products");
@@ -41,9 +41,9 @@ export default async function handler(req, res) {
         console.error("Category not found:", trimmedCategoryName);
         return res.status(404).json({ error: 'Category not found' });
       }
-      const categoryId = category._id;
+      const categoryId = new ObjectId(category._id); // Ensure categoryId is an ObjectId
       console.log("Fetching products for categoryId:", categoryId);
-      productsResult = await products.find({ category_ids: { $in: [categoryId] } }).toArray();
+      productsResult = await products.find({ category_ids: categoryId }).toArray(); // Correctly filter products
       console.log("Fetched products:", productsResult);
     }
 
