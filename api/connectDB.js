@@ -1,5 +1,5 @@
 // api/connectDB.js
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 
 const uri = "mongodb+srv://chomin2401:matkhaucuachau@moc-studio.f7so7.mongodb.net/?retryWrites=true&w=majority&appName=moc-studio";
 
@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     const { categoryId } = req.query;
     let productsResult = [];
     if (categoryId) {
-      productsResult = await products.find({ categoryId }).toArray();
+      productsResult = await products.find({ category_ids: ObjectId(categoryId) }).toArray();
     }
 
     // Send the result back to the client
