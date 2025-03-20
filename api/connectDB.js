@@ -23,12 +23,15 @@ export default async function handler(req, res) {
 
     // Fetch all categories
     const categoriesResult = await categories.find({}).toArray();
+    console.log("Fetched categories:", categoriesResult);
 
     // Fetch products based on the category if categoryId is provided
     const { categoryId } = req.query;
     let productsResult = [];
     if (categoryId) {
-      productsResult = await products.find({ category_ids: ObjectId(categoryId) }).toArray();
+      console.log("Fetching products for categoryId:", categoryId);
+      productsResult = await products.find({ category_ids: { $in: [ObjectId(categoryId)] } }).toArray();
+      console.log("Fetched products:", productsResult);
     }
 
     // Send the result back to the client
