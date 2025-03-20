@@ -2,16 +2,29 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import ProductCard from "../productCard";
 
-const ShopByRoom = ({ categories }) => {
+const ShopByRoom = () => {
   const { category } = useParams(); // Get the category from the URL
   const [products, setProducts] = useState([]);
 
+  const subcontent = {
+    "Shop by Room": [
+      { name: "Living Room", link: "/shop-by-room/living-room", _id: "60a6ec7e1f0ea3d8ab123b01" },
+      { name: "Bedroom", link: "/shop-by-room/bedroom", _id: "60a6ec7e1f0ea3d8ab123b02" },
+      { name: "Bathroom", link: "/shop-by-room/bathroom", _id: "60a6ec7e1f0ea3d8ab123b03" },
+      { name: "Kitchen", link: "/shop-by-room/kitchen", _id: "60a6ec7e1f0ea3d8ab123b04" },
+      { name: "More", link: "/shop-by-room/more", _id: "60a6ec7e1f0ea3d8ab123b05" },
+    ],
+  };
+
+  const selectedCategory = subcontent["Shop by Room"].find(
+    (item) => item.link === `/shop-by-room/${category}`
+  );
 
   useEffect(() => {
     if (selectedCategory) {
       fetch(`/api/connectDB?categoryId=${selectedCategory._id}`)
         .then((response) => response.json())
-        .then((data) => setProducts(data.products))
+        .then((data) => setProducts(data))
         .catch((error) => console.error("Error fetching products:", error));
     }
   }, [selectedCategory]);
@@ -26,7 +39,7 @@ const ShopByRoom = ({ categories }) => {
             <p>Explore {selectedCategory.name} products.</p>
           </div>
         ) : (
-          categories.map((item) => (
+          subcontent["Shop by Room"].map((item) => (
             <div key={item.name} className="border p-6 rounded-lg shadow-sm bg-blue text-white">
               <h2 className="text-xl font-semibold mb-4">{item.name}</h2>
               <Link to={item.link} className="text-blue-600 hover:underline">
