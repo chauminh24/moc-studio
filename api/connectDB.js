@@ -19,15 +19,20 @@ export default async function handler(req, res) {
     // Access the database
     const database = client.db("moc-studio"); // Replace with your database name
     const products = database.collection("products"); // Replace with your collection name
+    const categories = database.collection("categories"); // Replace with your collection name
 
-    // Get the category from the query parameters
+    // Fetch all categories
+    const categoriesResult = await categories.find({}).toArray();
+
+    // Fetch products based on the category if categoryId is provided
     const { categoryId } = req.query;
-
-    // Fetch products based on the category
-    const result = await products.find({ categoryId }).toArray();
+    let productsResult = [];
+    if (categoryId) {
+      productsResult = await products.find({ categoryId }).toArray();
+    }
 
     // Send the result back to the client
-    res.status(200).json(result);
+    res.status(200).json({ categories: categoriesResult, products: productsResult });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Unable to connect to the database' });
