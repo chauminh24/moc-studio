@@ -34,10 +34,11 @@ export default async function handler(req, res) {
     const { categoryName } = req.query;
     let productsResult = [];
     if (categoryName) {
-      console.log("Fetching category for categoryName:", categoryName);
-      const category = await categories.findOne({ name: categoryName });
+      const trimmedCategoryName = categoryName.trim();
+      console.log("Fetching category for categoryName:", trimmedCategoryName);
+      const category = await categories.findOne({ name: trimmedCategoryName });
       if (!category) {
-        console.error("Category not found:", categoryName);
+        console.error("Category not found:", trimmedCategoryName);
         return res.status(404).json({ error: 'Category not found' });
       }
       const categoryId = category._id;
