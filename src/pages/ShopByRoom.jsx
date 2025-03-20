@@ -22,9 +22,13 @@ const ShopByRoom = () => {
 
   useEffect(() => {
     if (selectedCategory) {
+      console.log(`Fetching products for category: ${selectedCategory.name}`);
       fetch(`/api/connectDB?categoryId=${selectedCategory._id}`)
         .then((response) => response.json())
-        .then((data) => setProducts(data))
+        .then((data) => {
+          console.log("Fetched products:", data);
+          setProducts(data.products);
+        })
         .catch((error) => console.error("Error fetching products:", error));
     }
   }, [selectedCategory]);
