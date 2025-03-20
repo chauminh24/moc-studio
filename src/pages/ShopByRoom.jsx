@@ -6,9 +6,6 @@ const ShopByRoom = ({ categories }) => {
   const { category } = useParams(); // Get the category from the URL
   const [products, setProducts] = useState([]);
 
-  const selectedCategory = categories.find(
-    (item) => item.link === `/shop-by-room/${category}`
-  );
 
   useEffect(() => {
     if (selectedCategory) {
