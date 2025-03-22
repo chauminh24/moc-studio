@@ -25,7 +25,7 @@ const ProductCard = ({ product }) => {
           {/* Title and Price */}
           <div>
             <h2 className="text-lg font-semibold">{product.name}</h2>
-            <p className="text-2xl font-bold text-gray-900">${product.price.$numberDecimal}</p> {/* Highlighted price */}
+            <p className="text-2xl font-bold text-gray-900">€{product.price.$numberDecimal}</p> {/* Highlighted price */}
           </div>
           {/* Save Button */}
           <button
