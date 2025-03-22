@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import ProductCard from "./ProductCard"; // Import your ProductCard component
 
 const ShopByProduct = () => {
   const { category, subcategory } = useParams(); // Get URL parameters
   const [products, setProducts] = useState([]);
+  const [selectedCategoryName, setSelectedCategoryName] = useState("");
 
   const subcontent = {
     "Shop by Product": [
@@ -43,30 +44,25 @@ const ShopByProduct = () => {
   );
 
   useEffect(() => {
-    if (selectedSubcategory) {
-      console.log(`Fetching products for subcategory: ${selectedSubcategory.name}`);
-      fetch(`/api/connectDB?subcategoryName=${selectedSubcategory.name}`)
+    // Determine the category/subcategory name to fetch products for
+    const categoryName = selectedSubcategory
+      ? selectedSubcategory.name
+      : selectedCategory?.name;
+
+    if (categoryName) {
+      // Set the selected category name for display
+      setSelectedCategoryName(categoryName);
+
+      // Fetch products for the selected category/subcategory name
+      console.log(`Fetching products for category: ${categoryName}`);
+      fetch(`/api/products?category=${categoryName}`) // Replace with your API endpoint
         .then((response) => response.json())
         .then((data) => {
           console.log("Fetched products:", data);
           if (data.products) {
             setProducts(data.products);
           } else {
-            console.error("No products found for subcategory:", selectedSubcategory.name);
-            setProducts([]);
-          }
-        })
-        .catch((error) => console.error("Error fetching products:", error));
-    } else if (selectedCategory) {
-      console.log(`Fetching products for category: ${selectedCategory.name}`);
-      fetch(`/api/connectDB?categoryName=${selectedCategory.name}`)
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Fetched products:", data);
-          if (data.products) {
-            setProducts(data.products);
-          } else {
-            console.error("No products found for category:", selectedCategory.name);
+            console.error("No products found for category:", categoryName);
             setProducts([]);
           }
         })
@@ -89,11 +85,11 @@ const ShopByProduct = () => {
 
         {/* Product cards (right column) */}
         <div className="md:col-span-2">
-          {selectedSubcategory ? (
+          {selectedCategoryName ? (
             <>
               <div className="border p-6 rounded-lg shadow-sm bg-orange text-white mb-8">
-                <h2 className="text-xl font-semibold mb-4">{selectedSubcategory.name}</h2>
-                <p>Explore {selectedSubcategory.name} products.</p>
+                <h2 className="text-xl font-semibold mb-4">{selectedCategoryName}</h2>
+                <p>Explore {selectedCategoryName} products.</p>
               </div>
               {products.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -102,44 +98,9 @@ const ShopByProduct = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-red-500">No products found in this subcategory.</p>
+                <p className="text-red-500">No products found in this category.</p>
               )}
             </>
-          ) : selectedCategory ? (
-            selectedCategory.isCollapsible ? (
-              <>
-                <div className="border p-6 rounded-lg shadow-sm bg-orange text-white mb-8">
-                  <h2 className="text-xl font-semibold mb-4">{selectedCategory.name}</h2>
-                  <p>Explore {selectedCategory.name} products.</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {selectedCategory.subItems.map((subItem) => (
-                    <div key={subItem.name} className="border p-6 rounded-lg shadow-sm bg-orange text-white">
-                      <h2 className="text-xl font-semibold mb-4">{subItem.name}</h2>
-                      <Link to={subItem.link} className="text-blue-600 hover:underline">
-                        Explore {subItem.name}
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="border p-6 rounded-lg shadow-sm bg-orange text-white mb-8">
-                  <h2 className="text-xl font-semibold mb-4">{selectedCategory.name}</h2>
-                  <p>Explore {selectedCategory.name} products.</p>
-                </div>
-                {products.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {products.map((product) => (
-                      <ProductCard key={product._id} product={product} />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-red-500">No products found in this category.</p>
-                )}
-              </>
-            )
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {subcontent["Shop by Product"].map((item) => (
