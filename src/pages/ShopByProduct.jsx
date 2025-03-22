@@ -44,7 +44,7 @@ const ShopByProduct = () => {
   );
 
   useEffect(() => {
-    // Determine the category/subcategory name to fetch products for
+    // Determine the category name to fetch products for
     const categoryName = selectedSubcategory
       ? selectedSubcategory.name
       : selectedCategory?.name;
@@ -53,9 +53,9 @@ const ShopByProduct = () => {
       // Set the selected category name for display
       setSelectedCategoryName(categoryName);
 
-      // Fetch products for the selected category/subcategory name
+      // Fetch products for the selected category name
       console.log(`Fetching products for category: ${categoryName}`);
-      fetch(`/api/products?category=${categoryName}`) // Replace with your API endpoint
+      fetch(`/api/products?categoryName=${categoryName}`) // Replace with your API endpoint
         .then((response) => response.json())
         .then((data) => {
           console.log("Fetched products:", data);
@@ -85,7 +85,7 @@ const ShopByProduct = () => {
 
         {/* Product cards (right column) */}
         <div className="md:col-span-2">
-          {selectedCategoryName ? (
+          {selectedCategoryName && (
             <>
               <div className="border p-6 rounded-lg shadow-sm bg-orange text-white mb-8">
                 <h2 className="text-xl font-semibold mb-4">{selectedCategoryName}</h2>
@@ -101,17 +101,6 @@ const ShopByProduct = () => {
                 <p className="text-red-500">No products found in this category.</p>
               )}
             </>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {subcontent["Shop by Product"].map((item) => (
-                <div key={item.name} className="border p-6 rounded-lg shadow-sm bg-orange text-white">
-                  <h2 className="text-xl font-semibold mb-4">{item.name}</h2>
-                  <Link to={item.link} className="text-blue-600 hover:underline">
-                    Explore {item.name}
-                  </Link>
-                </div>
-              ))}
-            </div>
           )}
         </div>
       </div>
