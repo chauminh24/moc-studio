@@ -1,6 +1,5 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import ProductCard from "../productCard";
 
 const ShopByProduct = () => {
   const { category, subcategory } = useParams(); // Get URL parameters
