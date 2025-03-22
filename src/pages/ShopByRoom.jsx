@@ -47,16 +47,20 @@ const ShopByRoom = () => {
               <h2 className="text-xl font-semibold mb-4">{selectedCategory.name}</h2>
               <p>Explore {selectedCategory.name} products.</p>
             </div>
-            {products.map((product) => (
-              <ProductCard
-                key={product._id}
-                image={product.image}
-                title={product.title}
-                price={product.price}
-                onSave={() => console.log(`Saved product: ${product.title}`)}
-                onAddToCart={() => console.log(`Added to cart: ${product.title}`)}
-              />
-            ))}
+            {products.length > 0 ? (
+              products.map((product) => (
+                <ProductCard
+                  key={product._id}
+                  image={product.image}
+                  title={product.name}
+                  price={product.price}
+                  onSave={() => console.log(`Saved product: ${product.name}`)}
+                  onAddToCart={() => console.log(`Added to cart: ${product.name}`)}
+                />
+              ))
+            ) : (
+              <p>No products found in this category.</p>
+            )}
           </>
         ) : (
           subcontent["Shop by Room"].map((item) => (
