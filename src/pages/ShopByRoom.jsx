@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import ProductCard from "../productCard";
+import ProductCard from "../components/ProductCard";
 
 const ShopByRoom = () => {
   const { category } = useParams(); // Get the category from the URL
@@ -31,6 +31,7 @@ const ShopByRoom = () => {
             setProducts(data.products);
           } else {
             console.error("No products found for category:", selectedCategory.name);
+            setProducts([]);
           }
         })
         .catch((error) => console.error("Error fetching products:", error));
@@ -49,17 +50,10 @@ const ShopByRoom = () => {
             </div>
             {products.length > 0 ? (
               products.map((product) => (
-                <ProductCard
-                  key={product._id}
-                  image={product.image}
-                  title={product.name}
-                  price={product.price}
-                  onSave={() => console.log(`Saved product: ${product.name}`)}
-                  onAddToCart={() => console.log(`Added to cart: ${product.name}`)}
-                />
+                <ProductCard key={product._id} product={product} />
               ))
             ) : (
-              <p>No products found in this category.</p>
+              <p className="text-red-500">No products found in this category.</p>
             )}
           </>
         ) : (
