@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import ProductCard from "./ProductCard"; // Import your ProductCard component
 
 const ShopByProduct = () => {
   const { category, subcategory } = useParams(); // Get URL parameters
+  const [products, setProducts] = useState([]);
 
   const subcontent = {
     "Shop by Product": [
@@ -40,51 +42,120 @@ const ShopByProduct = () => {
     (item) => item.link === `/shop-by-product/${category}/${subcategory}`
   );
 
+  useEffect(() => {
+    if (selectedSubcategory) {
+      console.log(`Fetching products for subcategory: ${selectedSubcategory.name}`);
+      fetch(`/api/connectDB?subcategoryName=${selectedSubcategory.name}`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Fetched products:", data);
+          if (data.products) {
+            setProducts(data.products);
+          } else {
+            console.error("No products found for subcategory:", selectedSubcategory.name);
+            setProducts([]);
+          }
+        })
+        .catch((error) => console.error("Error fetching products:", error));
+    } else if (selectedCategory) {
+      console.log(`Fetching products for category: ${selectedCategory.name}`);
+      fetch(`/api/connectDB?categoryName=${selectedCategory.name}`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Fetched products:", data);
+          if (data.products) {
+            setProducts(data.products);
+          } else {
+            console.error("No products found for category:", selectedCategory.name);
+            setProducts([]);
+          }
+        })
+        .catch((error) => console.error("Error fetching products:", error));
+    }
+  }, [selectedCategory, selectedSubcategory]);
+
   return (
     <div className="pt-[10em] mx-8">
-      <h1 className="text-3xl font-bold mb-4">Shop by Product</h1>
-      <div className={`grid ${selectedSubcategory || selectedCategory ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} gap-6`}>
-        {selectedSubcategory ? (
-          <div className="border p-6 rounded-lg shadow-sm jusify-center bg-orange" style={{ backgroundImage: `url(/images/categories/${selectedSubcategory.name}.jpg)`, backgroundSize: "cover", backgroundPosition: "center" }}>
-            <h2 className="text-xl font-semibold mb-4 ">{selectedSubcategory.name}</h2>
-            <p>Explore {selectedSubcategory.name} products.</p>
-          </div>
-        ) : selectedCategory ? (
-          selectedCategory.isCollapsible ? (
-            selectedCategory.subItems.map((subItem) => (
-              <div key={subItem.name} className="border p-6 rounded-lg shadow-sm bg-orange">
-                <h2 className="text-xl font-semibold mb-4">{subItem.name}</h2>
-                <Link to={subItem.link} className="text-blue-600 hover:underline">
-                  Explore {subItem.name}
-                </Link>
+      <h1 className="text-3xl font-bold mb-8">Shop by Product</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Full-height image (left column) */}
+        <div className="md:col-span-1">
+          <img
+            src="https://via.placeholder.com/600x1200" // Replace with your image
+            alt="Featured"
+            className="w-full h-full object-cover rounded-lg"
+          />
+        </div>
+
+        {/* Product cards (right column) */}
+        <div className="md:col-span-2">
+          {selectedSubcategory ? (
+            <>
+              <div className="border p-6 rounded-lg shadow-sm bg-orange text-white mb-8">
+                <h2 className="text-xl font-semibold mb-4">{selectedSubcategory.name}</h2>
+                <p>Explore {selectedSubcategory.name} products.</p>
               </div>
-            ))
-          ) : (
-            <div className="border p-6 rounded-lg shadow-sm bg-orange" style={{ backgroundImage: `url(${selectedCategory.image})`, backgroundSize: "cover", backgroundPosition: "center" }}>
-              <h2 className="text-xl font-semibold mb-4">{selectedCategory.name}</h2>
-              <p>Explore {selectedCategory.name} products.</p>
-            </div>
-          )
-        ) : (
-          subcontent["Shop by Product"].map((item) => (
-            <div key={item.name} className="border p-6 rounded-lg shadow-sm bg-orange">
-              <h2 className="text-xl font-semibold mb-4">{item.name}</h2>
-              {item.isCollapsible ? (
-                <Link to={item.link} className="text-blue-600 hover:underline">
-                  Explore {item.name}
-                </Link>
+              {products.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {products.map((product) => (
+                    <ProductCard key={product._id} product={product} />
+                  ))}
+                </div>
               ) : (
-                <Link to={item.link} className="text-blue-600 hover:underline">
-                  Explore {item.name}
-                </Link>
+                <p className="text-red-500">No products found in this subcategory.</p>
               )}
+            </>
+          ) : selectedCategory ? (
+            selectedCategory.isCollapsible ? (
+              <>
+                <div className="border p-6 rounded-lg shadow-sm bg-orange text-white mb-8">
+                  <h2 className="text-xl font-semibold mb-4">{selectedCategory.name}</h2>
+                  <p>Explore {selectedCategory.name} products.</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {selectedCategory.subItems.map((subItem) => (
+                    <div key={subItem.name} className="border p-6 rounded-lg shadow-sm bg-orange text-white">
+                      <h2 className="text-xl font-semibold mb-4">{subItem.name}</h2>
+                      <Link to={subItem.link} className="text-blue-600 hover:underline">
+                        Explore {subItem.name}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="border p-6 rounded-lg shadow-sm bg-orange text-white mb-8">
+                  <h2 className="text-xl font-semibold mb-4">{selectedCategory.name}</h2>
+                  <p>Explore {selectedCategory.name} products.</p>
+                </div>
+                {products.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {products.map((product) => (
+                      <ProductCard key={product._id} product={product} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-red-500">No products found in this category.</p>
+                )}
+              </>
+            )
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {subcontent["Shop by Product"].map((item) => (
+                <div key={item.name} className="border p-6 rounded-lg shadow-sm bg-orange text-white">
+                  <h2 className="text-xl font-semibold mb-4">{item.name}</h2>
+                  <Link to={item.link} className="text-blue-600 hover:underline">
+                    Explore {item.name}
+                  </Link>
+                </div>
+              ))}
             </div>
-          ))
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
-
 };
 
 export default ShopByProduct;
