@@ -42,10 +42,22 @@ const ShopByRoom = () => {
       <h1 className="text-3xl font-bold mb-4 ">Shop by Room</h1>
       <div className={`grid ${selectedCategory ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'} gap-6`}>
         {selectedCategory ? (
-          <div className="border p-6 rounded-lg shadow-sm bg-blue text-white">
-            <h2 className="text-xl font-semibold mb-4">{selectedCategory.name}</h2>
-            <p>Explore {selectedCategory.name} products.</p>
-          </div>
+          <>
+            <div className="border p-6 rounded-lg shadow-sm bg-blue text-white">
+              <h2 className="text-xl font-semibold mb-4">{selectedCategory.name}</h2>
+              <p>Explore {selectedCategory.name} products.</p>
+            </div>
+            {products.map((product) => (
+              <ProductCard
+                key={product._id}
+                image={product.image}
+                title={product.title}
+                price={product.price}
+                onSave={() => console.log(`Saved product: ${product.title}`)}
+                onAddToCart={() => console.log(`Added to cart: ${product.title}`)}
+              />
+            ))}
+          </>
         ) : (
           subcontent["Shop by Room"].map((item) => (
             <div key={item.name} className="border p-6 rounded-lg shadow-sm bg-blue text-white">
@@ -57,7 +69,6 @@ const ShopByRoom = () => {
           ))
         )}
       </div>
-      
     </div>
   );
 };
