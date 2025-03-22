@@ -1,13 +1,13 @@
 import React from "react";
 
-const ProductCard = ({ image, name, price, onSave, onAddToCart }) => {
+const ProductCard = ({ image, title, price, onSave, onAddToCart }) => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       {/* Image */}
       <div className="relative">
         <img
           src={image}
-          alt={name}
+          alt={title}
           className="w-full h-48 object-cover"
         />
         {/* Add to Cart Button (inside image) */}
@@ -19,12 +19,12 @@ const ProductCard = ({ image, name, price, onSave, onAddToCart }) => {
         </button>
       </div>
 
-      {/* name, Price, and Save Button */}
+      {/* Title, Price, and Save Button */}
       <div className="p-4">
         <div className="flex justify-between items-center">
-          {/* name and Price */}
+          {/* Title and Price */}
           <div>
-            <h3 className="text-lg font-semibold">{name}</h3>
+            <h3 className="text-lg font-semibold">{title}</h3>
             <p className="text-gray-600">€{price}</p>
           </div>
           {/* Save Button */}
