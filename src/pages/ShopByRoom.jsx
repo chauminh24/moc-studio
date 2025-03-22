@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import ProductCard from "../components/ProductCard";
+import ProductCard from "./ProductCard";
 
 const ShopByRoom = () => {
   const { category } = useParams(); // Get the category from the URL
