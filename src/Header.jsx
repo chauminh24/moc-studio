@@ -4,17 +4,6 @@ import { Link } from "react-router-dom";
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSubcontent, setActiveSubcontent] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery(""); // Clear the search input
-    }
-  };
-
 
   const toggleModal = () => {
     setIsOpen(!isOpen);
@@ -187,22 +176,24 @@ const Header = () => {
         {/* Logo */}
         <div className="absolute left-[3rem] transform -translate-y-1/2 top-1/2 z-20">
           <Link to="/">
-            <img src="/moc-studio.png" alt="Logo" className="h-[10rem] w-auto" />
+            <img
+              src="/moc-studio.png"
+              alt="Logo"
+              className="h-[10rem] w-auto"
+            />
           </Link>
         </div>
 
         {/* Search, Login, Shopping Bag */}
         <div className="flex items-center space-x-6">
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="hidden lg:flex items-center bg-white rounded-full shadow-sm">
+          <div className="hidden lg:flex items-center bg-white rounded-full shadow-sm">
             <input
               type="text"
               placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
               className="py-2 px-4 rounded-full focus:outline-none text-blue-700"
             />
-            <button type="submit" className="p-2" aria-label="Search">
+            <button className="p-2" aria-label="Search">
               <svg
                 className="w-6 h-6 text-blue"
                 fill="none"
@@ -218,14 +209,14 @@ const Header = () => {
                 />
               </svg>
             </button>
-          </form>
+          </div>
 
           {/* Login */}
           <Link
-            to="/login"
+            to="/login-register"
             className="hidden lg:block uppercase tracking-extra-wide text-blue"
           >
-            Log-In
+            Log In
           </Link>
 
           {/* Shopping Bag */}
@@ -255,7 +246,7 @@ const Header = () => {
               </svg>
             </button>
 
-            <Link to="/login" className="text-blue" aria-label="Login">
+            <Link to="/login-register" className="text-blue" aria-label="Login">
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -299,7 +290,7 @@ const Header = () => {
             (link) => (
               <Link
                 key={link}
-                to={`/shop-by-product/${link.toLowerCase().replace(" ", "-")}`}
+                to={`/${link.toLowerCase().replace(" ", "-")}`}
                 className="uppercase tracking-extra-wide text-orange"
               >
                 {link}
@@ -352,8 +343,8 @@ const Header = () => {
                   "Shop by Product",
                   "Shop by Room",
                   "Interior Consulting",
-                  "Contact",
                   "About",
+                  "Contact",
                 ].map((link) => (
                   <div key={link} className="flex items-center justify-between">
                     {(link === "Shop by Product" || link === "Shop by Room") ? (
