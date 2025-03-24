@@ -2,18 +2,21 @@ import React from "react";
 
 const ProductCard = ({ product }) => {
   return (
-    <div className="bg-white shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-      {/* Image */}
-      <div className="relative">
+    <div className="bg-white overflow-hidden group">
+      {/* Image Container with 2:3 Aspect Ratio */}
+      <div className="relative pb-[150%]"> {/* 3:2 = 150% (2/3*100) */}
         <img
           src={product.image_url}
           alt={product.name}
-          className="w-full h-64 object-cover"
+          className="absolute w-full h-full object-cover"
         />
-        {/* Add to Cart Button */}
+        {/* Add to Cart Button - Now Visible */}
         <button
           onClick={() => alert("Added to cart!")}
-          className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black text-white px-4 py-2 text-sm hover:bg-gray-800 transition-colors duration-300"
+          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 
+                    bg-black text-white px-6 py-2 text-xs tracking-widest
+                    opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                    whitespace-nowrap"
         >
           ADD TO CART
         </button>
@@ -23,8 +26,8 @@ const ProductCard = ({ product }) => {
       <div className="p-4">
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-lg font-medium uppercase tracking-wide">{product.name}</h2>
-            <p className="text-xl font-bold mt-1">€{product.price.$numberDecimal}</p>
+            <h2 className="text-sm font-medium uppercase tracking-widest mb-1">{product.name}</h2>
+            <p className="text-base font-bold">€{product.price.$numberDecimal}</p>
           </div>
           {/* Save Button */}
           <button
@@ -32,7 +35,7 @@ const ProductCard = ({ product }) => {
             className="text-gray-500 hover:text-black transition-colors duration-200"
           >
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
