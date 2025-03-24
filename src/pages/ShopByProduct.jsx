@@ -87,7 +87,7 @@ const ShopByProduct = () => {
         </div>
 
         {/* Product cards (right column) */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-4">
           {selectedSubcategory ? (
             <>
               <div

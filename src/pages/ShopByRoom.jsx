@@ -52,7 +52,7 @@ const ShopByRoom = () => {
         </div>
 
         {/* Product cards (right column) */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-4">
           {selectedCategory ? (
             <>
               <div className="border p-6 rounded-lg shadow-sm bg-blue text-white mb-8">
