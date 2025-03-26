@@ -10,6 +10,14 @@ const Header = () => {
     setActiveSubcontent(null); // Reset subcontent when modal is toggled
   };
 
+  const handleLinkClick = () => {
+    // Close the sidebar
+    setIsOpen(false);
+    setActiveSubcontent(null);
+    // Scroll to top
+    window.scrollTo(0, 0);
+  };
+
   const openSubcontent = (section) => {
     setActiveSubcontent(section);
   };
@@ -96,6 +104,7 @@ const Header = () => {
               <Link
                 to={item.link}
                 className="uppercase tracking-extra-wide text-white mb-2 hover:text-orange"
+                onClick={handleLinkClick}
               >
                 {item.name}
               </Link>
@@ -132,6 +141,7 @@ const Header = () => {
                     to={subItem.link}
                     key={idx}
                     className="block uppercase tracking-extra-wide text-white mb-2 hover:text-orange"
+                    onClick={handleLinkClick}
                   >
                     {subItem.name}
                   </Link>
@@ -292,6 +302,7 @@ const Header = () => {
                 key={link}
                 to={`/${link.toLowerCase().replace(" ", "-")}`}
                 className="uppercase tracking-extra-wide text-orange"
+                onClick={handleLinkClick}
               >
                 {link}
               </Link>

@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import ShopByRoom from "./pages/ShopByRoom";
 import ShopByProduct from "./pages/ShopByProduct";
 import NotFound from "./pages/NotFound";
+import InteriorConsulting from "./pages/InteriorConsulting";
 
 const App = () => {
   const [categories, setCategories] = useState([]);
@@ -44,6 +45,7 @@ const App = () => {
             <Route path="/shop-by-room" element={<ShopByRoom categories={categories} />} />
             <Route path="/shop-by-room/:category" element={<ShopByRoom categories={categories} />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/interior-consulting" element={<InteriorConsulting />} />
           </Routes>
         </main>
 
