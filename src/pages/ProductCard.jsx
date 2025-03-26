@@ -18,17 +18,17 @@ const ProductCard = ({ product }) => {
           alt={product.name}
           className="absolute w-full h-full object-cover"
         />
-        
+
         {/* Add to Cart Button */}
         <button
           onClick={handleAddToCart}
-          className={`absolute bottom-4 right-4 p-2 transition-all duration-300
-                     ${isAdded ? 'bg-blue' : 'bg-white'}
-                     rounded-full text-white`}
+          className={`absolute inset-x-0 bottom-4 mx-auto p-3 transition-all duration-300 
+              ${isAdded ? 'bg-blue text-white' : 'bg-white text-black shadow-md'} 
+              rounded-full`}
         >
           {isAdded ? (
             <svg
-              className="w-4 h-4"
+              className="w-6 h-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -43,7 +43,7 @@ const ProductCard = ({ product }) => {
             </svg>
           ) : (
             <svg
-              className="w-4 h-4"
+              className="w-6 h-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -58,6 +58,7 @@ const ProductCard = ({ product }) => {
             </svg>
           )}
         </button>
+
       </div>
 
       {/* Product Info */}
