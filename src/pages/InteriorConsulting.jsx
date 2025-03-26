@@ -122,23 +122,23 @@ const InteriorConsulting = () => {
   };
 
   return (
-    <div className="container mx-auto pt-[20em] px-4 py-8">
+    <div className="container mx-auto pt-[10em] px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-center md:text-left">
         Interior Design Consulting
       </h1>
   
       {/* Booking Section */}
       <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4 text-center md:text-left">
+        <h2 className="text-xl font-semibold mb-4 text-center md:text-left">
           Book a Consultation
         </h2>
-        <div className="bg-white p-4 shadow rounded-lg">
+        <div className="bg-white p-4 shadow rounded-lg max-w-md mx-auto">
           <Calendar
             localizer={localizer}
             events={events}
             startAccessor="start"
             endAccessor="end"
-            style={{ height: 500 }}
+            style={{ height: 400 }}
             onSelectEvent={handleSelectSlot}
             selectable
             views={['month', 'week', 'day']}
