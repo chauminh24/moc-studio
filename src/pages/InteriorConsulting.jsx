@@ -129,7 +129,7 @@ const InteriorConsulting = () => {
 
       {/* Booking Section */}
       <section className="mb-8 px-4">
-        <h2 className="text-lg md:text-xl font-semibold mb-3 text-center md:text-left">
+        <h2 className="text-xl font-bold text-blue mb-12 text-center">
           Book a Consultation
         </h2>
         <div className="bg-white p-3 shadow rounded-lg w-full max-w-lg mx-auto">
@@ -323,7 +323,7 @@ const InteriorConsulting = () => {
       {/* Our Services Section */}
       <section className="py-16 px-4 md:px-8">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-blue mb-12 text-center">Our Consulting Services</h2>
+          <h2 className="text-xl font-bold text-blue mb-12 text-center">Our Consulting Services</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -371,7 +371,7 @@ const InteriorConsulting = () => {
 
       {/* Past Projects */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4 text-center md:text-left">
+        <h2 className="text-xl font-bold text-blue mb-12 text-center">
           Past Projects
         </h2>
         {projects.length > 0 ? (
