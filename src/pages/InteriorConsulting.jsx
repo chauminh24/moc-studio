@@ -28,7 +28,7 @@ const InteriorConsulting = () => {
       try {
         const res = await fetch('/api/connectDB?type=interiorConsulting');
         const data = await res.json();
-  
+
         setAvailability(data.availability);
         setProjects(data.projects);
         setSessions(data.sessions);
@@ -36,12 +36,12 @@ const InteriorConsulting = () => {
         console.error('Error fetching data:', error);
       }
     };
-  
+
     fetchData();
   }, []);
 
   // Transform availability data for calendar
-  const events = availability.flatMap(day => 
+  const events = availability.flatMap(day =>
     day.time_slots
       .filter(slot => slot.available > 0)
       .map(slot => ({
@@ -63,11 +63,11 @@ const InteriorConsulting = () => {
 
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     if (type === 'checkbox') {
       setFormData(prev => ({
         ...prev,
-        [name]: checked 
+        [name]: checked
           ? [...prev[name], value]
           : prev[name].filter(item => item !== value)
       }));
@@ -81,7 +81,7 @@ const InteriorConsulting = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       // Create session
       const sessionRes = await fetch('/api/consulting_sessions', {
@@ -126,29 +126,31 @@ const InteriorConsulting = () => {
       <h1 className="text-3xl font-bold mb-8 text-center md:text-left">
         Interior Design Consulting
       </h1>
-  
+
       {/* Booking Section */}
-      <section className="mb-12">
-        <h2 className="text-xl font-semibold mb-4 text-center md:text-left">
+      <section className="mb-8 px-4">
+        <h2 className="text-lg md:text-xl font-semibold mb-3 text-center md:text-left">
           Book a Consultation
         </h2>
-        <div className="bg-white p-4 shadow rounded-lg max-w-md mx-auto">
+        <div className="bg-white p-3 shadow rounded-lg w-full max-w-lg mx-auto">
           <Calendar
             localizer={localizer}
             events={events}
             startAccessor="start"
             endAccessor="end"
-            style={{ height: 400 }}
+            style={{ height: "250px" }} // Smaller height for mobile
+            className="md:h-[450px]" // Larger height for bigger screens
             onSelectEvent={handleSelectSlot}
             selectable
-            views={['month', 'week', 'day']}
+            views={["month", "week", "day"]}
             defaultView="month"
             min={new Date(0, 0, 0, 9, 0, 0)} // 9 AM
             max={new Date(0, 0, 0, 18, 0, 0)} // 6 PM
           />
         </div>
       </section>
-  
+
+
       {/* Booking Modal */}
       {showBookingModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -156,7 +158,7 @@ const InteriorConsulting = () => {
             <h3 className="text-xl font-semibold mb-4 text-center">
               Book Session for {moment(selectedSlot.start).format('LLL')}
             </h3>
-  
+
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="block mb-2">Session Type</label>
@@ -171,7 +173,7 @@ const InteriorConsulting = () => {
                   <option value="in-person">In-Person Consultation</option>
                 </select>
               </div>
-  
+
               <div className="mb-4">
                 <label className="block mb-2">Design Focus</label>
                 <input
@@ -183,7 +185,7 @@ const InteriorConsulting = () => {
                   required
                 />
               </div>
-  
+
               <div className="mb-4">
                 <label className="block mb-2">Property Type</label>
                 <input
@@ -195,7 +197,7 @@ const InteriorConsulting = () => {
                   required
                 />
               </div>
-  
+
               <div className="mb-4">
                 <label className="block mb-2">Duration (minutes)</label>
                 <input
@@ -210,7 +212,7 @@ const InteriorConsulting = () => {
                   required
                 />
               </div>
-  
+
               <div className="mb-4">
                 <label className="block mb-2">Style Preferences</label>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -240,7 +242,7 @@ const InteriorConsulting = () => {
                   ))}
                 </div>
               </div>
-  
+
               <div className="mb-4">
                 <label className="block mb-2">Budget Range</label>
                 <select
@@ -258,7 +260,7 @@ const InteriorConsulting = () => {
                   <option value=">$5000">Over $5000</option>
                 </select>
               </div>
-  
+
               <div className="mb-4">
                 <label className="block mb-2">Priority Items</label>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -286,7 +288,7 @@ const InteriorConsulting = () => {
                   ))}
                 </div>
               </div>
-  
+
               <div className="mb-4">
                 <label className="block mb-2">Special Requirements</label>
                 <textarea
@@ -297,7 +299,7 @@ const InteriorConsulting = () => {
                   rows="3"
                 />
               </div>
-  
+
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
@@ -317,7 +319,7 @@ const InteriorConsulting = () => {
           </div>
         </div>
       )}
-  
+
       {/* Upcoming Sessions */}
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4 text-center md:text-left">
@@ -342,7 +344,7 @@ const InteriorConsulting = () => {
           <p className="text-center">No upcoming sessions scheduled.</p>
         )}
       </section>
-  
+
       {/* Past Projects */}
       <section>
         <h2 className="text-2xl font-semibold mb-4 text-center md:text-left">
