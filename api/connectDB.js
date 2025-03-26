@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     console.log("Connected to MongoDB");
 
     // Access the database
-    const database = client.db("moc-studio'");
+    const database = client.db("moc-studio");
     console.log("Accessed database:", database.databaseName);
 
     const products = database.collection("products");
