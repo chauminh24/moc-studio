@@ -18,42 +18,53 @@ export default async function handler(req, res) {
     await client.connect();
     console.log("Connected to MongoDB");
 
-    // Access the database
     const database = client.db("moc-studio");
-    console.log("Accessed database:", database.databaseName);
 
-    const products = database.collection("products");
-    const categories = database.collection("categories");
+    // Handle different API requests based on query parameters
+    const { type } = req.query;
 
-    // Fetch all categories
-    console.log("Fetching categories...");
-    const categoriesResult = await categories.find({}).toArray();
-    console.log("Fetched categories:", categoriesResult);
+    if (type === 'interiorConsulting') {
+      // Fetch consulting data
+      const availabilityCollection = database.collection("consulting_availability");
+      const projectsCollection = database.collection("interior_projects");
+      const sessionsCollection = database.collection("consulting_sessions");
 
-    // Fetch products based on the category name if categoryName is provided
-    const { categoryName } = req.query;
-    let productsResult = [];
-    if (categoryName) {
-      const trimmedCategoryName = categoryName.trim();
-      console.log("Fetching category for categoryName:", trimmedCategoryName);
-      const category = await categories.findOne({ name: trimmedCategoryName });
-      if (!category) {
-        console.error("Category not found:", trimmedCategoryName);
-        return res.status(404).json({ error: 'Category not found' });
+      const availability = await availabilityCollection.find({}).toArray();
+      const projects = await projectsCollection.find({}).toArray();
+      const sessions = await sessionsCollection.find({}).toArray();
+
+      return res.status(200).json({
+        availability,
+        projects,
+        sessions,
+      });
+    } else if (type === 'categoriesAndProducts') {
+      // Existing logic for categories and products
+      const categories = database.collection("categories");
+      const products = database.collection("products");
+
+      const categoriesResult = await categories.find({}).toArray();
+      const { categoryName } = req.query;
+      let productsResult = [];
+
+      if (categoryName) {
+        const trimmedCategoryName = categoryName.trim();
+        const category = await categories.findOne({ name: trimmedCategoryName });
+        if (!category) {
+          return res.status(404).json({ error: 'Category not found' });
+        }
+        const categoryId = new ObjectId(category._id);
+        productsResult = await products.find({ category_ids: categoryId }).toArray();
       }
-      const categoryId = new ObjectId(category._id); // Ensure categoryId is an ObjectId
-      console.log("Fetching products for categoryId:", categoryId);
-      productsResult = await products.find({ category_ids: categoryId }).toArray(); // Correctly filter products
-      console.log("Fetched products:", productsResult);
-    }
 
-    // Send the result back to the client
-    res.status(200).json({ categories: categoriesResult, products: productsResult });
+      return res.status(200).json({ categories: categoriesResult, products: productsResult });
+    } else {
+      return res.status(400).json({ error: 'Invalid request type' });
+    }
   } catch (error) {
     console.error("Error occurred:", error);
     res.status(500).json({ error: 'Unable to connect to the database', details: error.message });
   } finally {
-    // Close the connection
     await client.close();
     console.log("MongoDB connection closed");
   }

@@ -21,14 +21,24 @@ const ShopByRoom = () => {
   );
 
   useEffect(() => {
-    if (selectedCategory) {
-      fetch(`/api/connectDB?categoryName=${selectedCategory.name}`)
-        .then((response) => response.json())
-        .then((data) => {
+    const fetchProducts = async () => {
+      try {
+        if (selectedCategory) {
+          const response = await fetch(`/api/connectDB?type=categoriesAndProducts&categoryName=${encodeURIComponent(selectedCategory.name)}`);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch products: ${response.statusText}`);
+          }
+          const data = await response.json();
           setProducts(data.products || []);
-        })
-        .catch((error) => console.error("Error fetching products:", error));
-    }
+        } else {
+          setProducts([]); // Clear products if no category is selected
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+  
+    fetchProducts();
   }, [selectedCategory]);
 
   return (
