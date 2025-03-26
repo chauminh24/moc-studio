@@ -17,7 +17,7 @@ const Header = () => {
       setSearchQuery(""); // Clear the search bar after submission
     }
   };
-  
+
   const handleLinkClick = () => {
     // Close the sidebar
     setIsOpen(false);
@@ -205,13 +205,18 @@ const Header = () => {
         {/* Search, Login, Shopping Bag */}
         <div className="flex items-center space-x-6">
           {/* Search Bar */}
-          <div className="hidden lg:flex items-center bg-white rounded-full shadow-sm">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="hidden lg:flex items-center bg-white rounded-full shadow-sm"
+          >
             <input
               type="text"
               placeholder="Search"
               className="py-2 px-4 rounded-full focus:outline-none text-blue-700"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <button className="p-2" aria-label="Search">
+            <button type="submit" className="p-2" aria-label="Search">
               <svg
                 className="w-6 h-6 text-blue"
                 fill="none"
@@ -227,7 +232,8 @@ const Header = () => {
                 />
               </svg>
             </button>
-          </div>
+          </form>
+
 
           {/* Login */}
           <Link
