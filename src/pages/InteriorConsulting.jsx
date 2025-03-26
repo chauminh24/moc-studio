@@ -320,30 +320,54 @@ const InteriorConsulting = () => {
         </div>
       )}
 
-      {/* Upcoming Sessions */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4 text-center md:text-left">
-          Your Upcoming Sessions
-        </h2>
-        {sessions.filter((s) => ['scheduled', 'confirmed'].includes(s.status))
-          .length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sessions
-              .filter((s) => ['scheduled', 'confirmed'].includes(s.status))
-              .map((session) => (
-                <div key={session._id} className="bg-white p-4 shadow rounded-lg">
-                  <h3 className="font-semibold">{session.design_focus} Consultation</h3>
-                  <p>{moment(session.session_date).format('LLL')}</p>
-                  <p>Type: {session.session_type}</p>
-                  <p>Status: {session.status}</p>
-                  <p>Duration: {session.duration} minutes</p>
-                </div>
-              ))}
+      {/* Our Services Section */}
+      <section className="py-16 px-4 md:px-8">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold text-blue mb-12 text-center">Our Consulting Services</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                title: 'Space Planning',
+                description: 'Optimal furniture arrangement and traffic flow analysis',
+                icon: '📐'
+              },
+              {
+                title: 'Color Consultation',
+                description: 'Personalized color schemes for walls, furnishings, and decor',
+                icon: '🎨'
+              },
+              {
+                title: 'Furniture Selection',
+                description: 'Curated pieces that match your style and budget',
+                icon: '🛋️'
+              },
+              {
+                title: 'Lighting Design',
+                description: 'Layered lighting plans for functionality and ambiance',
+                icon: '💡'
+              },
+              {
+                title: 'Material Selection',
+                description: 'Guidance on flooring, countertops, and finishes',
+                icon: '🧱'
+              },
+              {
+                title: 'Custom Solutions',
+                description: 'Tailored designs for unique spaces and requirements',
+                icon: '✨'
+              }
+            ].map((service, index) => (
+              <div key={index} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                <div className="text-4xl mb-4">{service.icon}</div>
+                <h3 className="text-xl font-bold text-blue mb-2">{service.title}</h3>
+                <p className="text-gray-600">{service.description}</p>
+              </div>
+            ))}
           </div>
-        ) : (
-          <p className="text-center">No upcoming sessions scheduled.</p>
-        )}
+        </div>
       </section>
+
 
       {/* Past Projects */}
       <section>
