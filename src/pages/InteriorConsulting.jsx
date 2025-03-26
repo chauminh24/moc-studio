@@ -122,12 +122,17 @@ const InteriorConsulting = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Interior Design Consulting</h1>
-      
+    <div className="container mx-auto pt-[10em] px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8 text-center md:text-left">
+        Interior Design Consulting
+      </h1>
+  
+      {/* Booking Section */}
       <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Book a Consultation</h2>
-        <div className="bg-white p-4 shadow">
+        <h2 className="text-2xl font-semibold mb-4 text-center md:text-left">
+          Book a Consultation
+        </h2>
+        <div className="bg-white p-4 shadow rounded-lg">
           <Calendar
             localizer={localizer}
             events={events}
@@ -137,21 +142,21 @@ const InteriorConsulting = () => {
             onSelectEvent={handleSelectSlot}
             selectable
             views={['month', 'week', 'day']}
-            defaultView="week"
+            defaultView="month"
             min={new Date(0, 0, 0, 9, 0, 0)} // 9 AM
             max={new Date(0, 0, 0, 18, 0, 0)} // 6 PM
           />
         </div>
       </section>
-
+  
       {/* Booking Modal */}
       {showBookingModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-xl font-semibold mb-4">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="text-xl font-semibold mb-4 text-center">
               Book Session for {moment(selectedSlot.start).format('LLL')}
             </h3>
-            
+  
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="block mb-2">Session Type</label>
@@ -159,14 +164,14 @@ const InteriorConsulting = () => {
                   name="sessionType"
                   value={formData.sessionType}
                   onChange={handleFormChange}
-                  className="w-full p-2 border"
+                  className="w-full p-2 border rounded"
                   required
                 >
                   <option value="virtual">Virtual Consultation</option>
                   <option value="in-person">In-Person Consultation</option>
                 </select>
               </div>
-
+  
               <div className="mb-4">
                 <label className="block mb-2">Design Focus</label>
                 <input
@@ -174,11 +179,11 @@ const InteriorConsulting = () => {
                   name="designFocus"
                   value={formData.designFocus}
                   onChange={handleFormChange}
-                  className="w-full p-2 border"
+                  className="w-full p-2 border rounded"
                   required
                 />
               </div>
-
+  
               <div className="mb-4">
                 <label className="block mb-2">Property Type</label>
                 <input
@@ -186,11 +191,11 @@ const InteriorConsulting = () => {
                   name="propertyType"
                   value={formData.propertyType}
                   onChange={handleFormChange}
-                  className="w-full p-2 border"
+                  className="w-full p-2 border rounded"
                   required
                 />
               </div>
-
+  
               <div className="mb-4">
                 <label className="block mb-2">Duration (minutes)</label>
                 <input
@@ -201,15 +206,26 @@ const InteriorConsulting = () => {
                   min="30"
                   max="240"
                   step="30"
-                  className="w-full p-2 border"
+                  className="w-full p-2 border rounded"
                   required
                 />
               </div>
-
+  
               <div className="mb-4">
                 <label className="block mb-2">Style Preferences</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['modern', 'minimalist', 'traditional', 'industrial', 'scandinavian', 'bohemian', 'rustic', 'coastal', 'mid-century', 'contemporary'].map(style => (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {[
+                    'modern',
+                    'minimalist',
+                    'traditional',
+                    'industrial',
+                    'scandinavian',
+                    'bohemian',
+                    'rustic',
+                    'coastal',
+                    'mid-century',
+                    'contemporary',
+                  ].map((style) => (
                     <label key={style} className="flex items-center">
                       <input
                         type="checkbox"
@@ -224,14 +240,14 @@ const InteriorConsulting = () => {
                   ))}
                 </div>
               </div>
-
+  
               <div className="mb-4">
                 <label className="block mb-2">Budget Range</label>
                 <select
                   name="budgetRange"
                   value={formData.budgetRange}
                   onChange={handleFormChange}
-                  className="w-full p-2 border"
+                  className="w-full p-2 border rounded"
                   required
                 >
                   <option value="">Select budget</option>
@@ -242,11 +258,20 @@ const InteriorConsulting = () => {
                   <option value=">$5000">Over $5000</option>
                 </select>
               </div>
-
+  
               <div className="mb-4">
                 <label className="block mb-2">Priority Items</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['seating', 'storage', 'lighting', 'flooring', 'wall-treatment', 'window-treatment', 'decor', 'layout'].map(item => (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {[
+                    'seating',
+                    'storage',
+                    'lighting',
+                    'flooring',
+                    'wall-treatment',
+                    'window-treatment',
+                    'decor',
+                    'layout',
+                  ].map((item) => (
                     <label key={item} className="flex items-center">
                       <input
                         type="checkbox"
@@ -261,29 +286,29 @@ const InteriorConsulting = () => {
                   ))}
                 </div>
               </div>
-
+  
               <div className="mb-4">
                 <label className="block mb-2">Special Requirements</label>
                 <textarea
                   name="specialRequirements"
                   value={formData.specialRequirements}
                   onChange={handleFormChange}
-                  className="w-full p-2 border"
+                  className="w-full p-2 border rounded"
                   rows="3"
                 />
               </div>
-
+  
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowBookingModal(false)}
-                  className="px-4 py-2 border"
+                  className="px-4 py-2 border rounded"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white"
+                  className="px-4 py-2 bg-blue-500 text-white rounded"
                 >
                   Book Session
                 </button>
@@ -292,16 +317,19 @@ const InteriorConsulting = () => {
           </div>
         </div>
       )}
-
+  
       {/* Upcoming Sessions */}
       <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Your Upcoming Sessions</h2>
-        {sessions.filter(s => ['scheduled', 'confirmed'].includes(s.status)).length > 0 ? (
+        <h2 className="text-2xl font-semibold mb-4 text-center md:text-left">
+          Your Upcoming Sessions
+        </h2>
+        {sessions.filter((s) => ['scheduled', 'confirmed'].includes(s.status))
+          .length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {sessions
-              .filter(s => ['scheduled', 'confirmed'].includes(s.status))
-              .map(session => (
-                <div key={session._id} className="bg-white p-4 shadow">
+              .filter((s) => ['scheduled', 'confirmed'].includes(s.status))
+              .map((session) => (
+                <div key={session._id} className="bg-white p-4 shadow rounded-lg">
                   <h3 className="font-semibold">{session.design_focus} Consultation</h3>
                   <p>{moment(session.session_date).format('LLL')}</p>
                   <p>Type: {session.session_type}</p>
@@ -311,17 +339,19 @@ const InteriorConsulting = () => {
               ))}
           </div>
         ) : (
-          <p>No upcoming sessions scheduled.</p>
+          <p className="text-center">No upcoming sessions scheduled.</p>
         )}
       </section>
-
+  
       {/* Past Projects */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">Past Projects</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-center md:text-left">
+          Past Projects
+        </h2>
         {projects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.map(project => (
-              <div key={project._id} className="bg-white p-4 shadow">
+            {projects.map((project) => (
+              <div key={project._id} className="bg-white p-4 shadow rounded-lg">
                 <h3 className="font-semibold">{project.title}</h3>
                 <p>Status: {project.status}</p>
                 <p>Created: {moment(project.created_at).format('LL')}</p>
@@ -333,7 +363,7 @@ const InteriorConsulting = () => {
             ))}
           </div>
         ) : (
-          <p>No past projects found.</p>
+          <p className="text-center">No past projects found.</p>
         )}
       </section>
     </div>
