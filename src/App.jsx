@@ -5,8 +5,8 @@ import Footer from "./Footer";
 import Home from "./pages/Home";
 import ShopByRoom from "./pages/ShopByRoom";
 import ShopByProduct from "./pages/ShopByProduct";
+import InteriorConsulting from "./pages/InteriorConsulting"; // Import the InteriorConsulting component
 import NotFound from "./pages/NotFound";
-import InteriorConsulting from "./pages/InteriorConsulting";
 
 const App = () => {
   const [categories, setCategories] = useState([]);
@@ -33,6 +33,7 @@ const App = () => {
           <Routes>
             {/* Home Page */}
             <Route path="/" element={<Home />} />
+
             {/* Shop by Product Routes */}
             <Route path="/shop-by-product" element={<ShopByProduct />} />
             <Route path="/shop-by-product/:category" element={<ShopByProduct />} />
@@ -44,8 +45,12 @@ const App = () => {
             {/* Shop by Room Routes */}
             <Route path="/shop-by-room" element={<ShopByRoom categories={categories} />} />
             <Route path="/shop-by-room/:category" element={<ShopByRoom categories={categories} />} />
-            <Route path="*" element={<NotFound />} />
+
+            {/* Interior Consulting Route */}
             <Route path="/interior-consulting" element={<InteriorConsulting />} />
+
+            {/* Not Found Route */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
 
