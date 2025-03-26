@@ -5,7 +5,8 @@ import Footer from "./Footer";
 import Home from "./pages/Home";
 import ShopByRoom from "./pages/ShopByRoom";
 import ShopByProduct from "./pages/ShopByProduct";
-import InteriorConsulting from "./pages/InteriorConsulting"; // Import the InteriorConsulting component
+import InteriorConsulting from "./pages/InteriorConsulting";
+import SearchResults from "./pages/SearchResults";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
@@ -49,6 +50,9 @@ const App = () => {
             {/* Interior Consulting Route */}
             <Route path="/interior-consulting" element={<InteriorConsulting />} />
 
+            {/* Search Results Route */}
+            <Route path="/search" element={<SearchResults />} />
+            
             {/* Not Found Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>

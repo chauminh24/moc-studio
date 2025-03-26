@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -8,6 +8,14 @@ const Header = () => {
   const toggleModal = () => {
     setIsOpen(!isOpen);
     setActiveSubcontent(null); // Reset subcontent when modal is toggled
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery(""); // Clear the search bar after submission
+    }
   };
 
   const handleLinkClick = () => {
@@ -197,29 +205,34 @@ const Header = () => {
         {/* Search, Login, Shopping Bag */}
         <div className="flex items-center space-x-6">
           {/* Search Bar */}
-          <div className="hidden lg:flex items-center bg-white rounded-full shadow-sm">
-            <input
-              type="text"
-              placeholder="Search"
-              className="py-2 px-4 rounded-full focus:outline-none text-blue-700"
-            />
-            <button className="p-2" aria-label="Search">
-              <svg
-                className="w-6 h-6 text-blue"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </button>
-          </div>
+        <form
+          onSubmit={handleSearchSubmit}
+          className="hidden lg:flex items-center bg-white rounded-full shadow-sm"
+        >
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="py-2 px-4 rounded-full focus:outline-none text-blue-700"
+          />
+          <button type="submit" className="p-2" aria-label="Search">
+            <svg
+              className="w-6 h-6 text-blue"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </button>
+        </form>
 
           {/* Login */}
           <Link
@@ -357,7 +370,7 @@ const Header = () => {
                   "About",
                   "Contact",
                 ].map((link) => (
-                  <div key={link} className="flex items-center justify-between">
+                  <div key={link} className="flex">
                     {(link === "Shop by Product" || link === "Shop by Room") ? (
                       // If it's one of these two, only open subcontent
                       <button
@@ -372,6 +385,7 @@ const Header = () => {
                       <Link
                         to={`/${link.toLowerCase().replace(" & ", "-").replace(" ", "-")}`}
                         className="text-white uppercase tracking-extra-wide hover:text-orange"
+                        onClick={handleLinkClick}
                       >
                         {link}
                       </Link>

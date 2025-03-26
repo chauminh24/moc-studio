@@ -58,6 +58,21 @@ export default async function handler(req, res) {
       }
 
       return res.status(200).json({ categories: categoriesResult, products: productsResult });
+    
+    } else if (type === 'search') {
+      // Search products by query
+      const { query } = req.query;
+      if (!query) {
+        return res.status(400).json({ error: 'Search query is required' });
+      }
+    
+      const productsCollection = database.collection("products");
+      const searchResults = await productsCollection
+        .find({ name: { $regex: query, $options: "i" } }) // Case-insensitive search
+        .toArray();
+    
+      return res.status(200).json({ products: searchResults });  
+    
     } else {
       return res.status(400).json({ error: 'Invalid request type' });
     }
