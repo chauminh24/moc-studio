@@ -4,6 +4,9 @@ import { Link, useNavigate } from "react-router-dom";
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSubcontent, setActiveSubcontent] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false); // State for search modal
+  const navigate = useNavigate()
 
   const toggleModal = () => {
     setIsOpen(!isOpen);
@@ -15,7 +18,16 @@ const Header = () => {
     if (searchQuery.trim()) {
       navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery(""); // Clear the search bar after submission
+      setIsSearchModalOpen(false); // Close the search modal
     }
+  };
+
+  const openSearchModal = () => {
+    setIsSearchModalOpen(true);
+  };
+
+  const closeSearchModal = () => {
+    setIsSearchModalOpen(false);
   };
 
   const handleLinkClick = () => {
@@ -253,7 +265,7 @@ const Header = () => {
 
           {/* Mobile Icons */}
           <div className="flex lg:hidden space-x-4">
-            <button className="text-blue" aria-label="Search">
+            <button className="text-blue" aria-label="Search" onClick={openSearchModal}>
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -306,6 +318,49 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* Search Modal */}
+      {isSearchModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md mx-4">
+            <button
+              onClick={closeSearchModal}
+              className="absolute top-4 right-4 text-gray-500 hover:text-black"
+              aria-label="Close search modal"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <form onSubmit={handleSearchSubmit} className="flex flex-col space-y-4">
+              <input
+                type="text"
+                placeholder="Search"
+                className="py-2 px-4 border rounded focus:outline-none"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Search
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Navigation Links (Desktop Only) */}
       <div className="hidden lg:flex justify-end container mx-auto p-4">

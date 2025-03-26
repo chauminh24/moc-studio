@@ -33,11 +33,11 @@ const SearchResults = () => {
   }, [query]);
 
   if (loading) {
-    return <p className="text-center">Loading...</p>;
+    return <p className="text-center pt-[20em] uppercase text-xl">Loading...</p>;
   }
 
   if (error) {
-    return <p className="text-center text-red-500">Error: {error}</p>;
+    return <p className="text-center pt-[20em] text-red">Error: {error}</p>;
   }
 
   return (
