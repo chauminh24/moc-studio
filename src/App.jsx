@@ -1,21 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import Home from "./pages/Home";
 import ShopByRoom from "./pages/ShopByRoom";
 import ShopByProduct from "./pages/ShopByProduct";
 import NotFound from "./pages/NotFound";
-
-const ScrollToTop = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location]);
-
-  return null;
-};
+import InteriorConsulting from "./pages/InteriorConsulting";
 
 const App = () => {
   const [categories, setCategories] = useState([]);
@@ -33,7 +24,6 @@ const App = () => {
 
   return (
     <Router>
-      <ScrollToTop />
       <div>
         {/* Header */}
         <Header />
@@ -55,6 +45,7 @@ const App = () => {
             <Route path="/shop-by-room" element={<ShopByRoom categories={categories} />} />
             <Route path="/shop-by-room/:category" element={<ShopByRoom categories={categories} />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/interior-consulting" element={<InteriorConsulting />} />
           </Routes>
         </main>
 
