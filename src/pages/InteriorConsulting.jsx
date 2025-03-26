@@ -139,7 +139,7 @@ const InteriorConsulting = () => {
             startAccessor="start"
             endAccessor="end"
             style={{ height: "250px" }} // Smaller height for mobile
-            className="md:h-[450px]" // Larger height for bigger screens
+            className="md:h-[500]" // Larger height for bigger screens
             onSelectEvent={handleSelectSlot}
             selectable
             views={["month", "week", "day"]}
