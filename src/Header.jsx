@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { CartContext } from "./context/CartContext";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSubcontent, setActiveSubcontent] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false); // State for search modal
+  const [isCartModalOpen, setIsCartModalOpen] = useState(false); // State for cart modal
+  const { cart, removeFromCart } = useContext(CartContext);
   const navigate = useNavigate()
 
   const toggleModal = () => {
@@ -28,6 +31,14 @@ const Header = () => {
 
   const closeSearchModal = () => {
     setIsSearchModalOpen(false);
+  };
+
+  const openCartModal = () => {
+    setIsCartModalOpen(true);
+  };
+
+  const closeCartModal = () => {
+    setIsCartModalOpen(false);
   };
 
   const handleLinkClick = () => {
@@ -257,7 +268,7 @@ const Header = () => {
 
           {/* Shopping Bag */}
           <Link
-            to="/cart"
+            onClick={openCartModal}
             className="hidden lg:block uppercase tracking-extra-wide text-blue"
           >
             Shopping Bag (0)
@@ -299,7 +310,7 @@ const Header = () => {
               </svg>
             </Link>
 
-            <Link to="/cart" className="text-blue" aria-label="Cart">
+            <Link onClick={openCartModal} className="text-blue" aria-label="Cart">
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -362,6 +373,67 @@ const Header = () => {
         </div>
       )}
 
+      {/* Cart Modal */}
+      {isCartModalOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          {/* Overlay */}
+          <div
+            className="flex-1"
+            onClick={closeCartModal}
+          ></div>
+
+          {/* Cart Content */}
+          <div
+            className={`fixed inset-y-0 right-0 ${window.innerWidth > 768 ? "w-2/5" : "w-full"} bg-white p-6 z-40 shadow-lg`}
+          >
+            <button
+              onClick={closeCartModal}
+              className="absolute top-4 right-4 text-blue hover:text-black"
+              aria-label="Close cart modal"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <h2 className="text-xl text-blue font-bold mt-10 text-center">Shopping Cart</h2>
+            {cart.length > 0 ? (
+              cart.map((item) => (
+                <div key={item._id} className="flex justify-between items-center mb-4">
+                  <div>
+                    <h3 className="text-sm font-medium">{item.name}</h3>
+                    <p className="text-sm">€{item.price.$numberDecimal}</p>
+                    <p className="text-sm">Quantity: {item.quantity}</p>
+                  </div>
+                  <button
+                    onClick={() => removeFromCart(item._id)}
+                    className="text-red-500 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-blue">Your cart is empty.</p>
+              </div>
+            )}
+
+          </div>
+
+        </div>
+      )}
+
       {/* Navigation Links (Desktop Only) */}
       <div className="hidden lg:flex justify-end container mx-auto p-4">
         <nav className="flex space-x-9">
@@ -383,9 +455,8 @@ const Header = () => {
       {/* Modal for Toggle */}
       {isOpen && (
         <>
-          {/* Overlay for Mobile Only */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            className="fixed inset-0 bg-opacity-50 z-30"
             onClick={toggleModal}
           ></div>
 
@@ -419,60 +490,60 @@ const Header = () => {
             {/* Main Modal Content */}
             {!activeSubcontent ? (
               <nav className="flex flex-col space-y-4 mt-18 bg-blue ml-12 text-[25px] font-medium">
-              {[
-                "Shop by Product",
-                "Shop by Room",
-                "Interior Consulting",
-                "About",
-                "Contact",
-              ].map((link) => (
-                <div key={link} className="flex justify-between items-center">
-                  {(link === "Shop by Product" || link === "Shop by Room") ? (
-                    // If it's one of these two, only open subcontent
-                    <button
-                      onClick={() => openSubcontent(link)}
-                      className="text-white uppercase tracking-extra-wide hover:text-orange text-left flex-1"
-                      aria-label={`Open ${link} submenu`}
-                    >
-                      {link}
-                    </button>
-                  ) : (
-                    // Otherwise, it's a normal link
-                    <Link
-                      to={`/${link.toLowerCase().replace(" & ", "-").replace(" ", "-")}`}
-                      className="text-white uppercase tracking-extra-wide hover:text-orange text-left flex-1"
-                      onClick={handleLinkClick}
-                    >
-                      {link}
-                    </Link>
-                  )}
-            
-                  {(link === "Shop by Product" || link === "Shop by Room") && (
-                    <button
-                      onClick={() => openSubcontent(link)}
-                      className="text-white"
-                      aria-label={`Open ${link} submenu`}
-                    >
-                      <svg
-                        className="w-6 h-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
+                {[
+                  "Shop by Product",
+                  "Shop by Room",
+                  "Interior Consulting",
+                  "About",
+                  "Contact",
+                ].map((link) => (
+                  <div key={link} className="flex justify-between items-center">
+                    {(link === "Shop by Product" || link === "Shop by Room") ? (
+                      // If it's one of these two, only open subcontent
+                      <button
+                        onClick={() => openSubcontent(link)}
+                        className="text-white uppercase tracking-extra-wide hover:text-orange text-left flex-1"
+                        aria-label={`Open ${link} submenu`}
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              ))}
-            </nav>
-            
+                        {link}
+                      </button>
+                    ) : (
+                      // Otherwise, it's a normal link
+                      <Link
+                        to={`/${link.toLowerCase().replace(" & ", "-").replace(" ", "-")}`}
+                        className="text-white uppercase tracking-extra-wide hover:text-orange text-left flex-1"
+                        onClick={handleLinkClick}
+                      >
+                        {link}
+                      </Link>
+                    )}
+
+                    {(link === "Shop by Product" || link === "Shop by Room") && (
+                      <button
+                        onClick={() => openSubcontent(link)}
+                        className="text-white"
+                        aria-label={`Open ${link} submenu`}
+                      >
+                        <svg
+                          className="w-6 h-6"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </nav>
+
             ) : (
               <Subcontent section={activeSubcontent} />
             )}

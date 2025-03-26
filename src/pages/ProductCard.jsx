@@ -1,9 +1,12 @@
 import React, { useState } from "react";
+import { CartContext } from "../context/CartContext";
 
 const ProductCard = ({ product }) => {
+  const { addToCart } = useContext(CartContext);
   const [isAdded, setIsAdded] = useState(false);
 
   const handleAddToCart = () => {
+    addToCart(product);
     setIsAdded(true);
     // Add your actual cart logic here
     setTimeout(() => setIsAdded(false), 2000); // Reset after 2 seconds for demo
@@ -30,7 +33,7 @@ const ProductCard = ({ product }) => {
           >
             {isAdded ? (
               <svg
-                className="w-6 h-6"
+                className="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -45,7 +48,7 @@ const ProductCard = ({ product }) => {
               </svg>
             ) : (
               <svg
-                className="w-6 h-6"
+                className="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
