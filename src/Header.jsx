@@ -17,7 +17,7 @@ const Header = () => {
       setSearchQuery(""); // Clear the search bar after submission
     }
   };
-
+  
   const handleLinkClick = () => {
     // Close the sidebar
     setIsOpen(false);
@@ -205,34 +205,29 @@ const Header = () => {
         {/* Search, Login, Shopping Bag */}
         <div className="flex items-center space-x-6">
           {/* Search Bar */}
-        <form
-          onSubmit={handleSearchSubmit}
-          className="hidden lg:flex items-center bg-white rounded-full shadow-sm"
-        >
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="py-2 px-4 rounded-full focus:outline-none text-blue-700"
-          />
-          <button type="submit" className="p-2" aria-label="Search">
-            <svg
-              className="w-6 h-6 text-blue"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </button>
-        </form>
+          <div className="hidden lg:flex items-center bg-white rounded-full shadow-sm">
+            <input
+              type="text"
+              placeholder="Search"
+              className="py-2 px-4 rounded-full focus:outline-none text-blue-700"
+            />
+            <button className="p-2" aria-label="Search">
+              <svg
+                className="w-6 h-6 text-blue"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </button>
+          </div>
 
           {/* Login */}
           <Link
