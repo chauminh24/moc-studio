@@ -122,7 +122,7 @@ const InteriorConsulting = () => {
   };
 
   return (
-    <div className="container mx-auto pt-[10em] px-4 py-8">
+    <div className="container mx-auto pt-[20em] px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-center md:text-left">
         Interior Design Consulting
       </h1>
