@@ -321,11 +321,11 @@ const Header = () => {
 
       {/* Search Modal */}
       {isSearchModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-blue flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-full max-w-md mx-4">
             <button
               onClick={closeSearchModal}
-              className="absolute top-4 right-4 text-gray-500 hover:text-black"
+              className="absolute top-4 right-4 text-gray hover:text-black"
               aria-label="Close search modal"
             >
               <svg
@@ -353,7 +353,7 @@ const Header = () => {
               />
               <button
                 type="submit"
-                className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="py-2 px-4 bg-orange text-white rounded hover:bg-dark-beige"
               >
                 Search
               </button>
@@ -369,7 +369,7 @@ const Header = () => {
             (link) => (
               <Link
                 key={link}
-                to={`/${link.toLowerCase().replace(" ", "-")}`}
+                to={`/shop-by-room/${link.toLowerCase().replace(" ", "-")}`}
                 className="uppercase tracking-extra-wide text-orange"
                 onClick={handleLinkClick}
               >
@@ -419,59 +419,60 @@ const Header = () => {
             {/* Main Modal Content */}
             {!activeSubcontent ? (
               <nav className="flex flex-col space-y-4 mt-18 bg-blue ml-12 text-[25px] font-medium">
-                {[
-                  "Shop by Product",
-                  "Shop by Room",
-                  "Interior Consulting",
-                  "About",
-                  "Contact",
-                ].map((link) => (
-                  <div key={link} className="flex">
-                    {(link === "Shop by Product" || link === "Shop by Room") ? (
-                      // If it's one of these two, only open subcontent
-                      <button
-                        onClick={() => openSubcontent(link)}
-                        className="text-white uppercase tracking-extra-wide hover:text-orange"
-                        aria-label={`Open ${link} submenu`}
+              {[
+                "Shop by Product",
+                "Shop by Room",
+                "Interior Consulting",
+                "About",
+                "Contact",
+              ].map((link) => (
+                <div key={link} className="flex justify-between items-center">
+                  {(link === "Shop by Product" || link === "Shop by Room") ? (
+                    // If it's one of these two, only open subcontent
+                    <button
+                      onClick={() => openSubcontent(link)}
+                      className="text-white uppercase tracking-extra-wide hover:text-orange text-left flex-1"
+                      aria-label={`Open ${link} submenu`}
+                    >
+                      {link}
+                    </button>
+                  ) : (
+                    // Otherwise, it's a normal link
+                    <Link
+                      to={`/${link.toLowerCase().replace(" & ", "-").replace(" ", "-")}`}
+                      className="text-white uppercase tracking-extra-wide hover:text-orange text-left flex-1"
+                      onClick={handleLinkClick}
+                    >
+                      {link}
+                    </Link>
+                  )}
+            
+                  {(link === "Shop by Product" || link === "Shop by Room") && (
+                    <button
+                      onClick={() => openSubcontent(link)}
+                      className="text-white"
+                      aria-label={`Open ${link} submenu`}
+                    >
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        {link}
-                      </button>
-                    ) : (
-                      // Otherwise, it's a normal link
-                      <Link
-                        to={`/${link.toLowerCase().replace(" & ", "-").replace(" ", "-")}`}
-                        className="text-white uppercase tracking-extra-wide hover:text-orange"
-                        onClick={handleLinkClick}
-                      >
-                        {link}
-                      </Link>
-                    )}
-
-                    {(link === "Shop by Product" || link === "Shop by Room") && (
-                      <button
-                        onClick={() => openSubcontent(link)}
-                        className="text-white"
-                        aria-label={`Open ${link} submenu`}
-                      >
-                        <svg
-                          className="w-6 h-6"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </nav>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              ))}
+            </nav>
+            
             ) : (
               <Subcontent section={activeSubcontent} />
             )}

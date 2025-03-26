@@ -19,7 +19,10 @@
   --color-orange: #FE6C23;
   --color-blue: #76B3D0;
   --color-light-beige: #FFE9CA;
+  --color-dark-beige: #FFC999;
+  --color-black: #000;
   --tracking-extra-wide: 0.35em;
+  --opacity-50: 0.5;
 }
 
 /* Dark Mode */
