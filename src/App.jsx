@@ -8,6 +8,7 @@ import ShopByRoom from "./pages/ShopByRoom";
 import ShopByProduct from "./pages/ShopByProduct";
 import InteriorConsulting from "./pages/InteriorConsulting";
 import SearchResults from "./pages/SearchResults";
+import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
@@ -54,6 +55,11 @@ const App = () => {
 
               {/* Search Results Route */}
               <Route path="/search" element={<SearchResults />} />
+
+              {/* Login Route */}
+              <Route path="/login" element={<LoginPage />} />
+
+            
 
               {/* Not Found Route */}
               <Route path="*" element={<NotFound />} />
