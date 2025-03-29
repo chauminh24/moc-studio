@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import CartProvider from "./context/CartContext";
+import AuthProvider from "./context/AuthContext";
 import Header from "./Header";
 import Footer from "./Footer";
 import Home from "./pages/Home";
@@ -25,21 +26,25 @@ const App = () => {
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
-  // Custom component to conditionally render the Header
-  const ConditionalHeader = () => {
+  // Custom component to conditionally render Header and Footer
+  const ConditionalPageStyle = ({ children }) => {
     const location = useLocation();
-    return location.pathname !== "/login" ? <Header /> : null;
+    const isLoginPage = location.pathname === "/login";
+
+    return (
+      <>
+        {!isLoginPage && <Header />}
+        <main className="container mx-auto">{children}</main>
+        {!isLoginPage && <Footer />}
+      </>
+    );
   };
 
   return (
-    <CartProvider>
-      <Router>
-        <div>
-          {/* Conditionally Render Header */}
-          <ConditionalHeader />
-
-          {/* Main Content */}
-          <main className="container mx-auto">
+    <AuthProvider>
+      <CartProvider>
+        <Router>
+          <ConditionalPageStyle>
             <Routes>
               {/* Home Page */}
               <Route path="/" element={<Home />} />
@@ -68,13 +73,10 @@ const App = () => {
               {/* Not Found Route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </main>
-
-          {/* Footer */}
-          <Footer />
-        </div>
-      </Router>
-    </CartProvider>
+          </ConditionalPageStyle>
+        </Router>
+      </CartProvider>
+    </AuthProvider>
   );
 };
 

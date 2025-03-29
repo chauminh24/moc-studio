@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { CartContext } from "./context/CartContext";
+import { AuthContext } from "./context/AuthContext"; // Import AuthContext
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,8 +10,10 @@ const Header = () => {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false); // State for search modal
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const { user, logout } = useContext(AuthContext);  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const { cart, removeFromCart } = useContext(CartContext);
   const navigate = useNavigate()
+  const location = useLocation();
 
   const toggleModal = () => {
     setIsOpen(!isOpen);
@@ -51,16 +54,18 @@ const Header = () => {
   };
 
   const handleLoginClick = () => {
-    if (isLoggedIn) {
-      openAccountModal(); // Open account modal if logged in
+    if (user) {
+      setIsAccountModalOpen(true); // Open account modal if logged in
     } else {
-      navigate("/login"); // Redirect to login page if not logged in
+      // Redirect to login with the current page as the redirect URL
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
     }
   };
-
+  
   const handleLogout = () => {
-    setIsLoggedIn(false); // Simulate logging out
-    closeAccountModal();
+    logout();
+    setIsAccountModalOpen(false);
+    navigate("/"); // Redirect to homepage after logout
   };
 
 
@@ -286,7 +291,7 @@ const Header = () => {
             onClick={handleLoginClick}
             className="hidden lg:block uppercase tracking-extra-wide text-blue"
           >
-            {isLoggedIn ? "Account" : "Log In"}
+            {user ? "Account" : "Log In"}
           </button>
 
           {/* Shopping Bag */}
@@ -422,11 +427,11 @@ const Header = () => {
             </button>
             <div className="text-center">
               <img src="/moc-studio.png" alt="Logo" className="h-16 mx-auto mb-4" />
-              <h2 className="text-xl font-bold mb-4">Welcome, User</h2>
-              <button className="block w-full py-2 px-4 bg-blue-500 text-white rounded mb-2">
+              <h2 className="text-xl font-bold mb-4">Welcome, {user?.name || "User"}</h2>
+              <button onClick={() => navigate("/account")} className="block w-full py-2 px-4 bg-blue-500 text-white rounded mb-2">
                 Manage Account
               </button>
-              <button className="block w-full py-2 px-4 bg-blue-500 text-white rounded mb-2">
+              <button onClick={() => navigate("/orders")} className="block w-full py-2 px-4 bg-blue-500 text-white rounded mb-2">
                 View Orders
               </button>
               <button

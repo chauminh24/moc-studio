@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const { login } = useContext(AuthContext);
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const redirectUrl = new URLSearchParams(location.search).get("redirect") || "/";
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,12 +34,11 @@ const LoginPage = () => {
             }
 
             // Store user data and redirect
-            localStorage.setItem('user', JSON.stringify(data.user));
-            localStorage.setItem('token', data.token);
-            navigate('/dashboard'); // Or your desired redirect path
+            login(data.user, data.token);
+            navigate(redirectUrl); // Redirect to the previous page or homepage
         } catch (err) {
-            setError(err.message || 'An error occurred during login');
-            console.error('Login error:', err);
+            setError(err.message || "An error occurred during login");
+            console.error("Login error:", err);
         } finally {
             setIsLoading(false);
         }
