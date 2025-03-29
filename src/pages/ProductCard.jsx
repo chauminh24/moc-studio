@@ -8,27 +8,25 @@ const ProductCard = ({ product }) => {
   const handleAddToCart = () => {
     addToCart(product);
     setIsAdded(true);
-    // Add your actual cart logic here
     setTimeout(() => setIsAdded(false), 2000); // Reset after 2 seconds for demo
   };
 
   return (
     <div className="bg-white overflow-hidden group">
       {/* Image Container */}
-      <div className="relative pb-[150%]">
+      <div className="relative pb-[150%] md:pb-0 md:h-[100vh]">
         <img
           src={product.image_url}
           alt={product.name}
-          className="absolute w-full h-full object-cover"
+          className="absolute w-full h-full object-cover md:max-h-[100vh]"
         />
 
         {/* Add to Cart Button */}
-        {/* Centered Button Wrapper */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
           <button
             onClick={handleAddToCart}
             className={`p-3 transition-all duration-300 
-                ${isAdded ? 'bg-blue text-white' : 'bg-white text-black shadow-md'} 
+                ${isAdded ? "bg-blue text-white" : "bg-white text-black shadow-md"} 
                 rounded-full`}
           >
             {isAdded ? (
@@ -64,8 +62,6 @@ const ProductCard = ({ product }) => {
             )}
           </button>
         </div>
-
-
       </div>
 
       {/* Product Info */}
