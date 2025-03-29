@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import CartProvider from "./context/CartContext";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -25,12 +25,18 @@ const App = () => {
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
+  // Custom component to conditionally render the Header
+  const ConditionalHeader = () => {
+    const location = useLocation();
+    return location.pathname !== "/login" ? <Header /> : null;
+  };
+
   return (
     <CartProvider>
       <Router>
         <div>
-          {/* Header */}
-          <Header />
+          {/* Conditionally Render Header */}
+          <ConditionalHeader />
 
           {/* Main Content */}
           <main className="container mx-auto">
@@ -58,8 +64,6 @@ const App = () => {
 
               {/* Login Route */}
               <Route path="/login" element={<LoginPage />} />
-
-            
 
               {/* Not Found Route */}
               <Route path="*" element={<NotFound />} />
