@@ -7,8 +7,9 @@ const Header = () => {
   const [activeSubcontent, setActiveSubcontent] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false); // State for search modal
-  const [isCartModalOpen, setIsCartModalOpen] = useState(false); // State for cart modal
-  const { cart, removeFromCart } = useContext(CartContext);
+  const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const navigate = useNavigate()
 
   const toggleModal = () => {
@@ -40,6 +41,28 @@ const Header = () => {
   const closeCartModal = () => {
     setIsCartModalOpen(false);
   };
+
+  const openAccountModal = () => {
+    setIsAccountModalOpen(true);
+  };
+
+  const closeAccountModal = () => {
+    setIsAccountModalOpen(false);
+  };
+
+  const handleLoginClick = () => {
+    if (isLoggedIn) {
+      openAccountModal(); // Open account modal if logged in
+    } else {
+      navigate("/login"); // Redirect to login page if not logged in
+    }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false); // Simulate logging out
+    closeAccountModal();
+  };
+
 
   const handleLinkClick = () => {
     // Close the sidebar
@@ -259,12 +282,12 @@ const Header = () => {
 
 
           {/* Login */}
-          <Link
-            to="/login"
+          <button
+            onClick={handleLoginClick}
             className="hidden lg:block uppercase tracking-extra-wide text-blue"
           >
-            Log In
-          </Link>
+            {isLoggedIn ? "Account" : "Log In"}
+          </button>
 
           {/* Shopping Bag */}
           <Link
@@ -293,7 +316,7 @@ const Header = () => {
               </svg>
             </button>
 
-            <Link to="/login-register" className="text-blue" aria-label="Login">
+            <button onClick={handleLoginClick} className="text-blue" aria-label="Login">
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -308,7 +331,7 @@ const Header = () => {
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                 />
               </svg>
-            </Link>
+            </button>
 
             <Link onClick={openCartModal} className="text-blue" aria-label="Cart">
               <svg
@@ -369,6 +392,50 @@ const Header = () => {
                 Search
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Account Modal */}
+      {isAccountModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md mx-4">
+            <button
+              onClick={closeAccountModal}
+              className="absolute top-4 right-4 text-gray-500 hover:text-black"
+              aria-label="Close account modal"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <div className="text-center">
+              <img src="/moc-studio.png" alt="Logo" className="h-16 mx-auto mb-4" />
+              <h2 className="text-xl font-bold mb-4">Welcome, User</h2>
+              <button className="block w-full py-2 px-4 bg-blue-500 text-white rounded mb-2">
+                Manage Account
+              </button>
+              <button className="block w-full py-2 px-4 bg-blue-500 text-white rounded mb-2">
+                View Orders
+              </button>
+              <button
+                onClick={handleLogout}
+                className="block w-full py-2 px-4 bg-red-500 text-white rounded"
+              >
+                Log Out
+              </button>
+            </div>
           </div>
         </div>
       )}
