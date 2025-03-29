@@ -260,7 +260,7 @@ const Header = () => {
 
           {/* Login */}
           <Link
-            to="/login-register"
+            to="/login"
             className="hidden lg:block uppercase tracking-extra-wide text-blue"
           >
             Log In
