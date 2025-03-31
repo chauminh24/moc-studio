@@ -46,7 +46,8 @@ const LoginPage = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="w-full max-w-md p-8 space-y-8 bg-white shadow-lg">
+            <div className="w-full h-[2rem] bg-blue mb-4 absolute top-0"></div>
+            <div className="w-full max-w-md p-6 space-y-8 bg-white shadow-lg">
                 <div className="text-center">
                     <Link to="/">
                         <img
@@ -135,7 +136,7 @@ const LoginPage = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''
+                            className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue hover:bg-dark-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''
                                 }`}
                         >
                             {isLoading ? (
@@ -147,7 +148,7 @@ const LoginPage = () => {
                                     Signing in...
                                 </>
                             ) : (
-                                'Sign in'
+                                'Sign In'
                             )}
                         </button>
                     </div>
@@ -155,7 +156,7 @@ const LoginPage = () => {
 
                 <div className="text-center text-sm text-gray-600">
                     Don't have an account?{' '}
-                    <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+                    <Link to="/register" className="font-medium text-blue hover:text-light-blue">
                         Register here
                     </Link>
                 </div>
