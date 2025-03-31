@@ -31,13 +31,14 @@ const App = () => {
   // Custom component to conditionally render Header and Footer
   const ConditionalPageStyle = ({ children }) => {
     const location = useLocation();
-    const isLoginPage = location.pathname === "/login";
-
+    const excludedPaths = ["/login", "/register", "/forgot-password", "/not-found"]; // Add paths to exclude Header and Footer
+    const isExcludedPage = excludedPaths.includes(location.pathname);
+  
     return (
       <>
-        {!isLoginPage && <Header />}
+        {!isExcludedPage && <Header />}
         <main className="container mx-auto">{children}</main>
-        {!isLoginPage && <Footer />}
+        {!isExcludedPage && <Footer />}
       </>
     );
   };
