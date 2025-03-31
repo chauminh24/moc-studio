@@ -1,6 +1,7 @@
 import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer'; // For sending emails
 
 const uri = "mongodb+srv://chomin2401:matkhaucuachau@moc-studio.f7so7.mongodb.net/?retryWrites=true&w=majority&appName=moc-studio";
 const JWT_SECRET = "matkhaucuachau";
@@ -22,12 +23,10 @@ export default async function handler(req, res) {
     console.log("Connected to MongoDB");
 
     const database = client.db("moc-studio");
-
-    // Handle different API requests based on query parameters
     const { type } = req.query;
 
     if (type === 'login') {
-      // Handle login
+      // Existing login logic
       const { email, password } = req.body;
 
       if (!email || !password) {
@@ -47,7 +46,6 @@ export default async function handler(req, res) {
         return res.status(401).json({ message: 'Invalid email or password' });
       }
 
-      // Generate JWT token
       const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
 
       return res.status(200).json({
@@ -55,8 +53,87 @@ export default async function handler(req, res) {
         user: { id: user._id, email: user.email, name: user.name },
         token,
       });
+
+    } else if (type === 'register') {
+      // Handle registration
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+      }
+
+      const usersCollection = database.collection("users");
+      const existingUser = await usersCollection.findOne({ email });
+
+      if (existingUser) {
+        return res.status(409).json({ message: 'Email is already registered' });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = {
+        email,
+        password: hashedPassword,
+        createdAt: new Date(),
+      };
+
+      const result = await usersCollection.insertOne(newUser);
+
+      return res.status(201).json({
+        message: 'Registration successful',
+        user: { id: result.insertedId, email },
+      });
+
+    } else if (type === 'forgot-password') {
+      // Handle forgot password
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+      }
+
+      const usersCollection = database.collection("users");
+      const user = await usersCollection.findOne({ email });
+
+      if (!user) {
+        return res.status(404).json({ message: 'Email not found' });
+      }
+
+      // Generate a reset token
+      const resetToken = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '15m' });
+
+      // Send reset email
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'mocstudio.service@gmail.com', // Replace with your email
+          pass: 'xugj sful xsfr jzan', // Replace with your email password
+        },
+      });
+
+      const resetLink = `https://moc-studio-eight.vercel.app/reset-password?token=${resetToken}`; const mailOptions = {
+        from: 'mocstudio.service@gmail.com',
+        to: email,
+        subject: 'Reset Your MOC Studio Password',
+        html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #333;">MOC Studio Password Reset</h2>
+      <p>You requested a password reset. Click the button below to reset your password:</p>
+      <a href="${resetLink}" 
+         style="display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+         Reset Password
+      </a>
+      <p>If you didn't request this, please ignore this email.</p>
+      <p style="font-size: 12px; color: #777;">© ${new Date().getFullYear()} MOC Studio. All rights reserved.</p>
+    </div>
+  `,
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      return res.status(200).json({ message: 'Password reset email sent' });
+
     } else if (type === 'interiorConsulting') {
-      // Fetch consulting data
+      // Existing logic for interior consulting
       const availabilityCollection = database.collection("consulting_availability");
       const projectsCollection = database.collection("interior_projects");
       const sessionsCollection = database.collection("consulting_sessions");
@@ -70,6 +147,7 @@ export default async function handler(req, res) {
         projects,
         sessions,
       });
+
     } else if (type === 'categoriesAndProducts') {
       // Existing logic for categories and products
       const categories = database.collection("categories");
@@ -90,21 +168,21 @@ export default async function handler(req, res) {
       }
 
       return res.status(200).json({ categories: categoriesResult, products: productsResult });
-    
+
     } else if (type === 'search') {
-      // Search products by query
+      // Existing search logic
       const { query } = req.query;
       if (!query) {
         return res.status(400).json({ error: 'Search query is required' });
       }
-    
+
       const productsCollection = database.collection("products");
       const searchResults = await productsCollection
         .find({ name: { $regex: query, $options: "i" } }) // Case-insensitive search
         .toArray();
-    
-      return res.status(200).json({ products: searchResults });  
-    
+
+      return res.status(200).json({ products: searchResults });
+
     } else {
       return res.status(400).json({ error: 'Invalid request type' });
     }

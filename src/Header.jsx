@@ -478,7 +478,7 @@ const Header = () => {
                 />
               </svg>
             </button>
-            <h2 className="text-xl text-blue font-bold mt-10 text-center">Shopping Cart</h2>
+            <h2 className="text-xl text-blue font-bold mt-10 text-center">Shopping Bag</h2>
             {cart.length > 0 ? (
               cart.map((item) => (
                 <div key={item._id} className="flex justify-between items-center mb-4">
