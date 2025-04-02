@@ -10,8 +10,8 @@ const Header = () => {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false); // State for search modal
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
-  const { user, logout } = useContext(AuthContext);  
-  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const { user, logout } = useContext(AuthContext);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { cart, removeFromCart } = useContext(CartContext);
   const navigate = useNavigate()
   const location = useLocation();
@@ -62,7 +62,7 @@ const Header = () => {
       navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
     }
   };
-  
+
   const handleLogout = () => {
     logout();
     setIsAccountModalOpen(false);
@@ -300,7 +300,7 @@ const Header = () => {
             onClick={openCartModal}
             className="hidden lg:block uppercase tracking-extra-wide text-blue"
           >
-            Shopping Bag (0)
+            Shopping Bag ({cart.reduce((total, item) => total + item.quantity, 0)})
           </Link>
 
           {/* Mobile Icons */}

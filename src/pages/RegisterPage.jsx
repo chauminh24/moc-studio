@@ -81,7 +81,7 @@ const RegisterPage = () => {
                             Create an account
                         </h1>
                         <p className="mt-4 text-gray-600 text-center md:text-left hidden md:block">
-                            Join our community and start your creative journey.
+                            Join our community and let us help you bulding your dream house.
                         </p>
                     </div>
 
