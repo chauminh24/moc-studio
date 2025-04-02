@@ -66,18 +66,18 @@ const RegisterPage = () => {
             <div className="w-full h-8 bg-blue"></div>
             
             {/* Main content */}
-            <div className="container mx-auto px-4 py-8 md:py-16">
+            <div className="container mx-auto px-4 py-8 md:py-16 flex flex-col items-center justify-center min-h-screen">
                 <div className="flex flex-col md:flex-row items-center md:items-start">
                     {/* Left column (Logo & Title) - hidden on small screens if you prefer */}
                     <div className="w-full md:w-1/2 lg:w-2/5 flex flex-col items-center md:items-start md:pr-8 mb-8 md:mb-0">
-                        <Link to="/" className="mb-8 md:mb-12">
+                        <Link to="/" className="mb-8 md:mb-12 absolute top-2 ">
                             <img
                                 src="/moc-studio.png"
                                 alt="Logo"
                                 className="h-24 md:h-32 w-auto"
                             />
                         </Link>
-                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 text-center md:text-left">
+                        <h1 className="text-3xl mt-20 md:text-4xl font-bold text-gray-900 text-center md:text-left">
                             Create an account
                         </h1>
                         <p className="mt-4 text-gray-600 text-center md:text-left hidden md:block">
