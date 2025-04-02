@@ -10,7 +10,8 @@ const Header = () => {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false); // State for search modal
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
-  const { user, logout } = useContext(AuthContext);  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const { user, logout } = useContext(AuthContext);  
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const { cart, removeFromCart } = useContext(CartContext);
   const navigate = useNavigate()
   const location = useLocation();

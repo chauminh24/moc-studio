@@ -25,7 +25,43 @@ export default async function handler(req, res) {
     const database = client.db("moc-studio");
     const { type } = req.query;
 
-    if (type === 'login') {
+    if (type === 'register') {
+      // Handle registration
+      const { email, password, name } = req.body;
+
+      if (!email || !password || !name) {
+        return res.status(400).json({ message: 'Email, password, and name are required' });
+      }
+
+      const usersCollection = database.collection("users");
+      const existingUser = await usersCollection.findOne({ email });
+
+      if (existingUser) {
+        return res.status(409).json({ message: 'Email is already registered' });
+      }
+
+      if (password.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = {
+        email,
+        password: hashedPassword,
+        name,
+        role: "user", // Default role
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastLogin: null, // Set to null initially
+      };
+
+      const result = await usersCollection.insertOne(newUser);
+
+      return res.status(201).json({
+        message: 'Registration successful',
+        user: { id: result.insertedId, email, name, role: newUser.role },
+      });
+    } else if (type === 'login') {
       // Existing login logic
       const { email, password } = req.body;
 
@@ -48,41 +84,17 @@ export default async function handler(req, res) {
 
       const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
 
+      // Update lastLogin field
+      await usersCollection.updateOne(
+        { _id: user._id },
+        { $set: { lastLogin: new Date() } }
+      );
+
       return res.status(200).json({
         message: 'Login successful',
-        user: { id: user._id, email: user.email, name: user.name },
+        user: { id: user._id, email: user.email, name: user.name, role: user.role },
         token,
       });
-
-    } else if (type === 'register') {
-      // Handle registration
-      const { email, password } = req.body;
-
-      if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password are required' });
-      }
-
-      const usersCollection = database.collection("users");
-      const existingUser = await usersCollection.findOne({ email });
-
-      if (existingUser) {
-        return res.status(409).json({ message: 'Email is already registered' });
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = {
-        email,
-        password: hashedPassword,
-        createdAt: new Date(),
-      };
-
-      const result = await usersCollection.insertOne(newUser);
-
-      return res.status(201).json({
-        message: 'Registration successful',
-        user: { id: result.insertedId, email },
-      });
-
     } else if (type === 'forgot-password') {
       // Handle forgot password
       const { email } = req.body;
