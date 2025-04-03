@@ -50,13 +50,21 @@ export default async function handler(req, res) {
         password: hashedPassword,
         name,
         role: "user", // Default role
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        lastLogin: null, // Set to null initially
+        createdAt: new Date(), // Ensure this is a valid Date object
+        updatedAt: new Date(), // Optional but recommended
+        lastLogin: null, // Optional
       };
-
-      const result = await usersCollection.insertOne(newUser);
-
+      
+      // Log the document to verify its structure
+      console.log("Document to be inserted:", newUser);
+      
+      try {
+        const result = await usersCollection.insertOne(newUser);
+        console.log("User registered successfully:", result.insertedId);
+      } catch (error) {
+        console.error("MongoDB Validation Error:", error);
+        return res.status(500).json({ message: "Registration failed", details: error.message });
+      }
       return res.status(201).json({
         message: 'Registration successful',
         user: { id: result.insertedId, email, name, role: newUser.role },
