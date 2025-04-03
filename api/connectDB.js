@@ -28,22 +28,22 @@ export default async function handler(req, res) {
     if (type === 'register') {
       // Handle registration
       const { email, password, name } = req.body;
-
+    
       if (!email || !password || !name) {
         return res.status(400).json({ message: 'Email, password, and name are required' });
       }
-
+    
       const usersCollection = database.collection("users");
       const existingUser = await usersCollection.findOne({ email });
-
+    
       if (existingUser) {
         return res.status(409).json({ message: 'Email is already registered' });
       }
-
+    
       if (password.length < 8) {
         return res.status(400).json({ message: 'Password must be at least 8 characters long' });
       }
-
+    
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = {
         email,
@@ -54,17 +54,19 @@ export default async function handler(req, res) {
         updatedAt: new Date(), // Optional but recommended
         lastLogin: null, // Optional
       };
-      
+    
       // Log the document to verify its structure
       console.log("Document to be inserted:", newUser);
-      
+    
+      let result; // Declare result outside the try block
       try {
-        const result = await usersCollection.insertOne(newUser);
+        result = await usersCollection.insertOne(newUser);
         console.log("User registered successfully:", result.insertedId);
       } catch (error) {
         console.error("MongoDB Validation Error:", error);
         return res.status(500).json({ message: "Registration failed", details: error.message });
       }
+    
       return res.status(201).json({
         message: 'Registration successful',
         user: { id: result.insertedId, email, name, role: newUser.role },
