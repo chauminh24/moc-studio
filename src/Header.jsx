@@ -450,7 +450,7 @@ const Header = () => {
             <div className="p-2 border-t">
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-3 py-2 text-sm text-white bg-orange hover:bg-dark-orange rounded transition-colors"
+                className="w-full text-left px-3 py-2 text-sm text-orange hover:text-whte hover:bg-orange rounded transition-colors"
               >
                 Log Out
               </button>
