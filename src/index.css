@@ -17,12 +17,17 @@
   --color-*: initial;
   --color-white: #fff;
   --color-orange: #FE6C23;
+  --color-light-orange: #FF884D;
+  --color-dark-orange: #FF6F3C;
   --color-blue: #76B3D0;
   --color-light-blue: #A4D8E1;
   --color-dark-blue: #4A8DAA;
   --color-light-beige: #FFE9CA;
   --color-dark-beige: #FFC999;
   --color-black: #000;
+  --color-light-black: #1A1A1A;
+  --color-gray: #F5F5F5;
+  --color-light-gray: #E0E0E0;
   --tracking-extra-wide: 0.35em;
   --opacity-50: 0.5;
 }

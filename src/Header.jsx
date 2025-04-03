@@ -404,40 +404,53 @@ const Header = () => {
 
       {/* Account Modal */}
       {isAccountModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md mx-4">
-            <button
-              onClick={closeAccountModal}
-              className="absolute top-4 right-4 text-gray-500 hover:text-black"
-              aria-label="Close account modal"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
+        <div className="fixed inset-0 z-50" onClick={closeAccountModal}>
+          {/* Small modal positioned near account button */}
+          <div
+            className="absolute top-16 right-4 bg-white rounded-lg shadow-xl w-64 overflow-hidden"
+            onClick={(e) => e.stopPropagation()} // Prevent click from closing modal
+          >
+            {/* Modal header */}
+            <div className="p-4 border-b">
+              <div className="flex items-center space-x-3">
+                <img
+                  src="/moc-studio.png"
+                  alt="Logo"
+                  className="h-8 w-auto"
                 />
-              </svg>
-            </button>
-            <div className="text-center">
-              <img src="/moc-studio.png" alt="Logo" className="h-16 mx-auto mb-4" />
-              <h2 className="text-xl font-bold mb-4">Welcome, {user?.name || "User"}</h2>
-              <button onClick={() => navigate("/account")} className="block w-full py-2 px-4 bg-blue-500 text-white rounded mb-2">
+                <h3 className="font-medium text-sm">
+                  {user?.name || "User"}
+                </h3>
+              </div>
+            </div>
+
+            {/* Modal body */}
+            <div className="p-2 space-y-1">
+              <button
+                onClick={() => {
+                  navigate("/account");
+                  closeAccountModal();
+                }}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray rounded transition-colors"
+              >
                 Manage Account
               </button>
-              <button onClick={() => navigate("/orders")} className="block w-full py-2 px-4 bg-blue-500 text-white rounded mb-2">
+              <button
+                onClick={() => {
+                  navigate("/orders");
+                  closeAccountModal();
+                }}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray rounded transition-colors"
+              >
                 View Orders
               </button>
+            </div>
+
+            {/* Modal footer */}
+            <div className="p-2 border-t">
               <button
                 onClick={handleLogout}
-                className="block w-full py-2 px-4 bg-red-500 text-white rounded"
+                className="w-full text-left px-3 py-2 text-sm text-white bg-orange hover:bg-dark-orange rounded transition-colors"
               >
                 Log Out
               </button>
