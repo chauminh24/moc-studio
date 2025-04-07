@@ -12,7 +12,7 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div className="bg-white overflow-hidden group h-[100vh] flex flex-col">
+    <div className="bg-white overflow-hidden group h-[100vh] flex flex-col relative">
       {/* Image Container */}
       <div className="relative aspect-[2/3] w-full">
         <img
