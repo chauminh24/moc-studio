@@ -56,7 +56,7 @@ const ProductDetailsPage = () => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="container mx-auto pt-[10em] p-6">
+    <div className="container mx-auto pt-[12em] p-6">
       {product ? (
         <>
           {/* Product Details Section */}
