@@ -1,19 +1,20 @@
 import React, { useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useContext(CartContext);
   const [isAdded, setIsAdded] = useState(false);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e) => {
+    e.preventDefault(); // Prevent navigation when clicking the "Add to Cart" button
     addToCart(product);
     setIsAdded(true);
-    // Add your actual cart logic here
-    setTimeout(() => setIsAdded(false), 2000); // Reset after 2 seconds for demo
+    setTimeout(() => setIsAdded(false), 2000); // Reset after 2 seconds
   };
 
   return (
-    <div className="bg-white overflow-hidden group">
+    <Link to={`/product/${product._id}`} className="bg-white overflow-hidden group">
       {/* Image Container */}
       <div className="relative pb-[150%]">
         <img
@@ -23,7 +24,6 @@ const ProductCard = ({ product }) => {
         />
 
         {/* Add to Cart Button */}
-        {/* Centered Button Wrapper */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
           <button
             onClick={handleAddToCart}
@@ -64,8 +64,6 @@ const ProductCard = ({ product }) => {
             )}
           </button>
         </div>
-
-
       </div>
 
       {/* Product Info */}
@@ -79,7 +77,10 @@ const ProductCard = ({ product }) => {
           </div>
           {/* Save Button */}
           <button
-            onClick={() => alert("Saved!")}
+            onClick={(e) => {
+              e.preventDefault(); // Prevent navigation when clicking the "Save" button
+              alert("Saved!");
+            }}
             className="text-gray-500 hover:text-black transition-colors duration-200"
           >
             <svg
@@ -99,7 +100,7 @@ const ProductCard = ({ product }) => {
           </button>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
