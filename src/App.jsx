@@ -12,7 +12,6 @@ import SearchResults from "./pages/SearchResults";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import ProductDetailsPage from "./pages/ProductDetailsPage";
 import NotFound from "./pages/NotFound";
 
 
@@ -78,7 +77,6 @@ const App = () => {
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
               {/* Product Details Route */}
-              <Route path="/product/:id" element={<ProductDetailsPage />} />
 
               {/* Not Found Route */}
               <Route path="*" element={<NotFound />} />
