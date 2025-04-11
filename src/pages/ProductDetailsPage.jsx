@@ -75,13 +75,13 @@ const ProductDetailsPage = () => {
                     <>
                       <button
                         onClick={handlePrevMedia}
-                        className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full"
+                        className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-light-blue text-white p-2 rounded-full"
                       >
                         &#8592;
                       </button>
                       <button
                         onClick={handleNextMedia}
-                        className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full"
+                        className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-light-blue text-white p-2 rounded-full"
                       >
                         &#8594;
                       </button>
@@ -100,13 +100,13 @@ const ProductDetailsPage = () => {
             {/* Product Info */}
             <div className="flex-1">
               <h1 className="text-2xl font-bold mb-4">{product.name}</h1>
-              <p className="text-lg text-gray-700 mb-4">{product.description}</p>
-              <p className="text-xl font-semibold text-blue-600 mb-4">
+              <p className="text-lg text-gray mb-4">{product.description}</p>
+              <p className="text-xl font-semibold text-blue mb-4">
                 €{product.price.$numberDecimal}
               </p>
               <button
                 onClick={handleAddToCart}
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
+                className="bg-blue text-white px-6 py-2 rounded-lg hover:bg-dark-blue transition"
               >
                 Add to Cart
               </button>
@@ -118,7 +118,7 @@ const ProductDetailsPage = () => {
             <h2 className="text-xl font-bold mb-4">Reviews</h2>
             {reviews.length > 0 ? (
               reviews.map((review) => (
-                <div key={review._id} className="border-b border-gray-200 py-4">
+                <div key={review._id} className="border-b border-light-gray py-4">
                   <p className="font-semibold">{review.comment}</p>
                   <p className="text-sm text-gray-500">
                     Rating: {review.rating} / 5
@@ -145,7 +145,7 @@ const ProductDetailsPage = () => {
                     className="w-full h-48 object-cover rounded-lg mb-4"
                   />
                   <h3 className="text-lg font-semibold">{relatedProduct.name}</h3>
-                  <p className="text-blue-600 font-bold">
+                  <p className="text-dark-blue font-bold">
                     €{relatedProduct.price.$numberDecimal}
                   </p>
                 </div>
