@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 
 const ProductDetailsPage = () => {
-  const { productId } = useParams();
+  const { productId } = useParams(); // Dynamically get the product ID from the URL
   const { addToCart } = useContext(CartContext);
   const [product, setProduct] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -17,14 +17,15 @@ const ProductDetailsPage = () => {
       try {
         setLoading(true);
 
-        // Fetch product details
-        const productResponse = await fetch(`/api/connectDB?type=productDetails&productId=${productId}`);
-        if (!productResponse.ok) throw new Error("Failed to fetch product details");
-        const productData = await productResponse.json();
-        setProduct(productData.product);
-        setMedia(productData.media);
-        setReviews(productData.reviews);
-        setRelatedProducts(productData.relatedProducts);
+        // Fetch product details from the backend
+        const response = await fetch(`/api/connectDB?type=productDetails&productId=${productId}`);
+        if (!response.ok) throw new Error("Failed to fetch product details");
+        const data = await response.json();
+
+        setProduct(data.product);
+        setMedia(data.media);
+        setReviews(data.reviews);
+        setRelatedProducts(data.relatedProducts);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -33,7 +34,7 @@ const ProductDetailsPage = () => {
     };
 
     fetchProductDetails();
-  }, [productId]);
+  }, [productId]); // Re-run the effect when the productId changes
 
   const handleAddToCart = () => {
     if (product) {
