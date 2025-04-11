@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 
 const ProductDetailsPage = () => {
@@ -64,11 +64,11 @@ const ProductDetailsPage = () => {
             {/* Product Media */}
             <div className="flex-1 relative">
               {media.length > 0 ? (
-                <>
+                <div className="relative w-full h-[400px] bg-gray-100 rounded-lg overflow-hidden">
                   <img
                     src={media[currentMediaIndex].media_url}
                     alt={product.name}
-                    className="w-full h-auto object-cover rounded-lg"
+                    className="w-full h-full object-cover"
                   />
                   {/* Arrows for navigation */}
                   {media.length > 1 && (
@@ -87,13 +87,15 @@ const ProductDetailsPage = () => {
                       </button>
                     </>
                   )}
-                </>
+                </div>
               ) : (
-                <img
-                  src="/placeholder/image_placeholder.png"
-                  alt="Placeholder"
-                  className="w-full h-auto object-cover rounded-lg"
-                />
+                <div className="relative w-full h-[400px] bg-gray-100 rounded-lg overflow-hidden">
+                  <img
+                    src="/placeholder/image_placeholder.png"
+                    alt="Placeholder"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               )}
             </div>
 
@@ -135,7 +137,8 @@ const ProductDetailsPage = () => {
             <h2 className="text-xl font-bold mb-4">Related Products</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {relatedProducts.map((relatedProduct) => (
-                <div
+                <Link
+                  to={`/product/${relatedProduct._id}`}
                   key={relatedProduct._id}
                   className="border rounded-lg p-4 hover:shadow-lg transition"
                 >
@@ -148,7 +151,7 @@ const ProductDetailsPage = () => {
                   <p className="text-dark-blue font-bold">
                     €{relatedProduct.price.$numberDecimal}
                   </p>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
