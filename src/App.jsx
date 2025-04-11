@@ -12,6 +12,7 @@ import SearchResults from "./pages/SearchResults";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ProductDetailsPage from "./pages/ProductDetailsPage";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
@@ -74,7 +75,7 @@ const App = () => {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              
+
               {/* Product Details Route */}
               <Route path="/product/:productId" element={<ProductDetailsPage />} />
 
