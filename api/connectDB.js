@@ -25,7 +25,31 @@ export default async function handler(req, res) {
     const database = client.db("moc-studio");
     const { type } = req.query;
 
-    if (type === 'register') {
+    if (type === 'productDetails') {
+      const { productId } = req.query;
+    
+      if (!productId) {
+        return res.status(400).json({ error: 'Product ID is required' });
+      }
+    
+      const productsCollection = database.collection("products");
+      const reviewsCollection = database.collection("product_reviews");
+      const mediaCollection = database.collection("product_media");
+    
+      const product = await productsCollection.findOne({ _id: new ObjectId(productId) });
+      if (!product) {
+        return res.status(404).json({ error: 'Product not found' });
+      }
+    
+      const reviews = await reviewsCollection.find({ product_id: new ObjectId(productId) }).toArray();
+      const media = await mediaCollection.find({ product_id: new ObjectId(productId) }).toArray();
+      const relatedProducts = await productsCollection
+        .find({ category_ids: { $in: product.category_ids }, _id: { $ne: new ObjectId(productId) } })
+        .limit(3)
+        .toArray();
+    
+      return res.status(200).json({ product, reviews, media, relatedProducts });
+    } else if (type === 'register') {
       // Handle registration
       const { email, password, name } = req.body;
     
