@@ -9,6 +9,7 @@ const ProductDetailsPage = () => {
   const [reviews, setReviews] = useState([]);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [media, setMedia] = useState([]);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0); // Track the current media index
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -43,23 +44,50 @@ const ProductDetailsPage = () => {
     }
   };
 
+  const handleNextMedia = () => {
+    setCurrentMediaIndex((prevIndex) => (prevIndex + 1) % media.length);
+  };
+
+  const handlePrevMedia = () => {
+    setCurrentMediaIndex((prevIndex) => (prevIndex - 1 + media.length) % media.length);
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto pt-[10em] p-6">
       {product ? (
         <>
           {/* Product Details Section */}
           <div className="flex flex-col md:flex-row gap-6">
             {/* Product Media */}
-            <div className="flex-1">
+            <div className="flex-1 relative">
               {media.length > 0 ? (
-                <img
-                  src={media[0].media_url}
-                  alt={product.name}
-                  className="w-full h-auto object-cover rounded-lg"
-                />
+                <>
+                  <img
+                    src={media[currentMediaIndex].media_url}
+                    alt={product.name}
+                    className="w-full h-auto object-cover rounded-lg"
+                  />
+                  {/* Arrows for navigation */}
+                  {media.length > 1 && (
+                    <>
+                      <button
+                        onClick={handlePrevMedia}
+                        className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full"
+                      >
+                        &#8592;
+                      </button>
+                      <button
+                        onClick={handleNextMedia}
+                        className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full"
+                      >
+                        &#8594;
+                      </button>
+                    </>
+                  )}
+                </>
               ) : (
                 <img
                   src="/placeholder/image_placeholder.png"
