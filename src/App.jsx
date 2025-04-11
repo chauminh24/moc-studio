@@ -74,6 +74,9 @@ const App = () => {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              
+              {/* Product Details Route */}
+              <Route path="/product/:productId" element={<ProductDetailsPage />} />
 
               {/* Not Found Route */}
               <Route path="*" element={<NotFound />} />
