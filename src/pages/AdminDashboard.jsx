@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+const localizer = momentLocalizer(moment);
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("orders");
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
+  const [media, setMedia] = useState([]);
+  const [availability, setAvailability] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,6 +23,16 @@ const AdminDashboard = () => {
     category_ids: [],
     stock: 0,
     image_url: ""
+  });
+  const [newMedia, setNewMedia] = useState({
+    product_id: "",
+    media_url: "",
+    media_type: "image",
+    is_primary: false
+  });
+  const [newAvailability, setNewAvailability] = useState({
+    date: "",
+    time_slots: []
   });
 
   // Fetch data based on active tab
@@ -30,11 +47,21 @@ const AdminDashboard = () => {
           if (!response.ok) throw new Error("Failed to fetch orders");
           const data = await response.json();
           setOrders(data.orders);
-        } else {
-          const response = await fetch("/api/connectDB?type=adminProducts");
-          if (!response.ok) throw new Error("Failed to fetch products");
+        } else if (activeTab === "products") {
+          const productsResponse = await fetch("/api/connectDB?type=adminProducts");
+          if (!productsResponse.ok) throw new Error("Failed to fetch products");
+          const productsData = await productsResponse.json();
+          setProducts(productsData.products);
+
+          const mediaResponse = await fetch("/api/connectDB?type=adminMedia");
+          if (!mediaResponse.ok) throw new Error("Failed to fetch media");
+          const mediaData = await mediaResponse.json();
+          setMedia(mediaData.media);
+        } else if (activeTab === "availability") {
+          const response = await fetch("/api/connectDB?type=adminAvailability");
+          if (!response.ok) throw new Error("Failed to fetch availability");
           const data = await response.json();
-          setProducts(data.products);
+          setAvailability(data.availability);
         }
       } catch (err) {
         setError(err.message);
@@ -129,6 +156,36 @@ const AdminDashboard = () => {
     }
   };
 
+  // Handle product media upload
+  const handleAddMedia = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/connectDB", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "addProductMedia",
+          media: newMedia,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to add media");
+
+      const createdMedia = await response.json();
+      setMedia([...media, createdMedia]);
+      setNewMedia({
+        product_id: "",
+        media_url: "",
+        media_type: "image",
+        is_primary: false
+      });
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   // Handle product deletion
   const deleteProduct = async (productId) => {
     try {
@@ -146,6 +203,80 @@ const AdminDashboard = () => {
       if (!response.ok) throw new Error("Failed to delete product");
 
       setProducts(products.filter(product => product._id !== productId));
+      // Also delete associated media
+      setMedia(media.filter(item => item.product_id !== productId));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  // Handle media deletion
+  const deleteMedia = async (mediaId) => {
+    try {
+      const response = await fetch("/api/connectDB", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "deleteMedia",
+          mediaId,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to delete media");
+
+      setMedia(media.filter(item => item._id !== mediaId));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  // Handle availability creation
+  const handleAddAvailability = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/connectDB", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "addAvailability",
+          availability: newAvailability,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to add availability");
+
+      const createdAvailability = await response.json();
+      setAvailability([...availability, createdAvailability]);
+      setNewAvailability({
+        date: "",
+        time_slots: []
+      });
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  // Handle availability deletion
+  const deleteAvailability = async (availabilityId) => {
+    try {
+      const response = await fetch("/api/connectDB", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "deleteAvailability",
+          availabilityId,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to delete availability");
+
+      setAvailability(availability.filter(item => item._id !== availabilityId));
     } catch (err) {
       setError(err.message);
     }
@@ -160,6 +291,10 @@ const AdminDashboard = () => {
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product._id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredAvailability = availability.filter(avail =>
+    avail.date.includes(searchTerm)
   );
 
   return (
@@ -191,6 +326,12 @@ const AdminDashboard = () => {
             onClick={() => setActiveTab("products")}
           >
             Products
+          </button>
+          <button
+            className={`py-4 px-6 font-medium ${activeTab === "availability" ? "text-blue border-b-2 border-blue" : "text-gray-500"}`}
+            onClick={() => setActiveTab("availability")}
+          >
+            Availability
           </button>
         </div>
 
@@ -347,6 +488,71 @@ const AdminDashboard = () => {
               </form>
             </div>
 
+            {/* Add Media Form */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold text-blue mb-4">Add Product Media</h2>
+              <form onSubmit={handleAddMedia}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
+                    <select
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
+                      value={newMedia.product_id}
+                      onChange={(e) => setNewMedia({...newMedia, product_id: e.target.value})}
+                      required
+                    >
+                      <option value="">Select Product</option>
+                      {products.map(product => (
+                        <option key={product._id} value={product._id}>{product.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Media URL</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
+                      value={newMedia.media_url}
+                      onChange={(e) => setNewMedia({...newMedia, media_url: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Media Type</label>
+                    <select
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
+                      value={newMedia.media_type}
+                      onChange={(e) => setNewMedia({...newMedia, media_type: e.target.value})}
+                    >
+                      <option value="image">Image</option>
+                      <option value="video">Video</option>
+                      <option value="3d">3D Model</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="is_primary"
+                      className="h-4 w-4 text-blue focus:ring-blue border-gray-300 rounded"
+                      checked={newMedia.is_primary}
+                      onChange={(e) => setNewMedia({...newMedia, is_primary: e.target.checked})}
+                    />
+                    <label htmlFor="is_primary" className="ml-2 block text-sm text-gray-700">
+                      Primary Media
+                    </label>
+                  </div>
+                </div>
+                <div className="mt-6">
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-blue text-white rounded-lg hover:bg-dark-blue transition"
+                  >
+                    Add Media
+                  </button>
+                </div>
+              </form>
+            </div>
+
             {/* Products List */}
             <div className="bg-white rounded-lg shadow overflow-hidden">
               <div className="overflow-x-auto">
@@ -356,43 +562,197 @@ const AdminDashboard = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Media</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredProducts.length > 0 ? (
                       filteredProducts.map((product) => (
-                        <tr key={product._id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <div className="flex-shrink-0 h-10 w-10">
-                                <img
-                                  className="h-10 w-10 rounded-md object-cover"
-                                  src={product.image_url || "/placeholder/image_placeholder.png"}
-                                  alt={product.name}
-                                />
+                        <React.Fragment key={product._id}>
+                          <tr>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="flex-shrink-0 h-10 w-10">
+                                  <img
+                                    className="h-10 w-10 rounded-md object-cover"
+                                    src={product.image_url || "/placeholder/image_placeholder.png"}
+                                    alt={product.name}
+                                  />
+                                </div>
+                                <div className="ml-4">
+                                  <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                                  <div className="text-sm text-gray-500 line-clamp-1">{product.description}</div>
+                                </div>
                               </div>
-                              <div className="ml-4">
-                                <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                                <div className="text-sm text-gray-500 line-clamp-1">{product.description}</div>
-                              </div>
-                            </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              €{product.price.$numberDecimal}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {product.stock}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {media.filter(m => m.product_id === product._id).length} media items
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <button
+                                onClick={() => setEditProduct(product)}
+                                className="text-blue hover:text-blue-700 mr-4"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => deleteProduct(product._id)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                          {/* Media for this product */}
+                          {media.filter(m => m.product_id === product._id).map(mediaItem => (
+                            <tr key={mediaItem._id} className="bg-gray-50">
+                              <td colSpan="4" className="px-6 py-4">
+                                <div className="flex items-center">
+                                  <div className="flex-shrink-0 h-16 w-16">
+                                    {mediaItem.media_type === 'image' ? (
+                                      <img
+                                        className="h-16 w-16 object-cover rounded"
+                                        src={mediaItem.media_url}
+                                        alt={`Media for ${product.name}`}
+                                      />
+                                    ) : (
+                                      <div className="h-16 w-16 bg-gray-200 rounded flex items-center justify-center">
+                                        {mediaItem.media_type === 'video' ? '🎥 Video' : '🖥️ 3D Model'}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="ml-4">
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {mediaItem.media_type} {mediaItem.is_primary && '(Primary)'}
+                                    </div>
+                                    <div className="text-sm text-gray-500">{mediaItem.media_url}</div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <button
+                                  onClick={() => deleteMedia(mediaItem._id)}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </React.Fragment>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
+                          No products found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Availability Tab */}
+        {!loading && activeTab === "availability" && (
+          <div className="space-y-6">
+            {/* Add Availability Form */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold text-blue mb-4">Add Availability</h2>
+              <form onSubmit={handleAddAvailability}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <input
+                      type="date"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
+                      value={newAvailability.date}
+                      onChange={(e) => setNewAvailability({...newAvailability, date: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Time Slots (comma separated)</label>
+                    <input
+                      type="text"
+                      placeholder="9:00, 10:00, 11:00"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
+                      value={newAvailability.time_slots.join(', ')}
+                      onChange={(e) => setNewAvailability({
+                        ...newAvailability,
+                        time_slots: e.target.value.split(',').map(t => t.trim())
+                      })}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="mt-6">
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-blue text-white rounded-lg hover:bg-dark-blue transition"
+                  >
+                    Add Availability
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Availability Calendar */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-bold text-blue mb-4">Availability Calendar</h2>
+              <div className="h-[500px]">
+                <Calendar
+                  localizer={localizer}
+                  events={availability.flatMap(avail => 
+                    avail.time_slots.map(time => ({
+                      title: `Available (${time})`,
+                      start: new Date(`${avail.date}T${time}:00`),
+                      end: new Date(`${avail.date}T${time}:00`),
+                      allDay: false
+                    }))
+                  )}
+                  startAccessor="start"
+                  endAccessor="end"
+                  defaultView="week"
+                  min={new Date(0, 0, 0, 9, 0, 0)}
+                  max={new Date(0, 0, 0, 18, 0, 0)}
+                />
+              </div>
+            </div>
+
+            {/* Availability List */}
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Slots</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredAvailability.length > 0 ? (
+                      filteredAvailability.map((avail) => (
+                        <tr key={avail._id}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {new Date(avail.date).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            €{product.price.$numberDecimal}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {product.stock}
+                            {avail.time_slots.join(', ')}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             <button
-                              onClick={() => setEditProduct(product)}
-                              className="text-blue hover:text-blue-700 mr-4"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => deleteProduct(product._id)}
+                              onClick={() => deleteAvailability(avail._id)}
                               className="text-red-500 hover:text-red-700"
                             >
                               Delete
@@ -402,8 +762,8 @@ const AdminDashboard = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500">
-                          No products found
+                        <td colSpan="3" className="px-6 py-4 text-center text-sm text-gray-500">
+                          No availability found
                         </td>
                       </tr>
                     )}

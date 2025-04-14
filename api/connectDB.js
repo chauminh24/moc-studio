@@ -292,6 +292,69 @@ export default async function handler(req, res) {
       await productsCollection.deleteOne({ _id: new ObjectId(productId) });
 
       return res.status(200).json({ message: "Product deleted" });
+    } // Add these to your existing if-else conditions in connectDB.js
+
+    else if (type === 'adminMedia') {
+      const mediaCollection = database.collection("product_media");
+      const media = await mediaCollection.find({}).toArray();
+      return res.status(200).json({ media });
+    }
+    
+    else if (type === 'adminAvailability') {
+      const availabilityCollection = database.collection("consulting_availability");
+      const availability = await availabilityCollection.find({}).toArray();
+      return res.status(200).json({ availability });
+    }
+    
+    else if (type === 'addProductMedia') {
+      const { media } = req.body;
+      const mediaCollection = database.collection("product_media");
+      
+      const newMedia = {
+        ...media,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+    
+      const result = await mediaCollection.insertOne(newMedia);
+      newMedia._id = result.insertedId;
+    
+      return res.status(201).json(newMedia);
+    }
+    
+    else if (type === 'deleteMedia') {
+      const { mediaId } = req.body;
+      const mediaCollection = database.collection("product_media");
+    
+      await mediaCollection.deleteOne({ _id: new ObjectId(mediaId) });
+    
+      return res.status(200).json({ message: "Media deleted" });
+    }
+    
+    else if (type === 'addAvailability') {
+      const { availability } = req.body;
+      const availabilityCollection = database.collection("consulting_availability");
+      
+      const newAvailability = {
+        date: availability.date,
+        time_slots: availability.time_slots,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+    
+      const result = await availabilityCollection.insertOne(newAvailability);
+      newAvailability._id = result.insertedId;
+    
+      return res.status(201).json(newAvailability);
+    }
+    
+    else if (type === 'deleteAvailability') {
+      const { availabilityId } = req.body;
+      const availabilityCollection = database.collection("consulting_availability");
+    
+      await availabilityCollection.deleteOne({ _id: new ObjectId(availabilityId) });
+    
+      return res.status(200).json({ message: "Availability deleted" });
     }
     else {
       return res.status(400).json({ error: 'Invalid request type' });
