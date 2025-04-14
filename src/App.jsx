@@ -12,6 +12,8 @@ import SearchResults from "./pages/SearchResults";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import AboutPage from "./pages/AboutPage";
+import AdminDashboard from "./pages/AdminDashboard"; // Import the admin dashboard page
 import ProductDetailsPage from "./pages/ProductDetailsPage"; // Import the ProductDetailsPage
 import NotFound from "./pages/NotFound";
 
@@ -79,6 +81,19 @@ const App = () => {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
+              {/* About Page Route */}
+              <Route path="/about" element={<AboutPage />} />
+
+              {/* Admin Dashboard Route */}
+              <Route
+                path="/admin"
+                element={
+                  <RequireAuth>
+                    <AdminDashboard />
+                  </RequireAuth>
+                }
+              />
+
               {/* Not Found Route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
@@ -90,3 +105,17 @@ const App = () => {
 };
 
 export default App;
+
+// Create a RequireAuth component:
+function RequireAuth({ children }) {
+  const { user, isAdmin } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user || !isAdmin) {
+      navigate('/login');
+    }
+  }, [user, isAdmin, navigate]);
+
+  return user && isAdmin ? children : null;
+}

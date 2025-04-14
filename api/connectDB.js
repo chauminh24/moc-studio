@@ -27,47 +27,47 @@ export default async function handler(req, res) {
 
     if (type === 'productDetails') {
       const { productId } = req.query;
-    
+
       if (!productId) {
         return res.status(400).json({ error: 'Product ID is required' });
       }
-    
+
       const productsCollection = database.collection("products");
       const reviewsCollection = database.collection("product_reviews");
       const mediaCollection = database.collection("product_media");
-    
+
       const product = await productsCollection.findOne({ _id: new ObjectId(productId) });
       if (!product) {
         return res.status(404).json({ error: 'Product not found' });
       }
-    
+
       const reviews = await reviewsCollection.find({ product_id: new ObjectId(productId) }).toArray();
       const media = await mediaCollection.find({ product_id: new ObjectId(productId) }).toArray();
       const relatedProducts = await productsCollection
         .find({ category_ids: { $in: product.category_ids }, _id: { $ne: new ObjectId(productId) } })
         .limit(3)
         .toArray();
-    
+
       return res.status(200).json({ product, reviews, media, relatedProducts });
     } else if (type === 'register') {
       // Handle registration
       const { email, password, name } = req.body;
-    
+
       if (!email || !password || !name) {
         return res.status(400).json({ message: 'Email, password, and name are required' });
       }
-    
+
       const usersCollection = database.collection("users");
       const existingUser = await usersCollection.findOne({ email });
-    
+
       if (existingUser) {
         return res.status(409).json({ message: 'Email is already registered' });
       }
-    
+
       if (password.length < 8) {
         return res.status(400).json({ message: 'Password must be at least 8 characters long' });
       }
-    
+
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = {
         email,
@@ -78,10 +78,10 @@ export default async function handler(req, res) {
         updatedAt: new Date(), // Optional but recommended
         lastLogin: null, // Optional
       };
-    
+
       // Log the document to verify its structure
       console.log("Document to be inserted:", newUser);
-    
+
       let result; // Declare result outside the try block
       try {
         result = await usersCollection.insertOne(newUser);
@@ -90,7 +90,7 @@ export default async function handler(req, res) {
         console.error("MongoDB Validation Error:", error);
         return res.status(500).json({ message: "Registration failed", details: error.message });
       }
-    
+
       return res.status(201).json({
         message: 'Registration successful',
         user: { id: result.insertedId, email, name, role: newUser.role },
@@ -229,7 +229,71 @@ export default async function handler(req, res) {
 
       return res.status(200).json({ products: searchResults });
 
-    } else {
+    }// Add these to your existing if-else conditions in connectDB.js
+
+    else if (type === 'adminOrders') {
+      const ordersCollection = database.collection("orders");
+      const orders = await ordersCollection.find({}).sort({ createdAt: -1 }).toArray();
+      return res.status(200).json({ orders });
+    }
+
+    else if (type === 'adminProducts') {
+      const productsCollection = database.collection("products");
+      const products = await productsCollection.find({}).toArray();
+      return res.status(200).json({ products });
+    }
+
+    else if (type === 'updateOrderStatus') {
+      const { orderId, status } = req.body;
+      const ordersCollection = database.collection("orders");
+
+      await ordersCollection.updateOne(
+        { _id: new ObjectId(orderId) },
+        { $set: { status } }
+      );
+
+      return res.status(200).json({ message: "Order status updated" });
+    }
+
+    else if (type === 'updateProduct') {
+      const { product } = req.body;
+      const productsCollection = database.collection("products");
+
+      await productsCollection.updateOne(
+        { _id: new ObjectId(product._id) },
+        { $set: product }
+      );
+
+      return res.status(200).json({ message: "Product updated" });
+    }
+
+    else if (type === 'createProduct') {
+      const { product } = req.body;
+      const productsCollection = database.collection("products");
+
+      // Convert price to Decimal128
+      const newProduct = {
+        ...product,
+        price: { $numberDecimal: parseFloat(product.price).toFixed(2) },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const result = await productsCollection.insertOne(newProduct);
+      newProduct._id = result.insertedId;
+
+      return res.status(201).json(newProduct);
+    }
+
+    else if (type === 'deleteProduct') {
+      const { productId } = req.body;
+      const productsCollection = database.collection("products");
+
+      await productsCollection.deleteOne({ _id: new ObjectId(productId) });
+
+      return res.status(200).json({ message: "Product deleted" });
+    }
+    else {
       return res.status(400).json({ error: 'Invalid request type' });
     }
   } catch (error) {
