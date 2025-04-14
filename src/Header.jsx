@@ -405,7 +405,6 @@ const Header = () => {
       {/* Account Modal */}
       {isAccountModalOpen && (
         <div className="fixed inset-0 z-50" onClick={closeAccountModal}>
-          {/* Small modal positioned near account button */}
           <div
             className="absolute top-16 right-4 bg-white rounded-lg shadow-xl w-64 overflow-hidden"
             onClick={(e) => e.stopPropagation()} // Prevent click from closing modal
@@ -440,18 +439,9 @@ const Header = () => {
               >
                 Manage Account
               </button>
-              <button
-                onClick={() => {
-                  navigate("/orders");
-                  closeAccountModal();
-                }}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-gray rounded transition-colors"
-              >
-                View Orders
-              </button>
 
-              {/* Admin Dashboard Button - Only shown for admins */}
-              {user?.role === "admin" && (
+              {/* Conditional buttons based on role */}
+              {user?.role === "admin" ? (
                 <button
                   onClick={() => {
                     navigate("/admin");
@@ -479,6 +469,16 @@ const Header = () => {
                     />
                   </svg>
                   Admin Dashboard
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    navigate("/orders");
+                    closeAccountModal();
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray rounded transition-colors"
+                >
+                  View Orders
                 </button>
               )}
             </div>

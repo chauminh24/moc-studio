@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const AboutPage = () => {
   return (
-    <div className="min-h-screen pt-32 pb-16 px-4 sm:px-6 lg:px-8 bg-white">
+    <div className="min-h-screen pt-[10em] pb-16 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-4xl mx-auto">
         {/* Page Header */}
         <div className="text-center mb-12">
