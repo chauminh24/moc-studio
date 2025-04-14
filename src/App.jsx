@@ -106,16 +106,20 @@ const App = () => {
 
 export default App;
 
-// Create a RequireAuth component:
 function RequireAuth({ children }) {
-  const { user, isAdmin } = useContext(AuthContext);
+  const { user, isAdmin } = useContext(AuthContext); // Ensure AuthContext is properly imported and provided
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!user || !isAdmin) {
-      navigate('/login');
+      navigate('/login', { replace: true }); // Redirect to login if not authenticated or not an admin
     }
   }, [user, isAdmin, navigate]);
 
-  return user && isAdmin ? children : null;
+  // Render children only if the user is authenticated and is an admin
+  if (!user || !isAdmin) {
+    return null; // Prevent rendering protected content
+  }
+
+  return children;
 }
