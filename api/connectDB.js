@@ -332,20 +332,52 @@ export default async function handler(req, res) {
     }
     
     else if (type === 'addAvailability') {
-      const { availability } = req.body;
+      const { date, time_slots } = req.body; // Accept date and time slots
       const availabilityCollection = database.collection("consulting_availability");
-      
-      const newAvailability = {
-        date: availability.date,
-        time_slots: availability.time_slots,
-        created_at: new Date(),
-        updated_at: new Date()
-      };
     
-      const result = await availabilityCollection.insertOne(newAvailability);
-      newAvailability._id = result.insertedId;
+      try {
+        // Validate the input
+        if (!date || !time_slots || !Array.isArray(time_slots)) {
+          return res.status(400).json({ message: "Invalid input. 'date' and 'time_slots' are required." });
+        }
     
-      return res.status(201).json(newAvailability);
+        // Ensure each time slot has the required fields
+        for (const slot of time_slots) {
+          if (!slot.time || typeof slot.available !== "number" || typeof slot.capacity !== "number") {
+            return res.status(400).json({ message: "Each time slot must have 'time', 'available', and 'capacity' fields." });
+          }
+        }
+    
+        // Check if the date already exists
+        const existingAvailability = await availabilityCollection.findOne({ date: new Date(date) });
+    
+        if (existingAvailability) {
+          // Update the existing date with new time slots
+          await availabilityCollection.updateOne(
+            { date: new Date(date) },
+            {
+              $set: {
+                time_slots,
+                updated_at: new Date(),
+              },
+            }
+          );
+        } else {
+          // Insert a new date with time slots
+          const newAvailability = {
+            date: new Date(date),
+            time_slots,
+            updated_at: new Date(),
+          };
+    
+          await availabilityCollection.insertOne(newAvailability);
+        }
+    
+        return res.status(200).json({ message: "Consulting availability updated successfully." });
+      } catch (error) {
+        console.error("Error adding consulting availability:", error);
+        return res.status(500).json({ message: "Failed to add consulting availability", details: error.message });
+      }
     }
     
     else if (type === 'deleteAvailability') {
