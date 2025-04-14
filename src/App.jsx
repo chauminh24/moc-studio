@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import React, { useEffect, useState, useContext } from "react";
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import CartProvider from "./context/CartContext";
-import AuthProvider from "./context/AuthContext";
+import AuthProvider, { AuthContext } from "./context/AuthContext"; // Make sure to export AuthContext from AuthContext.js
 import Header from "./Header";
 import Footer from "./Footer";
 import Home from "./pages/Home";
@@ -13,9 +13,27 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import AboutPage from "./pages/AboutPage";
-import AdminDashboard from "./pages/AdminDashboard"; // Import the admin dashboard page
-import ProductDetailsPage from "./pages/ProductDetailsPage"; // Import the ProductDetailsPage
+import AdminDashboard from "./pages/AdminDashboard";
+import ProductDetailsPage from "./pages/ProductDetailsPage";
 import NotFound from "./pages/NotFound";
+
+// Move RequireAuth component inside App component or to a separate file
+const RequireAuth = ({ children }) => {
+  const { user, isAdmin } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user || !isAdmin) {
+      navigate('/login', { replace: true });
+    }
+  }, [user, isAdmin, navigate]);
+
+  if (!user || !isAdmin) {
+    return null;
+  }
+
+  return children;
+};
 
 const App = () => {
   const [categories, setCategories] = useState([]);
@@ -31,10 +49,9 @@ const App = () => {
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
-  // Custom component to conditionally render Header and Footer
   const ConditionalPageStyle = ({ children }) => {
     const location = useLocation();
-    const excludedPaths = ["/login", "/register", "/forgot-password", "/not-found"]; // Add paths to exclude Header and Footer
+    const excludedPaths = ["/login", "/register", "/forgot-password", "/not-found"];
     const isExcludedPage = excludedPaths.includes(location.pathname);
 
     return (
@@ -52,39 +69,22 @@ const App = () => {
         <Router>
           <ConditionalPageStyle>
             <Routes>
-              {/* Home Page */}
               <Route path="/" element={<Home />} />
-
-              {/* Shop by Product Routes */}
               <Route path="/shop-by-product" element={<ShopByProduct />} />
               <Route path="/shop-by-product/:category" element={<ShopByProduct />} />
               <Route
                 path="/shop-by-product/:category/:subcategory"
                 element={<ShopByProduct />}
               />
-
-              {/* Shop by Room Routes */}
               <Route path="/shop-by-room" element={<ShopByRoom categories={categories} />} />
               <Route path="/shop-by-room/:category" element={<ShopByRoom categories={categories} />} />
-
-              {/* Product Details Route */}
               <Route path="/product/:productId" element={<ProductDetailsPage />} />
-
-              {/* Interior Consulting Route */}
               <Route path="/interior-consulting" element={<InteriorConsulting />} />
-
-              {/* Search Results Route */}
               <Route path="/search" element={<SearchResults />} />
-
-              {/* Login/Register/Forgot-Password Route */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-
-              {/* About Page Route */}
               <Route path="/about" element={<AboutPage />} />
-
-              {/* Admin Dashboard Route */}
               <Route
                 path="/admin"
                 element={
@@ -93,8 +93,6 @@ const App = () => {
                   </RequireAuth>
                 }
               />
-
-              {/* Not Found Route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </ConditionalPageStyle>
@@ -105,21 +103,3 @@ const App = () => {
 };
 
 export default App;
-
-function RequireAuth({ children }) {
-  const { user, isAdmin } = useContext(AuthContext); // Ensure AuthContext is properly imported and provided
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!user || !isAdmin) {
-      navigate('/login', { replace: true }); // Redirect to login if not authenticated or not an admin
-    }
-  }, [user, isAdmin, navigate]);
-
-  // Render children only if the user is authenticated and is an admin
-  if (!user || !isAdmin) {
-    return null; // Prevent rendering protected content
-  }
-
-  return children;
-}
