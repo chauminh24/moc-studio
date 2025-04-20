@@ -90,7 +90,7 @@ const AdminDashboard = () => {
 
       if (!response.ok) throw new Error("Failed to update order status");
 
-      setOrders(orders.map(order => 
+      setOrders(orders.map(order =>
         order._id === orderId ? { ...order, status: newStatus } : order
       ));
     } catch (err) {
@@ -115,7 +115,7 @@ const AdminDashboard = () => {
 
       if (!response.ok) throw new Error("Failed to update product");
 
-      setProducts(products.map(product => 
+      setProducts(products.map(product =>
         product._id === editProduct._id ? editProduct : product
       ));
       setEditProduct(null);
@@ -236,6 +236,12 @@ const AdminDashboard = () => {
   const handleAddAvailability = async (e) => {
     e.preventDefault();
     try {
+      const formattedTimeSlots = newAvailability.time_slots.map((time) => ({
+        time,
+        available: 3, // Default available slots (you can make this dynamic)
+        capacity: 3, // Default capacity (you can make this dynamic)
+      }));
+
       const response = await fetch("/api/connectDB", {
         method: "POST",
         headers: {
@@ -243,7 +249,8 @@ const AdminDashboard = () => {
         },
         body: JSON.stringify({
           type: "addAvailability",
-          availability: newAvailability,
+          date: newAvailability.date,
+          time_slots: formattedTimeSlots,
         }),
       });
 
@@ -253,7 +260,7 @@ const AdminDashboard = () => {
       setAvailability([...availability, createdAvailability]);
       setNewAvailability({
         date: "",
-        time_slots: []
+        time_slots: [],
       });
     } catch (err) {
       setError(err.message);
@@ -434,7 +441,7 @@ const AdminDashboard = () => {
                       type="text"
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       value={newProduct.name}
-                      onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                      onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                       required
                     />
                   </div>
@@ -445,7 +452,7 @@ const AdminDashboard = () => {
                       step="0.01"
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       value={newProduct.price}
-                      onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                      onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
                       required
                     />
                   </div>
@@ -455,7 +462,7 @@ const AdminDashboard = () => {
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       rows="3"
                       value={newProduct.description}
-                      onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                      onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                     />
                   </div>
                   <div>
@@ -464,7 +471,7 @@ const AdminDashboard = () => {
                       type="number"
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       value={newProduct.stock}
-                      onChange={(e) => setNewProduct({...newProduct, stock: parseInt(e.target.value)})}
+                      onChange={(e) => setNewProduct({ ...newProduct, stock: parseInt(e.target.value) })}
                     />
                   </div>
                   <div>
@@ -473,7 +480,7 @@ const AdminDashboard = () => {
                       type="text"
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       value={newProduct.image_url}
-                      onChange={(e) => setNewProduct({...newProduct, image_url: e.target.value})}
+                      onChange={(e) => setNewProduct({ ...newProduct, image_url: e.target.value })}
                     />
                   </div>
                 </div>
@@ -498,7 +505,7 @@ const AdminDashboard = () => {
                     <select
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       value={newMedia.product_id}
-                      onChange={(e) => setNewMedia({...newMedia, product_id: e.target.value})}
+                      onChange={(e) => setNewMedia({ ...newMedia, product_id: e.target.value })}
                       required
                     >
                       <option value="">Select Product</option>
@@ -513,7 +520,7 @@ const AdminDashboard = () => {
                       type="text"
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       value={newMedia.media_url}
-                      onChange={(e) => setNewMedia({...newMedia, media_url: e.target.value})}
+                      onChange={(e) => setNewMedia({ ...newMedia, media_url: e.target.value })}
                       required
                     />
                   </div>
@@ -522,7 +529,7 @@ const AdminDashboard = () => {
                     <select
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       value={newMedia.media_type}
-                      onChange={(e) => setNewMedia({...newMedia, media_type: e.target.value})}
+                      onChange={(e) => setNewMedia({ ...newMedia, media_type: e.target.value })}
                     >
                       <option value="image">Image</option>
                       <option value="video">Video</option>
@@ -535,7 +542,7 @@ const AdminDashboard = () => {
                       id="is_primary"
                       className="h-4 w-4 text-blue focus:ring-blue border-gray-300 rounded"
                       checked={newMedia.is_primary}
-                      onChange={(e) => setNewMedia({...newMedia, is_primary: e.target.checked})}
+                      onChange={(e) => setNewMedia({ ...newMedia, is_primary: e.target.checked })}
                     />
                     <label htmlFor="is_primary" className="ml-2 block text-sm text-gray-700">
                       Primary Media
@@ -676,23 +683,76 @@ const AdminDashboard = () => {
                       type="date"
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       value={newAvailability.date}
-                      onChange={(e) => setNewAvailability({...newAvailability, date: e.target.value})}
+                      onChange={(e) => setNewAvailability({ ...newAvailability, date: e.target.value })}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Time Slots (comma separated)</label>
-                    <input
-                      type="text"
-                      placeholder="9:00, 10:00, 11:00"
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
-                      value={newAvailability.time_slots.join(', ')}
-                      onChange={(e) => setNewAvailability({
-                        ...newAvailability,
-                        time_slots: e.target.value.split(',').map(t => t.trim())
-                      })}
-                      required
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Time Slots</label>
+                    <div className="space-y-2">
+                      {newAvailability.time_slots.map((slot, index) => (
+                        <div key={index} className="flex items-center space-x-4">
+                          <input
+                            type="text"
+                            placeholder="Time (e.g., 09:00)"
+                            className="w-1/3 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
+                            value={slot.time}
+                            onChange={(e) => {
+                              const updatedSlots = [...newAvailability.time_slots];
+                              updatedSlots[index].time = e.target.value;
+                              setNewAvailability({ ...newAvailability, time_slots: updatedSlots });
+                            }}
+                            required
+                          />
+                          <input
+                            type="number"
+                            placeholder="Available"
+                            className="w-1/3 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
+                            value={slot.available}
+                            onChange={(e) => {
+                              const updatedSlots = [...newAvailability.time_slots];
+                              updatedSlots[index].available = parseInt(e.target.value, 10);
+                              setNewAvailability({ ...newAvailability, time_slots: updatedSlots });
+                            }}
+                            required
+                          />
+                          <input
+                            type="number"
+                            placeholder="Capacity"
+                            className="w-1/3 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
+                            value={slot.capacity}
+                            onChange={(e) => {
+                              const updatedSlots = [...newAvailability.time_slots];
+                              updatedSlots[index].capacity = parseInt(e.target.value, 10);
+                              setNewAvailability({ ...newAvailability, time_slots: updatedSlots });
+                            }}
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updatedSlots = newAvailability.time_slots.filter((_, i) => i !== index);
+                              setNewAvailability({ ...newAvailability, time_slots: updatedSlots });
+                            }}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setNewAvailability({
+                          ...newAvailability,
+                          time_slots: [...newAvailability.time_slots, { time: "", available: 3, capacity: 3 }],
+                        })
+                      }
+                      className="mt-2 px-4 py-2 bg-blue text-white rounded-lg hover:bg-dark-blue transition"
+                    >
+                      Add Time Slot
+                    </button>
                   </div>
                 </div>
                 <div className="mt-6">
@@ -712,7 +772,7 @@ const AdminDashboard = () => {
               <div className="h-[500px]">
                 <Calendar
                   localizer={localizer}
-                  events={availability.flatMap(avail => 
+                  events={availability.flatMap(avail =>
                     avail.time_slots.map(time => ({
                       title: `Available (${time})`,
                       start: new Date(`${avail.date}T${time}:00`),
@@ -798,7 +858,7 @@ const AdminDashboard = () => {
                         type="text"
                         className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                         value={editProduct.name}
-                        onChange={(e) => setEditProduct({...editProduct, name: e.target.value})}
+                        onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })}
                         required
                       />
                     </div>
@@ -810,7 +870,7 @@ const AdminDashboard = () => {
                         className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                         value={editProduct.price.$numberDecimal}
                         onChange={(e) => setEditProduct({
-                          ...editProduct, 
+                          ...editProduct,
                           price: { $numberDecimal: e.target.value }
                         })}
                         required
@@ -822,7 +882,7 @@ const AdminDashboard = () => {
                         className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                         rows="4"
                         value={editProduct.description}
-                        onChange={(e) => setEditProduct({...editProduct, description: e.target.value})}
+                        onChange={(e) => setEditProduct({ ...editProduct, description: e.target.value })}
                       />
                     </div>
                     <div>
@@ -831,7 +891,7 @@ const AdminDashboard = () => {
                         type="number"
                         className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                         value={editProduct.stock}
-                        onChange={(e) => setEditProduct({...editProduct, stock: parseInt(e.target.value)})}
+                        onChange={(e) => setEditProduct({ ...editProduct, stock: parseInt(e.target.value) })}
                       />
                     </div>
                     <div>
@@ -840,7 +900,7 @@ const AdminDashboard = () => {
                         type="text"
                         className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                         value={editProduct.image_url}
-                        onChange={(e) => setEditProduct({...editProduct, image_url: e.target.value})}
+                        onChange={(e) => setEditProduct({ ...editProduct, image_url: e.target.value })}
                       />
                     </div>
                   </div>
