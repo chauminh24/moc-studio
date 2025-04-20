@@ -893,7 +893,7 @@ const AdminDashboard = () => {
                             {new Date(avail.date).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {avail.time_slots.join(', ')}
+                            {avail.time_slots.map(slot => `${slot.time} (${slot.available}/${slot.capacity})`).join(', ')}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             <button
