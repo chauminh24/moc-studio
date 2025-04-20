@@ -239,14 +239,6 @@ const AdminDashboard = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    console.log("API Request:", {
-      method: req.method,
-      url: req.url,
-      query: req.query,
-      body: req.body
-    });
-
-
 
     try {
       // Process time slots
@@ -264,7 +256,7 @@ const AdminDashboard = () => {
         throw new Error("Please add at least one time slot");
       }
 
-      // Before making the fetch request, add:
+      // Log the payload being sent to the API
       console.log("Sending availability data:", {
         date: newAvailability.date,
         time_slots: timeSlots
