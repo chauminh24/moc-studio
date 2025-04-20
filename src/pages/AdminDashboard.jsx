@@ -236,61 +236,75 @@ const AdminDashboard = () => {
   // Handle availability creation
   const handleAddAvailability = async (e) => {
     e.preventDefault();
-    try {
-      // Validate input
-      if (!newAvailability.date || !newAvailability.time_slots) {
-        throw new Error("Date and time slots are required");
-      }
+    setIsLoading(true);
+    setError('');
+    console.log("API Request:", {
+      method: req.method,
+      url: req.url,
+      query: req.query,
+      body: req.body
+    });
 
-      // Process time slots into the required structure
-      const timeSlotsArray = newAvailability.time_slots
+
+
+    try {
+      // Process time slots
+      const timeSlots = newAvailability.time_slots
         .split(',')
-        .map(slot => slot.trim())
-        .filter(slot => slot.length > 0)
+        .map(t => t.trim())
+        .filter(t => t)
         .map(time => ({
           time,
           available: newAvailability.default_capacity,
           capacity: newAvailability.default_capacity
         }));
 
-      if (timeSlotsArray.length === 0) {
-        throw new Error("Please enter at least one valid time slot");
+      if (timeSlots.length === 0) {
+        throw new Error("Please add at least one time slot");
       }
+
+      // Before making the fetch request, add:
+      console.log("Sending availability data:", {
+        date: newAvailability.date,
+        time_slots: timeSlots
+      });
 
       const response = await fetch('/api/connectDB?type=addAvailability', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           availability: {
             date: newAvailability.date,
-            time_slots: timeSlotsArray
+            time_slots: timeSlots
           }
-        }),
+        })
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to add availability");
+        throw new Error(data.error || data.message || "Failed to add availability");
       }
 
-      // Refresh availability data
+      // Success - refresh data
       const availResponse = await fetch('/api/connectDB?type=adminAvailability');
-      const availData = await availResponse.json();
-      setAvailability(availData.availability);
+      const newData = await availResponse.json();
+      setAvailability(newData.availability);
 
       setNewAvailability({
-        date: "",
-        time_slots: "",
+        date: '',
+        time_slots: '',
         default_capacity: 1
       });
+
     } catch (err) {
-      setError(err.message);
-      console.error("Availability error:", err);
+      console.error("Full error:", err);
+      setError(`${err.message} - Please check console for details`);
+    } finally {
+      setIsLoading(false);
     }
   };
+
   // Handle availability deletion
   const deleteAvailability = async (availabilityId) => {
     try {

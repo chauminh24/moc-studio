@@ -335,90 +335,62 @@ export default async function handler(req, res) {
       const { availability } = req.body;
       const availabilityCollection = database.collection("consulting_availability");
       
-      console.log("Received availability data:", availability);
-      console.log("Converted date:", dateObj);
-      console.log("Validated time slots:", validatedTimeSlots);
       try {
-        // Validate the input
-        if (!availability || !availability.date || !availability.time_slots) {
-          return res.status(400).json({ 
-            message: "Invalid input. 'date' and 'time_slots' are required.",
-            received: availability
-          });
+        console.log("Received availability data:", JSON.stringify(availability, null, 2));
+    
+        if (!availability) {
+          throw new Error("No availability data received");
         }
     
-        // Convert date string to Date object
+        // Validate date
+        if (!availability.date) {
+          throw new Error("Date is required");
+        }
         const dateObj = new Date(availability.date);
         if (isNaN(dateObj.getTime())) {
-          return res.status(400).json({ 
-            message: "Invalid date format. Please use YYYY-MM-DD format."
-          });
+          throw new Error(`Invalid date format: ${availability.date}`);
         }
     
-        // Ensure time_slots is an array
-        if (!Array.isArray(availability.time_slots)) {
-          return res.status(400).json({ 
-            message: "time_slots must be an array of time slot objects"
-          });
+        // Validate time slots
+        if (!availability.time_slots || !Array.isArray(availability.time_slots)) {
+          throw new Error("time_slots must be an array");
         }
     
-        // Validate each time slot
-        const validatedTimeSlots = availability.time_slots.map(slot => {
-          if (!slot.time || typeof slot.available === 'undefined' || typeof slot.capacity === 'undefined') {
-            throw new Error(`Invalid time slot: ${JSON.stringify(slot)}`);
+        const validatedSlots = availability.time_slots.map(slot => {
+          if (!slot.time || !slot.available || !slot.capacity) {
+            throw new Error(`Missing required fields in time slot: ${JSON.stringify(slot)}`);
           }
-          
-          // Validate time format (HH:MM)
-          if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(slot.time)) {
-            throw new Error(`Invalid time format for slot: ${slot.time}. Use HH:MM format.`);
-          }
-          
           return {
             time: slot.time,
-            available: parseInt(slot.available) || 0,
-            capacity: parseInt(slot.capacity) || 1
+            available: parseInt(slot.available),
+            capacity: parseInt(slot.capacity)
           };
         });
     
-        // Check if the date already exists
-        const existingAvailability = await availabilityCollection.findOne({ 
-          date: dateObj 
+        const result = await availabilityCollection.insertOne({
+          date: dateObj,
+          time_slots: validatedSlots,
+          updated_at: new Date()
         });
     
-        const availabilityData = {
-          date: dateObj,
-          time_slots: validatedTimeSlots,
-          updated_at: new Date()
-        };
+        console.log("Insert result:", result);
+        return res.status(201).json({
+          success: true,
+          insertedId: result.insertedId
+        });
     
-        if (existingAvailability) {
-          // Update existing availability
-          const result = await availabilityCollection.updateOne(
-            { _id: existingAvailability._id },
-            { $set: availabilityData }
-          );
-          return res.status(200).json({ 
-            message: "Availability updated",
-            matchedCount: result.matchedCount,
-            modifiedCount: result.modifiedCount
-          });
-        } else {
-          // Create new availability
-          const result = await availabilityCollection.insertOne(availabilityData);
-          return res.status(201).json({ 
-            message: "Availability created",
-            insertedId: result.insertedId
-          });
-        }
       } catch (error) {
-        console.error("Error in addAvailability:", error);
-        return res.status(500).json({ 
-          message: "Failed to add availability",
+        console.error("Detailed error:", {
+          message: error.message,
+          stack: error.stack,
+          receivedData: availability
+        });
+        return res.status(400).json({
+          success: false,
           error: error.message,
-          stack: error.stack
+          details: error.stack
         });
       }
-      
     }
 
     else if (type === 'deleteAvailability') {
