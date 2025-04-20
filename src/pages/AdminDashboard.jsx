@@ -666,7 +666,6 @@ const AdminDashboard = () => {
                               >
                                 Edit
                               </button>
-                              // In your component
                               <button
                                 onClick={() => handleDeleteAvailability(avail._id)}
                                 disabled={isLoading}
