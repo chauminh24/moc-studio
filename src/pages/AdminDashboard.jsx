@@ -299,8 +299,12 @@ const AdminDashboard = () => {
   };
 
   // Handle availability deletion
-  const deleteAvailability = async (availabilityId) => {
+  const handleDeleteAvailability = async (availabilityId) => {
     try {
+      setIsLoading(true);
+      setError(null);
+  
+      // Send delete request to the server
       const response = await fetch("/api/connectDB", {
         method: "POST",
         headers: {
@@ -311,12 +315,20 @@ const AdminDashboard = () => {
           availabilityId,
         }),
       });
-
-      if (!response.ok) throw new Error("Failed to delete availability");
-
-      setAvailability(availability.filter(item => item._id !== availabilityId));
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || data.message || "Failed to delete availability");
+      }
+  
+      // Update the availability list after successful deletion
+      setAvailability(availability.filter((item) => item._id !== availabilityId));
     } catch (err) {
+      console.error("Error deleting availability:", err);
       setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -897,7 +909,7 @@ const AdminDashboard = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             <button
-                              onClick={() => deleteAvailability(avail._id)}
+                              onClick={() => handleDeleteAvailability(avail._id)}
                               className="text-red-500 hover:text-red-700"
                             >
                               Delete

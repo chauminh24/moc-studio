@@ -396,10 +396,39 @@ export default async function handler(req, res) {
     else if (type === 'deleteAvailability') {
       const { availabilityId } = req.body;
       const availabilityCollection = database.collection("consulting_availability");
-
-      await availabilityCollection.deleteOne({ _id: new ObjectId(availabilityId) });
-
-      return res.status(200).json({ message: "Availability deleted" });
+    
+      try {
+        console.log("Received availabilityId for deletion:", availabilityId);
+    
+        // Validate availabilityId
+        if (!availabilityId) {
+          throw new Error("Availability ID is required");
+        }
+    
+        // Attempt to delete the availability
+        const result = await availabilityCollection.deleteOne({ _id: new ObjectId(availabilityId) });
+    
+        if (result.deletedCount === 0) {
+          throw new Error(`No availability found with ID: ${availabilityId}`);
+        }
+    
+        console.log("Delete result:", result);
+        return res.status(200).json({
+          success: true,
+          message: "Availability deleted successfully",
+        });
+      } catch (error) {
+        console.error("Error deleting availability:", {
+          message: error.message,
+          stack: error.stack,
+          receivedData: availabilityId,
+        });
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+          details: error.stack,
+        });
+      }
     }
     else {
       return res.status(400).json({ error: 'Invalid request type' });
