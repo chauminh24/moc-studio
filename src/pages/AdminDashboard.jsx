@@ -32,7 +32,8 @@ const AdminDashboard = () => {
   });
   const [newAvailability, setNewAvailability] = useState({
     date: "",
-    time_slots: []
+    time_slots: "",
+    default_capacity: 1  // Default capacity for new slots
   });
 
   // Fetch data based on active tab
@@ -233,14 +234,36 @@ const AdminDashboard = () => {
   };
 
   // Handle availability creation
+  // Updated handleAddAvailability function
   const handleAddAvailability = async (e) => {
     e.preventDefault();
     try {
-      const formattedTimeSlots = newAvailability.time_slots.map((time) => ({
-        time,
-        available: 3, // Default available slots (you can make this dynamic)
-        capacity: 3, // Default capacity (you can make this dynamic)
-      }));
+      // Validate input
+      if (!newAvailability.date || !newAvailability.time_slots) {
+        throw new Error("Date and time slots are required");
+      }
+
+      // Process time slots into the required structure
+      const timeSlotsArray = newAvailability.time_slots
+        .split(',')
+        .map(slot => slot.trim())
+        .filter(slot => slot.length > 0)
+        .map(time => ({
+          time,
+          available: newAvailability.default_capacity,
+          capacity: newAvailability.default_capacity
+        }));
+
+      if (timeSlotsArray.length === 0) {
+        throw new Error("Please enter at least one valid time slot");
+      }
+
+      // Create the properly formatted availability object
+      const availabilityData = {
+        date: new Date(newAvailability.date),
+        time_slots: timeSlotsArray,
+        updated_at: new Date()  // Add the required updated_at field
+      };
 
       const response = await fetch("/api/connectDB", {
         method: "POST",
@@ -249,24 +272,27 @@ const AdminDashboard = () => {
         },
         body: JSON.stringify({
           type: "addAvailability",
-          date: newAvailability.date,
-          time_slots: formattedTimeSlots,
+          availability: availabilityData,
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to add availability");
+      const data = await response.json();
 
-      const createdAvailability = await response.json();
-      setAvailability([...availability, createdAvailability]);
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to add availability");
+      }
+
+      setAvailability([...availability, data.availability]);
       setNewAvailability({
         date: "",
-        time_slots: [],
+        time_slots: "",
+        default_capacity: 1
       });
     } catch (err) {
       setError(err.message);
+      console.error("Availability error:", err);
     }
   };
-
   // Handle availability deletion
   const deleteAvailability = async (availabilityId) => {
     try {
@@ -683,76 +709,47 @@ const AdminDashboard = () => {
                       type="date"
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       value={newAvailability.date}
-                      onChange={(e) => setNewAvailability({ ...newAvailability, date: e.target.value })}
+                      onChange={(e) => setNewAvailability({
+                        ...newAvailability,
+                        date: e.target.value
+                      })}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Time Slots</label>
-                    <div className="space-y-2">
-                      {newAvailability.time_slots.map((slot, index) => (
-                        <div key={index} className="flex items-center space-x-4">
-                          <input
-                            type="text"
-                            placeholder="Time (e.g., 09:00)"
-                            className="w-1/3 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
-                            value={slot.time}
-                            onChange={(e) => {
-                              const updatedSlots = [...newAvailability.time_slots];
-                              updatedSlots[index].time = e.target.value;
-                              setNewAvailability({ ...newAvailability, time_slots: updatedSlots });
-                            }}
-                            required
-                          />
-                          <input
-                            type="number"
-                            placeholder="Available"
-                            className="w-1/3 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
-                            value={slot.available}
-                            onChange={(e) => {
-                              const updatedSlots = [...newAvailability.time_slots];
-                              updatedSlots[index].available = parseInt(e.target.value, 10);
-                              setNewAvailability({ ...newAvailability, time_slots: updatedSlots });
-                            }}
-                            required
-                          />
-                          <input
-                            type="number"
-                            placeholder="Capacity"
-                            className="w-1/3 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
-                            value={slot.capacity}
-                            onChange={(e) => {
-                              const updatedSlots = [...newAvailability.time_slots];
-                              updatedSlots[index].capacity = parseInt(e.target.value, 10);
-                              setNewAvailability({ ...newAvailability, time_slots: updatedSlots });
-                            }}
-                            required
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const updatedSlots = newAvailability.time_slots.filter((_, i) => i !== index);
-                              setNewAvailability({ ...newAvailability, time_slots: updatedSlots });
-                            }}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setNewAvailability({
-                          ...newAvailability,
-                          time_slots: [...newAvailability.time_slots, { time: "", available: 3, capacity: 3 }],
-                        })
-                      }
-                      className="mt-2 px-4 py-2 bg-blue text-white rounded-lg hover:bg-dark-blue transition"
-                    >
-                      Add Time Slot
-                    </button>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Time Slots (comma separated, e.g., "09:00, 10:00, 11:00")
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
+                      value={newAvailability.time_slots}
+                      onChange={(e) => setNewAvailability({
+                        ...newAvailability,
+                        time_slots: e.target.value
+                      })}
+                      placeholder="09:00, 10:00, 11:00"
+                      required
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Must be in 24-hour HH:MM format (e.g., 09:00, 13:30)
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Default Capacity per Slot
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
+                      value={newAvailability.default_capacity}
+                      onChange={(e) => setNewAvailability({
+                        ...newAvailability,
+                        default_capacity: parseInt(e.target.value) || 1
+                      })}
+                      required
+                    />
                   </div>
                 </div>
                 <div className="mt-6">
@@ -772,19 +769,102 @@ const AdminDashboard = () => {
               <div className="h-[500px]">
                 <Calendar
                   localizer={localizer}
-                  events={availability.flatMap(avail =>
-                    avail.time_slots.map(time => ({
-                      title: `Available (${time})`,
-                      start: new Date(`${avail.date}T${time}:00`),
-                      end: new Date(`${avail.date}T${time}:00`),
-                      allDay: false
-                    }))
-                  )}
+                  events={availability.flatMap(avail => {
+                    // Convert MongoDB date string to Date object if needed
+                    const dateObj = avail.date instanceof Date ? avail.date : new Date(avail.date);
+                    const dateStr = dateObj.toISOString().split('T')[0];
+
+                    return avail.time_slots.map(slot => ({
+                      id: `${avail._id}-${slot.time}`,
+                      title: `Available (${slot.time}) - ${slot.available}/${slot.capacity}`,
+                      start: new Date(`${dateStr}T${slot.time}:00`),
+                      end: new Date(`${dateStr}T${slot.time}:00`),
+                      allDay: false,
+                      resource: {
+                        ...slot,
+                        dateId: avail._id
+                      }
+                    }));
+                  })}
                   startAccessor="start"
                   endAccessor="end"
                   defaultView="week"
-                  min={new Date(0, 0, 0, 9, 0, 0)}
-                  max={new Date(0, 0, 0, 18, 0, 0)}
+                  views={['week', 'day', 'agenda']}
+                  min={new Date(0, 0, 0, 9, 0, 0)}  // 9:00 AM
+                  max={new Date(0, 0, 0, 18, 0, 0)} // 6:00 PM
+                  step={30}                          // 30 minute intervals
+                  timeslots={2}                      // Number of time slots per hour
+                  eventPropGetter={(event) => ({
+                    style: {
+                      backgroundColor: event.resource.available > 0 ? '#3182ce' : '#e53e3e',
+                      borderRadius: '4px',
+                      border: 'none',
+                      color: 'white',
+                      padding: '2px 5px',
+                      fontSize: '12px'
+                    }
+                  })}
+                  onSelectEvent={(event) => {
+                    // Handle event click (e.g., show edit modal)
+                    console.log('Selected availability:', event);
+                  }}
+                  components={{
+                    event: ({ event }) => (
+                      <div className="p-1">
+                        <div className="font-semibold">{event.title}</div>
+                        {event.resource.available > 0 && (
+                          <div className="text-xs">Slots available</div>
+                        )}
+                      </div>
+                    ),
+                    toolbar: (toolbarProps) => (
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => toolbarProps.onNavigate('PREV')}
+                            className="px-3 py-1 border rounded"
+                          >
+                            Back
+                          </button>
+                          <button
+                            onClick={() => toolbarProps.onNavigate('TODAY')}
+                            className="px-3 py-1 border rounded"
+                          >
+                            Today
+                          </button>
+                          <button
+                            onClick={() => toolbarProps.onNavigate('NEXT')}
+                            className="px-3 py-1 border rounded"
+                          >
+                            Next
+                          </button>
+                        </div>
+                        <span className="text-lg font-medium">
+                          {toolbarProps.label}
+                        </span>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => toolbarProps.onView('day')}
+                            className={`px-3 py-1 border rounded ${toolbarProps.view === 'day' ? 'bg-blue-100' : ''}`}
+                          >
+                            Day
+                          </button>
+                          <button
+                            onClick={() => toolbarProps.onView('week')}
+                            className={`px-3 py-1 border rounded ${toolbarProps.view === 'week' ? 'bg-blue-100' : ''}`}
+                          >
+                            Week
+                          </button>
+                          <button
+                            onClick={() => toolbarProps.onView('agenda')}
+                            className={`px-3 py-1 border rounded ${toolbarProps.view === 'agenda' ? 'bg-blue-100' : ''}`}
+                          >
+                            Agenda
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  }}
                 />
               </div>
             </div>
