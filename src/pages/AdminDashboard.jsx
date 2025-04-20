@@ -303,8 +303,9 @@ const AdminDashboard = () => {
     try {
       setIsLoading(true);
       setError(null);
-  
-      // Send delete request to the server
+
+      console.log("Attempting to delete availability with ID:", availabilityId);
+
       const response = await fetch("/api/connectDB", {
         method: "POST",
         headers: {
@@ -312,21 +313,33 @@ const AdminDashboard = () => {
         },
         body: JSON.stringify({
           type: "deleteAvailability",
-          availabilityId,
+          availabilityId: availabilityId.toString() // Ensure it's a string
         }),
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.error || data.message || "Failed to delete availability");
       }
-  
-      // Update the availability list after successful deletion
-      setAvailability(availability.filter((item) => item._id !== availabilityId));
+
+      console.log("Delete successful, refreshing availability data...");
+
+      // Refresh the availability list
+      const availResponse = await fetch('/api/connectDB?type=adminAvailability');
+      const newData = await availResponse.json();
+      setAvailability(newData.availability);
+
+      // Optional: Show success message
+      setSuccessMessage("Availability deleted successfully!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+
     } catch (err) {
-      console.error("Error deleting availability:", err);
-      setError(err.message);
+      console.error("Delete error:", {
+        error: err,
+        availabilityId: availabilityId
+      });
+      setError(`Delete failed: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -652,12 +665,26 @@ const AdminDashboard = () => {
                               >
                                 Edit
                               </button>
+                              // In your component
                               <button
-                                onClick={() => deleteProduct(product._id)}
-                                className="text-red-500 hover:text-red-700"
+                                onClick={() => handleDeleteAvailability(avail._id)}
+                                disabled={isLoading}
+                                className="text-red-500 hover:text-red-700 disabled:opacity-50"
                               >
-                                Delete
+                                {isLoading ? 'Deleting...' : 'Delete'}
                               </button>
+
+                              {error && (
+                                <div className="bg-red-100 border-l-4 border-red-500 p-4 mb-4">
+                                  <p className="text-red-700">{error}</p>
+                                </div>
+                              )}
+
+                              {successMessage && (
+                                <div className="bg-green-100 border-l-4 border-green-500 p-4 mb-4">
+                                  <p className="text-green-700">{successMessage}</p>
+                                </div>
+                              )}
                             </td>
                           </tr>
                           {/* Media for this product */}

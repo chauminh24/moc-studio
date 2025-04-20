@@ -398,35 +398,60 @@ export default async function handler(req, res) {
       const availabilityCollection = database.collection("consulting_availability");
     
       try {
-        console.log("Received availabilityId for deletion:", availabilityId);
+        console.log("Delete request received for availability ID:", availabilityId);
     
-        // Validate availabilityId
-        if (!availabilityId) {
-          throw new Error("Availability ID is required");
+        // Validate input
+        if (!availabilityId || typeof availabilityId !== 'string') {
+          throw new Error("Valid availability ID is required");
         }
     
-        // Attempt to delete the availability
-        const result = await availabilityCollection.deleteOne({ _id: new ObjectId(availabilityId) });
-    
-        if (result.deletedCount === 0) {
-          throw new Error(`No availability found with ID: ${availabilityId}`);
+        // Validate ObjectId format
+        if (!ObjectId.isValid(availabilityId)) {
+          throw new Error("Invalid availability ID format");
         }
     
-        console.log("Delete result:", result);
+        const objectId = new ObjectId(availabilityId);
+        
+        // First check if document exists
+        const existingDoc = await availabilityCollection.findOne({ _id: objectId });
+        if (!existingDoc) {
+          throw new Error(`Availability with ID ${availabilityId} not found`);
+        }
+    
+        // Perform deletion
+        const result = await availabilityCollection.deleteOne({ _id: objectId });
+    
+        // Verify deletion
+        if (result.deletedCount !== 1) {
+          throw new Error(`Failed to delete availability (deletedCount: ${result.deletedCount})`);
+        }
+    
+        console.log("Successfully deleted availability:", {
+          id: availabilityId,
+          date: existingDoc.date,
+          time_slots: existingDoc.time_slots.length
+        });
+    
         return res.status(200).json({
           success: true,
-          message: "Availability deleted successfully",
+          deletedCount: result.deletedCount,
+          deletedId: availabilityId,
+          message: "Availability successfully deleted"
         });
+    
       } catch (error) {
-        console.error("Error deleting availability:", {
-          message: error.message,
+        console.error("Delete availability error:", {
+          error: error.message,
           stack: error.stack,
-          receivedData: availabilityId,
+          receivedId: availabilityId,
+          timestamp: new Date().toISOString()
         });
+    
         return res.status(400).json({
           success: false,
           error: error.message,
-          details: error.stack,
+          receivedId: availabilityId,
+          details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
       }
     }
