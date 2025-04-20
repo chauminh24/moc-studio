@@ -234,7 +234,6 @@ const AdminDashboard = () => {
   };
 
   // Handle availability creation
-  // Updated handleAddAvailability function
   const handleAddAvailability = async (e) => {
     e.preventDefault();
     try {
@@ -258,21 +257,16 @@ const AdminDashboard = () => {
         throw new Error("Please enter at least one valid time slot");
       }
 
-      // Create the properly formatted availability object
-      const availabilityData = {
-        date: new Date(newAvailability.date),
-        time_slots: timeSlotsArray,
-        updated_at: new Date()  // Add the required updated_at field
-      };
-
-      const response = await fetch("/api/connectDB", {
-        method: "POST",
+      const response = await fetch('/api/connectDB?type=addAvailability', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          type: "addAvailability",
-          availability: availabilityData,
+          availability: {
+            date: newAvailability.date,
+            time_slots: timeSlotsArray
+          }
         }),
       });
 
@@ -282,7 +276,11 @@ const AdminDashboard = () => {
         throw new Error(data.message || "Failed to add availability");
       }
 
-      setAvailability([...availability, data.availability]);
+      // Refresh availability data
+      const availResponse = await fetch('/api/connectDB?type=adminAvailability');
+      const availData = await availResponse.json();
+      setAvailability(availData.availability);
+
       setNewAvailability({
         date: "",
         time_slots: "",

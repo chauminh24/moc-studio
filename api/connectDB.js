@@ -299,93 +299,134 @@ export default async function handler(req, res) {
       const media = await mediaCollection.find({}).toArray();
       return res.status(200).json({ media });
     }
-    
+
     else if (type === 'adminAvailability') {
       const availabilityCollection = database.collection("consulting_availability");
       const availability = await availabilityCollection.find({}).toArray();
       return res.status(200).json({ availability });
     }
-    
+
     else if (type === 'addProductMedia') {
       const { media } = req.body;
       const mediaCollection = database.collection("product_media");
-      
+
       const newMedia = {
         ...media,
         created_at: new Date(),
         updated_at: new Date()
       };
-    
+
       const result = await mediaCollection.insertOne(newMedia);
       newMedia._id = result.insertedId;
-    
+
       return res.status(201).json(newMedia);
     }
-    
+
     else if (type === 'deleteMedia') {
       const { mediaId } = req.body;
       const mediaCollection = database.collection("product_media");
-    
+
       await mediaCollection.deleteOne({ _id: new ObjectId(mediaId) });
-    
+
       return res.status(200).json({ message: "Media deleted" });
     }
-    
+
     else if (type === 'addAvailability') {
-      const { date, time_slots } = req.body; // Accept date and time slots
+      const { availability } = req.body;
       const availabilityCollection = database.collection("consulting_availability");
-    
+      
+      console.log("Received availability data:", availability);
+      console.log("Converted date:", dateObj);
+      console.log("Validated time slots:", validatedTimeSlots);
       try {
         // Validate the input
-        if (!date || !time_slots || !Array.isArray(time_slots)) {
-          return res.status(400).json({ message: "Invalid input. 'date' and 'time_slots' are required." });
+        if (!availability || !availability.date || !availability.time_slots) {
+          return res.status(400).json({ 
+            message: "Invalid input. 'date' and 'time_slots' are required.",
+            received: availability
+          });
         }
     
-        // Ensure each time slot has the required fields
-        for (const slot of time_slots) {
-          if (!slot.time || typeof slot.available !== "number" || typeof slot.capacity !== "number") {
-            return res.status(400).json({ message: "Each time slot must have 'time', 'available', and 'capacity' fields." });
-          }
+        // Convert date string to Date object
+        const dateObj = new Date(availability.date);
+        if (isNaN(dateObj.getTime())) {
+          return res.status(400).json({ 
+            message: "Invalid date format. Please use YYYY-MM-DD format."
+          });
         }
+    
+        // Ensure time_slots is an array
+        if (!Array.isArray(availability.time_slots)) {
+          return res.status(400).json({ 
+            message: "time_slots must be an array of time slot objects"
+          });
+        }
+    
+        // Validate each time slot
+        const validatedTimeSlots = availability.time_slots.map(slot => {
+          if (!slot.time || typeof slot.available === 'undefined' || typeof slot.capacity === 'undefined') {
+            throw new Error(`Invalid time slot: ${JSON.stringify(slot)}`);
+          }
+          
+          // Validate time format (HH:MM)
+          if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(slot.time)) {
+            throw new Error(`Invalid time format for slot: ${slot.time}. Use HH:MM format.`);
+          }
+          
+          return {
+            time: slot.time,
+            available: parseInt(slot.available) || 0,
+            capacity: parseInt(slot.capacity) || 1
+          };
+        });
     
         // Check if the date already exists
-        const existingAvailability = await availabilityCollection.findOne({ date: new Date(date) });
+        const existingAvailability = await availabilityCollection.findOne({ 
+          date: dateObj 
+        });
+    
+        const availabilityData = {
+          date: dateObj,
+          time_slots: validatedTimeSlots,
+          updated_at: new Date()
+        };
     
         if (existingAvailability) {
-          // Update the existing date with new time slots
-          await availabilityCollection.updateOne(
-            { date: new Date(date) },
-            {
-              $set: {
-                time_slots,
-                updated_at: new Date(),
-              },
-            }
+          // Update existing availability
+          const result = await availabilityCollection.updateOne(
+            { _id: existingAvailability._id },
+            { $set: availabilityData }
           );
+          return res.status(200).json({ 
+            message: "Availability updated",
+            matchedCount: result.matchedCount,
+            modifiedCount: result.modifiedCount
+          });
         } else {
-          // Insert a new date with time slots
-          const newAvailability = {
-            date: new Date(date),
-            time_slots,
-            updated_at: new Date(),
-          };
-    
-          await availabilityCollection.insertOne(newAvailability);
+          // Create new availability
+          const result = await availabilityCollection.insertOne(availabilityData);
+          return res.status(201).json({ 
+            message: "Availability created",
+            insertedId: result.insertedId
+          });
         }
-    
-        return res.status(200).json({ message: "Consulting availability updated successfully." });
       } catch (error) {
-        console.error("Error adding consulting availability:", error);
-        return res.status(500).json({ message: "Failed to add consulting availability", details: error.message });
+        console.error("Error in addAvailability:", error);
+        return res.status(500).json({ 
+          message: "Failed to add availability",
+          error: error.message,
+          stack: error.stack
+        });
       }
+      
     }
-    
+
     else if (type === 'deleteAvailability') {
       const { availabilityId } = req.body;
       const availabilityCollection = database.collection("consulting_availability");
-    
+
       await availabilityCollection.deleteOne({ _id: new ObjectId(availabilityId) });
-    
+
       return res.status(200).json({ message: "Availability deleted" });
     }
     else {
