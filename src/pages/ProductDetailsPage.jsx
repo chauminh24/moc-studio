@@ -78,7 +78,7 @@ const ProductDetailsPage = () => {
     const currentMedia = media[currentMediaIndex];
 
     switch (currentMedia.media_type) {
-      case "3d":
+      case "3d_model":
         return (
           <div className="w-full h-[400px] bg-gray-100 rounded-lg overflow-hidden">
             <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
@@ -86,7 +86,7 @@ const ProductDetailsPage = () => {
               <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
               <pointLight position={[-10, -10, -10]} />
               <Suspense fallback={null}>
-                <ModelViewer url={currentMedia.media_url} />
+                <ModelViewer url={currentMedia.file_path} />
                 <OrbitControls enableZoom={true} enablePan={true} />
               </Suspense>
             </Canvas>
@@ -97,13 +97,13 @@ const ProductDetailsPage = () => {
           <video
             controls
             className="w-full h-[400px] object-cover rounded-lg"
-            src={currentMedia.media_url}
+            src={currentMedia.file_path}
           />
         );
       default: // image
         return (
           <img
-            src={currentMedia.media_url}
+            src={currentMedia.file_path}
             alt={product.name}
             className="w-full h-[400px] object-cover rounded-lg"
           />

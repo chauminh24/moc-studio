@@ -28,10 +28,15 @@ const AdminDashboard = () => {
   });
   const [newMedia, setNewMedia] = useState({
     product_id: "",
-    media_url: "",
+    file_path: "",
     media_type: "image",
     is_primary: false
   });
+  const modelFiles = [
+    "/models/velvet-dining-chair.glb",
+    "/models/modern-sofa.glb",
+    "/models/wooden-table.glb"
+  ];
   const [newAvailability, setNewAvailability] = useState({
     date: "",
     time_slots: "",
@@ -621,16 +626,19 @@ const AdminDashboard = () => {
                   {/* Media URL */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Media URL *
+                      File Path *
                     </label>
-                    <input
-                      type="url"
+                    <select
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
-                      value={newMedia.media_url}
-                      onChange={(e) => setNewMedia({ ...newMedia, media_url: e.target.value })}
-                      placeholder="https://example.com/image.jpg"
+                      value={newMedia.file_path}
+                      onChange={(e) => setNewMedia({ ...newMedia, file_path: e.target.value })}
                       required
-                    />
+                    >
+                      <option value="">Select a 3D Model</option>
+                      {modelFiles.map(path => (
+                        <option key={path} value={path}>{path}</option>
+                      ))}
+                    </select>
                   </div>
 
                   {/* Media Type */}
