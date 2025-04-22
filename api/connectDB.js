@@ -8,6 +8,8 @@ const JWT_SECRET = "matkhaucuachau";
 
 export default async function handler(req, res) {
   console.log("Attempting to connect to MongoDB...");
+  console.log("Request type:", type);
+  console.log("Request body:", req.body);
 
   const client = new MongoClient(uri, {
     serverApi: {
