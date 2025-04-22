@@ -154,24 +154,30 @@ export default async function handler(req, res) {
           user: 'mocstudio.service@gmail.com', // Replace with your email
           pass: 'xugj sful xsfr jzan', // Replace with your email password
         },
+        tls: {
+          rejectUnauthorized: false, // Allow self-signed certificates (if needed)
+        },
       });
 
-      const resetLink = `https://moc-studio-eight.vercel.app/reset-password?token=${resetToken}`; const mailOptions = {
+      const resetLink = `https://moc-studio-eight.vercel.app/reset-password?token=${resetToken}`; 
+      
+      const mailOptions = {
         from: 'mocstudio.service@gmail.com',
         to: email,
         subject: 'Reset Your MOC Studio Password',
+        text: `You requested a password reset. Click the link below to reset your password:\n\n${resetLink}\n\nIf you didn't request this, please ignore this email.`,
         html: `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #333;">MOC Studio Password Reset</h2>
-      <p>You requested a password reset. Click the button below to reset your password:</p>
-      <a href="${resetLink}" 
-         style="display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
-         Reset Password
-      </a>
-      <p>If you didn't request this, please ignore this email.</p>
-      <p style="font-size: 12px; color: #777;">© ${new Date().getFullYear()} MOC Studio. All rights reserved.</p>
-    </div>
-  `,
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">MOC Studio Password Reset</h2>
+            <p>You requested a password reset. Click the button below to reset your password:</p>
+            <a href="${resetLink}" 
+               style="display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+               Reset Password
+            </a>
+            <p>If you didn't request this, please ignore this email.</p>
+            <p style="font-size: 12px; color: #777;">© ${new Date().getFullYear()} MOC Studio. All rights reserved.</p>
+          </div>
+        `,
       };
 
       await transporter.sendMail(mailOptions);
