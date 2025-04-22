@@ -8,7 +8,6 @@ const JWT_SECRET = "matkhaucuachau";
 
 export default async function handler(req, res) {
   console.log("Attempting to connect to MongoDB...");
-  console.log("Request type:", type);
   console.log("Request body:", req.body);
 
   const client = new MongoClient(uri, {
@@ -26,6 +25,8 @@ export default async function handler(req, res) {
 
     const database = client.db("moc-studio");
     const { type } = req.query;
+
+    console.log("Request type:", type);
 
     if (type === 'productDetails') {
       const { productId } = req.query;
