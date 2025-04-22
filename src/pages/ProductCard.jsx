@@ -18,9 +18,12 @@ const ProductCard = ({ product }) => {
       {/* Image Container */}
       <div className="relative pb-[150%]">
         <img
-          src={product.image_url}
+          src={product.image_url || "/placeholder/image_placeholder.png"}
           alt={product.name}
           className="absolute w-full h-full object-cover"
+          onError={(e) => {
+            e.target.src = "/placeholder/image_placeholder.png";
+          }}
         />
 
         {/* Add to Cart Button */}

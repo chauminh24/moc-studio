@@ -31,8 +31,8 @@ const ShopByRoom = () => {
   );
 
   // Get the appropriate image based on the selected category
-  const categoryImage = selectedCategory 
-    ? roomImages[selectedCategory.name] 
+  const categoryImage = selectedCategory
+    ? roomImages[selectedCategory.name]
     : "/images/categories/default.jpg";
 
   useEffect(() => {
@@ -55,14 +55,14 @@ const ShopByRoom = () => {
         setLoading(false); // Stop loading regardless of success or failure
       }
     };
-  
+
     fetchProducts();
   }, [selectedCategory]);
 
   return (
     <div className="pt-[10em] mx-8">
       <h1 className="text-3xl font-bold mb-8">Shop by Room</h1>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Full-height image (left column) - only on larger screens */}
         <div className="hidden lg:block lg:col-span-1">
@@ -71,7 +71,7 @@ const ShopByRoom = () => {
             alt={selectedCategory ? selectedCategory.name : "Shop by Room"}
             className="w-full h-full object-cover"
             onError={(e) => {
-              e.target.src = "/images/categories/default.jpg";
+              e.target.src = "/placeholder/image_placeholder.png";
             }}
           />
         </div>
@@ -84,7 +84,7 @@ const ShopByRoom = () => {
                 <h2 className="text-xl font-semibold">{selectedCategory.name}</h2>
                 <p>Explore {selectedCategory.name} products.</p>
               </div>
-              
+
               {/* Loading State */}
               {loading ? (
                 <div className="flex justify-center items-center h-64">

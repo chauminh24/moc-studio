@@ -49,8 +49,8 @@ const ShopByProduct = () => {
         const categoryName = selectedSubcategory
           ? selectedSubcategory.name
           : selectedCategory
-          ? selectedCategory.name
-          : null;
+            ? selectedCategory.name
+            : null;
 
         if (categoryName) {
           setLoading(true);
@@ -90,6 +90,9 @@ const ShopByProduct = () => {
             src="https://via.placeholder.com/600x1200"
             alt="Featured"
             className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.src = "/placeholder/image_placeholder.png";
+            }}
           />
         </div>
 

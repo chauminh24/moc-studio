@@ -54,7 +54,7 @@ const ProductDetailsPage = () => {
 
   const handleAddToCart = async () => {
     if (!product) return;
-    
+
     try {
       setAddingToCart(true);
       await addToCart(product);
