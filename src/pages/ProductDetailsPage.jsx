@@ -145,7 +145,7 @@ const ProductDetailsPage = () => {
             {/* Product Info */}
             <div className="flex-1">
               <h1 className="text-2xl font-bold mb-4">{product.name}</h1>
-              <p className="text-lg text-gray mb-4">{product.description}</p>
+              <p className="text-lg text-black mb-4">{product.description}</p>
               <p className="text-xl font-semibold text-blue mb-4">
                 €{product.price.$numberDecimal}
               </p>

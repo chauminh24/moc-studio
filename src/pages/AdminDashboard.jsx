@@ -160,9 +160,22 @@ const AdminDashboard = () => {
   };
 
   // Handle product media upload
+  // Enhanced handleAddMedia function
   const handleAddMedia = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setSuccessMessage("");
+
     try {
+      // Validate form data
+      if (!newMedia.product_id || !newMedia.media_url) {
+        throw new Error("Product and media URL are required");
+      }
+
+      // Log what we're sending
+      console.log("Sending media data:", newMedia);
+
       const response = await fetch("/api/connectDB", {
         method: "POST",
         headers: {
@@ -170,22 +183,40 @@ const AdminDashboard = () => {
         },
         body: JSON.stringify({
           type: "addProductMedia",
-          media: newMedia,
+          media: {
+            ...newMedia,
+            is_primary: newMedia.is_primary || false // Ensure boolean
+          },
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to add media");
+      const data = await response.json();
 
-      const createdMedia = await response.json();
-      setMedia([...media, createdMedia]);
+      if (!response.ok) {
+        throw new Error(data.error || data.message || "Failed to add media");
+      }
+
+      // Refresh media list
+      const mediaResponse = await fetch("/api/connectDB?type=adminMedia");
+      const newMediaData = await mediaResponse.json();
+      setMedia(newMediaData.media);
+
+      // Reset form and show success
       setNewMedia({
         product_id: "",
         media_url: "",
         media_type: "image",
         is_primary: false
       });
+
+      setSuccessMessage("Media added successfully!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+
     } catch (err) {
+      console.error("Media addition error:", err);
       setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -555,10 +586,23 @@ const AdminDashboard = () => {
             {/* Add Media Form */}
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-bold text-blue mb-4">Add Product Media</h2>
+              {error && (
+                <div className="bg-red-100 border-l-4 border-red-500 p-4 mb-4">
+                  <p className="text-red-700">{error}</p>
+                </div>
+              )}
+              {successMessage && (
+                <div className="bg-green-100 border-l-4 border-green-500 p-4 mb-4">
+                  <p className="text-green-700">{successMessage}</p>
+                </div>
+              )}
               <form onSubmit={handleAddMedia}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Product Selection */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Product *
+                    </label>
                     <select
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       value={newMedia.product_id}
@@ -567,32 +611,46 @@ const AdminDashboard = () => {
                     >
                       <option value="">Select Product</option>
                       {products.map(product => (
-                        <option key={product._id} value={product._id}>{product.name}</option>
+                        <option key={product._id} value={product._id}>
+                          {product.name} (ID: {product._id.substring(0, 6)}...)
+                        </option>
                       ))}
                     </select>
                   </div>
+
+                  {/* Media URL */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Media URL</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Media URL *
+                    </label>
                     <input
-                      type="text"
+                      type="url"
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       value={newMedia.media_url}
                       onChange={(e) => setNewMedia({ ...newMedia, media_url: e.target.value })}
+                      placeholder="https://example.com/image.jpg"
                       required
                     />
                   </div>
+
+                  {/* Media Type */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Media Type</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Media Type *
+                    </label>
                     <select
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       value={newMedia.media_type}
                       onChange={(e) => setNewMedia({ ...newMedia, media_type: e.target.value })}
+                      required
                     >
                       <option value="image">Image</option>
                       <option value="video">Video</option>
                       <option value="3d">3D Model</option>
                     </select>
                   </div>
+
+                  {/* Primary Media Checkbox */}
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -602,16 +660,18 @@ const AdminDashboard = () => {
                       onChange={(e) => setNewMedia({ ...newMedia, is_primary: e.target.checked })}
                     />
                     <label htmlFor="is_primary" className="ml-2 block text-sm text-gray-700">
-                      Primary Media
+                      Set as Primary Media
                     </label>
                   </div>
                 </div>
                 <div className="mt-6">
                   <button
                     type="submit"
-                    className="px-6 py-2 bg-blue text-white rounded-lg hover:bg-dark-blue transition"
+                    disabled={isLoading}
+                    className={`px-6 py-2 bg-blue text-white rounded-lg hover:bg-dark-blue transition ${isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                   >
-                    Add Media
+                    {isLoading ? 'Adding...' : 'Add Media'}
                   </button>
                 </div>
               </form>

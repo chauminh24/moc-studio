@@ -315,17 +315,73 @@ export default async function handler(req, res) {
     else if (type === 'addProductMedia') {
       const { media } = req.body;
       const mediaCollection = database.collection("product_media");
-
-      const newMedia = {
-        ...media,
-        created_at: new Date(),
-        updated_at: new Date()
-      };
-
-      const result = await mediaCollection.insertOne(newMedia);
-      newMedia._id = result.insertedId;
-
-      return res.status(201).json(newMedia);
+      
+      try {
+        console.log("Received media data:", JSON.stringify(media, null, 2));
+    
+        // Validate required fields
+        if (!media || !media.product_id || !media.media_url || !media.media_type) {
+          throw new Error("Product ID, media URL, and media type are required");
+        }
+    
+        // Validate product_id is a valid ObjectId
+        if (!ObjectId.isValid(media.product_id)) {
+          throw new Error("Invalid product ID format");
+        }
+    
+        // Validate media_type is one of the allowed values
+        const allowedTypes = ['image', 'video', '3d'];
+        if (!allowedTypes.includes(media.media_type)) {
+          throw new Error(`Invalid media type. Allowed types: ${allowedTypes.join(', ')}`);
+        }
+    
+        // Validate URL format (basic check)
+        try {
+          new URL(media.media_url);
+        } catch (e) {
+          throw new Error("Invalid media URL format");
+        }
+    
+        // Check if product exists
+        const productsCollection = database.collection("products");
+        const productExists = await productsCollection.findOne({ 
+          _id: new ObjectId(media.product_id) 
+        });
+        
+        if (!productExists) {
+          throw new Error("Product not found");
+        }
+    
+        const newMedia = {
+          product_id: new ObjectId(media.product_id),
+          media_url: media.media_url,
+          media_type: media.media_type,
+          is_primary: media.is_primary || false,
+          created_at: new Date(),
+          updated_at: new Date()
+        };
+    
+        const result = await mediaCollection.insertOne(newMedia);
+        newMedia._id = result.insertedId;
+    
+        return res.status(201).json({
+          success: true,
+          media: newMedia,
+          message: "Media added successfully"
+        });
+    
+      } catch (error) {
+        console.error("Error adding media:", {
+          message: error.message,
+          stack: error.stack,
+          receivedData: media
+        });
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+          details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+      }
     }
 
     else if (type === 'deleteMedia') {
