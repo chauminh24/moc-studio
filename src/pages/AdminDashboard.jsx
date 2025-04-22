@@ -166,38 +166,37 @@ const AdminDashboard = () => {
     setIsLoading(true);
     setError(null);
     setSuccessMessage("");
-
+  
     try {
       // Validate form data
       if (!newMedia.product_id || !newMedia.file_path) {
         throw new Error("Product and file path are required");
       }
-
-      const response = await fetch("/api/connectDB", {
+  
+      const response = await fetch("/api/connectDB?type=addProductMedia", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          type: "addProductMedia",
           media: {
             ...newMedia,
             is_primary: false, // Primary media is handled by image_url in the products collection
           },
         }),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(data.error || data.message || "Failed to add media");
       }
-
+  
       // Refresh media list
       const mediaResponse = await fetch("/api/connectDB?type=adminMedia");
       const newMediaData = await mediaResponse.json();
       setMedia(newMediaData.media);
-
+  
       // Reset form and show success
       setNewMedia({
         product_id: "",
@@ -205,7 +204,7 @@ const AdminDashboard = () => {
         media_type: "image",
         is_primary: false,
       });
-
+  
       setSuccessMessage("Media added successfully!");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {

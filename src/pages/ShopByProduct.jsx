@@ -5,8 +5,6 @@ import ProductCard from "./ProductCard";
 const ShopByProduct = () => {
   const { category, subcategory } = useParams();
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false); // Add loading state
-  const [error, setError] = useState(null); // Add error state
 
   const subcontent = {
     "Shop by Product": [
@@ -53,13 +51,7 @@ const ShopByProduct = () => {
             : null;
 
         if (categoryName) {
-          setLoading(true);
-          setError(null); // Reset error state
-          const response = await fetch(
-            `/api/connectDB?type=categoriesAndProducts&categoryName=${encodeURIComponent(
-              categoryName
-            )}`
-          );
+          const response = await fetch(`/api/connectDB?type=categoriesAndProducts&categoryName=${encodeURIComponent(categoryName)}`);
           if (!response.ok) {
             throw new Error(`Failed to fetch products: ${response.statusText}`);
           }
@@ -70,9 +62,6 @@ const ShopByProduct = () => {
         }
       } catch (error) {
         console.error("Error fetching products:", error);
-        setError(error.message); // Set error state
-      } finally {
-        setLoading(false); // Stop loading regardless of success or failure
       }
     };
 
@@ -90,35 +79,20 @@ const ShopByProduct = () => {
             src="https://via.placeholder.com/600x1200"
             alt="Featured"
             className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.src = "/placeholder/image_placeholder.png";
-            }}
           />
         </div>
 
         {/* Product cards (right columns) */}
         <div className="lg:col-span-3">
-          {loading ? (
-            <div className="flex justify-center items-center h-[300px]">
-              <div className="loader border-t-4 border-blue-500 rounded-full w-12 h-12 animate-spin"></div>
-            </div>
-          ) : error ? (
-            <div className="text-red-500 text-center">
-              <p>Error: {error}</p>
-            </div>
-          ) : selectedSubcategory ? (
+          {selectedSubcategory ? (
             <>
-              <div
-                className="mb-8 p-6 bg-orange text-white"
+              <div className="mb-8 p-6 bg-orange text-white"
                 style={{
                   backgroundImage: `url(/images/categories/${selectedSubcategory.name}.jpg)`,
                   backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              >
-                <h2 className="text-xl font-semibold">
-                  {selectedSubcategory.name}
-                </h2>
+                  backgroundPosition: "center"
+                }}>
+                <h2 className="text-xl font-semibold">{selectedSubcategory.name}</h2>
                 <p>Explore {selectedSubcategory.name} products.</p>
               </div>
 
@@ -135,17 +109,13 @@ const ShopByProduct = () => {
           ) : selectedCategory ? (
             selectedCategory.isCollapsible ? (
               <>
-                <div
-                  className="mb-8 p-6 bg-orange text-white"
+                <div className="mb-8 p-6 bg-orange text-white"
                   style={{
                     backgroundImage: `url(/images/categories/${selectedCategory.name}.jpg)`,
                     backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                >
-                  <h2 className="text-xl font-semibold">
-                    {selectedCategory.name}
-                  </h2>
+                    backgroundPosition: "center"
+                  }}>
+                  <h2 className="text-xl font-semibold">{selectedCategory.name}</h2>
                   <p>Explore {selectedCategory.name} products.</p>
                 </div>
 
@@ -153,10 +123,7 @@ const ShopByProduct = () => {
                   {selectedCategory.subItems.map((subItem) => (
                     <div key={subItem.name} className="p-4 bg-orange">
                       <h2 className="text-lg font-semibold">{subItem.name}</h2>
-                      <Link
-                        to={subItem.link}
-                        className="text-blue-600 hover:underline"
-                      >
+                      <Link to={subItem.link} className="text-blue-600 hover:underline">
                         Explore
                       </Link>
                     </div>
@@ -165,17 +132,13 @@ const ShopByProduct = () => {
               </>
             ) : (
               <>
-                <div
-                  className="mb-8 p-6 bg-orange text-white"
+                <div className="mb-8 p-6 bg-orange text-white"
                   style={{
                     backgroundImage: `url(/images/categories/${selectedCategory.name}.jpg)`,
                     backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                >
-                  <h2 className="text-xl font-semibold">
-                    {selectedCategory.name}
-                  </h2>
+                    backgroundPosition: "center"
+                  }}>
+                  <h2 className="text-xl font-semibold">{selectedCategory.name}</h2>
                   <p>Explore {selectedCategory.name} products.</p>
                 </div>
 
@@ -195,10 +158,7 @@ const ShopByProduct = () => {
               {subcontent["Shop by Product"].map((item) => (
                 <div key={item.name} className="p-4 bg-orange">
                   <h2 className="text-lg font-semibold">{item.name}</h2>
-                  <Link
-                    to={item.link}
-                    className="text-blue-600 hover:underline"
-                  >
+                  <Link to={item.link} className="text-blue-600 hover:underline">
                     Explore
                   </Link>
                 </div>
