@@ -5,6 +5,7 @@ import { CartContext } from "../context/CartContext";
 const ProductCard = ({ product }) => {
   const { addToCart } = useContext(CartContext);
   const [isAdded, setIsAdded] = useState(false);
+  const [imageSrc, setImageSrc] = useState(product.image_url || "/placeholder/image_placeholder.png"); // Track image source
 
   const handleAddToCart = (e) => {
     e.preventDefault(); // Prevent navigation when clicking the "Add to Cart" button
@@ -13,17 +14,19 @@ const ProductCard = ({ product }) => {
     setTimeout(() => setIsAdded(false), 2000); // Reset after 2 seconds
   };
 
+  const handleImageError = () => {
+    setImageSrc("/placeholder/image_placeholder.png"); // Set placeholder image on error
+  };
+
   return (
     <Link to={`/product/${product._id}`} className="bg-white overflow-hidden group">
       {/* Image Container */}
       <div className="relative pb-[150%]">
         <img
-          src={product.image_url || "/placeholder/image_placeholder.png"}
+          src={imageSrc}
           alt={product.name}
           className="absolute w-full h-full object-cover"
-          onError={(e) => {
-            e.target.src = "/placeholder/image_placeholder.png";
-          }}
+          onError={handleImageError} // Handle image loading errors
         />
 
         {/* Add to Cart Button */}
