@@ -10,7 +10,7 @@ const Home = () => {
       </div>
       <div className="md:px-25 px-10 pt-10">
         <img
-          src="/placeholder/square_holder.png"
+          src="/images/header.jpg"
           alt="Header Image"
           className="h-auto md:w-[40vw] w-full"
         />
