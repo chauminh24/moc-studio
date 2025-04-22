@@ -8,6 +8,8 @@ const JWT_SECRET = "matkhaucuachau";
 
 export default async function handler(req, res) {
   console.log("Attempting to connect to MongoDB...");
+  console.log("Request type:", type);
+  console.log("Request body:", req.body);
 
   const client = new MongoClient(uri, {
     serverApi: {
@@ -159,8 +161,8 @@ export default async function handler(req, res) {
         },
       });
 
-      const resetLink = `https://moc-studio-eight.vercel.app/reset-password?token=${resetToken}`; 
-      
+      const resetLink = `https://moc-studio-eight.vercel.app/reset-password?token=${resetToken}`;
+
       const mailOptions = {
         from: 'mocstudio.service@gmail.com',
         to: email,
@@ -315,58 +317,56 @@ export default async function handler(req, res) {
     else if (type === 'addProductMedia') {
       const { media } = req.body;
       const mediaCollection = database.collection("product_media");
-      
+
       try {
         console.log("Received media data:", media);
-    
+
         // Validate required fields
         if (!media || !media.product_id || !media.file_path || !media.media_type) {
           throw new Error("Product ID, file path, and media type are required");
         }
-    
+
         // Validate product exists
         const productExists = await database.collection("products").findOne({
-          _id: new ObjectId(media.product_id)
+          _id: new ObjectId(media.product_id),
         });
-        
+
         if (!productExists) {
           throw new Error("Product not found");
         }
-    
+
         // Validate file path format
-        if (!media.file_path.startsWith('/models/') && 
-            !media.file_path.startsWith('/images/')) {
+        if (!media.file_path.startsWith('/models/') && !media.file_path.startsWith('/images/')) {
           throw new Error("File path must start with /models/ or /images/");
         }
-    
+
         // Validate media type
         const allowedTypes = ['image', 'video', '3d_model'];
         if (!allowedTypes.includes(media.media_type)) {
           throw new Error(`Invalid media type. Allowed: ${allowedTypes.join(', ')}`);
         }
-    
+
         const newMedia = {
           product_id: new ObjectId(media.product_id),
           media_type: media.media_type,
           file_path: media.file_path,
           is_primary: media.is_primary || false,
           created_at: new Date(),
-          updated_at: new Date()
+          updated_at: new Date(),
         };
-    
+
         const result = await mediaCollection.insertOne(newMedia);
         newMedia._id = result.insertedId;
-    
+
         return res.status(201).json({
           success: true,
-          media: newMedia
+          media: newMedia,
         });
-    
       } catch (error) {
         console.error("Error adding media:", error);
         return res.status(400).json({
           success: false,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -383,14 +383,14 @@ export default async function handler(req, res) {
     else if (type === 'addAvailability') {
       const { availability } = req.body;
       const availabilityCollection = database.collection("consulting_availability");
-      
+
       try {
         console.log("Received availability data:", JSON.stringify(availability, null, 2));
-    
+
         if (!availability) {
           throw new Error("No availability data received");
         }
-    
+
         // Validate date
         if (!availability.date) {
           throw new Error("Date is required");
@@ -399,12 +399,12 @@ export default async function handler(req, res) {
         if (isNaN(dateObj.getTime())) {
           throw new Error(`Invalid date format: ${availability.date}`);
         }
-    
+
         // Validate time slots
         if (!availability.time_slots || !Array.isArray(availability.time_slots)) {
           throw new Error("time_slots must be an array");
         }
-    
+
         const validatedSlots = availability.time_slots.map(slot => {
           if (!slot.time || !slot.available || !slot.capacity) {
             throw new Error(`Missing required fields in time slot: ${JSON.stringify(slot)}`);
@@ -415,19 +415,19 @@ export default async function handler(req, res) {
             capacity: parseInt(slot.capacity)
           };
         });
-    
+
         const result = await availabilityCollection.insertOne({
           date: dateObj,
           time_slots: validatedSlots,
           updated_at: new Date()
         });
-    
+
         console.log("Insert result:", result);
         return res.status(201).json({
           success: true,
           insertedId: result.insertedId
         });
-    
+
       } catch (error) {
         console.error("Detailed error:", {
           message: error.message,
@@ -445,49 +445,49 @@ export default async function handler(req, res) {
     else if (type === 'deleteAvailability') {
       const { availabilityId } = req.body;
       const availabilityCollection = database.collection("consulting_availability");
-    
+
       try {
         console.log("Delete request received for availability ID:", availabilityId);
-    
+
         // Validate input
         if (!availabilityId || typeof availabilityId !== 'string') {
           throw new Error("Valid availability ID is required");
         }
-    
+
         // Validate ObjectId format
         if (!ObjectId.isValid(availabilityId)) {
           throw new Error("Invalid availability ID format");
         }
-    
+
         const objectId = new ObjectId(availabilityId);
-        
+
         // First check if document exists
         const existingDoc = await availabilityCollection.findOne({ _id: objectId });
         if (!existingDoc) {
           throw new Error(`Availability with ID ${availabilityId} not found`);
         }
-    
+
         // Perform deletion
         const result = await availabilityCollection.deleteOne({ _id: objectId });
-    
+
         // Verify deletion
         if (result.deletedCount !== 1) {
           throw new Error(`Failed to delete availability (deletedCount: ${result.deletedCount})`);
         }
-    
+
         console.log("Successfully deleted availability:", {
           id: availabilityId,
           date: existingDoc.date,
           time_slots: existingDoc.time_slots.length
         });
-    
+
         return res.status(200).json({
           success: true,
           deletedCount: result.deletedCount,
           deletedId: availabilityId,
           message: "Availability successfully deleted"
         });
-    
+
       } catch (error) {
         console.error("Delete availability error:", {
           error: error.message,
@@ -495,7 +495,7 @@ export default async function handler(req, res) {
           receivedId: availabilityId,
           timestamp: new Date().toISOString()
         });
-    
+
         return res.status(400).json({
           success: false,
           error: error.message,

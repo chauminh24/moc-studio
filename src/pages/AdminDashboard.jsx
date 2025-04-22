@@ -32,11 +32,6 @@ const AdminDashboard = () => {
     media_type: "image",
     is_primary: false
   });
-  const modelFiles = [
-    "/models/velvet-dining-chair.glb",
-    "/models/modern-sofa.glb",
-    "/models/wooden-table.glb"
-  ];
   const [newAvailability, setNewAvailability] = useState({
     date: "",
     time_slots: "",
@@ -623,19 +618,14 @@ const AdminDashboard = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       File Path *
                     </label>
-                    <select
+                    <input
+                      type="text"
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue"
                       value={newMedia.file_path}
                       onChange={(e) => setNewMedia({ ...newMedia, file_path: e.target.value })}
+                      placeholder="Enter file path (e.g., /models/example.glb)"
                       required
-                    >
-                      <option value="">Select a File</option>
-                      {modelFiles.map((path) => (
-                        <option key={path} value={path}>
-                          {path}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
 
                   {/* Media Type */}

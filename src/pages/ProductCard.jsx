@@ -5,17 +5,26 @@ import { CartContext } from "../context/CartContext";
 const ProductCard = ({ product }) => {
   const { addToCart } = useContext(CartContext);
   const [isAdded, setIsAdded] = useState(false);
-  const [imageSrc, setImageSrc] = useState(product.image_url || "/placeholder/image_placeholder.png"); // Track image source
+  const [imageError, setImageError] = useState(false); // Track if image failed to load
+
+  // Use placeholder if no image URL or if error occurred
+  const imageSrc = imageError || !product.image_url 
+    ? "/placeholder/image_placeholder.png" 
+    : product.image_url;
 
   const handleAddToCart = (e) => {
-    e.preventDefault(); // Prevent navigation when clicking the "Add to Cart" button
+    e.preventDefault();
     addToCart(product);
     setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000); // Reset after 2 seconds
+    setTimeout(() => setIsAdded(false), 2000);
   };
 
-  const handleImageError = () => {
-    setImageSrc("/placeholder/image_placeholder.png"); // Set placeholder image on error
+  const handleImageError = (e) => {
+    // Only set error state if it's not already the placeholder
+    if (e.target.src !== "/placeholder/image_placeholder.png") {
+      setImageError(true);
+      e.target.src = "/placeholder/image_placeholder.png";
+    }
   };
 
   return (
@@ -26,7 +35,9 @@ const ProductCard = ({ product }) => {
           src={imageSrc}
           alt={product.name}
           className="absolute w-full h-full object-cover"
-          onError={handleImageError} // Handle image loading errors
+          onError={handleImageError}
+          loading="lazy" // Add lazy loading
+          decoding="async" // Add async decoding
         />
 
         {/* Add to Cart Button */}
