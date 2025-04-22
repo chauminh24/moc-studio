@@ -174,12 +174,9 @@ const AdminDashboard = () => {
 
     try {
       // Validate form data
-      if (!newMedia.product_id || !newMedia.media_url) {
-        throw new Error("Product and media URL are required");
+      if (!newMedia.product_id || !newMedia.file_path) {
+        throw new Error("Product and file path are required");
       }
-
-      // Log what we're sending
-      console.log("Sending media data:", newMedia);
 
       const response = await fetch("/api/connectDB", {
         method: "POST",
@@ -190,7 +187,7 @@ const AdminDashboard = () => {
           type: "addProductMedia",
           media: {
             ...newMedia,
-            is_primary: newMedia.is_primary || false // Ensure boolean
+            is_primary: false, // Primary media is handled by image_url in the products collection
           },
         }),
       });
@@ -209,16 +206,14 @@ const AdminDashboard = () => {
       // Reset form and show success
       setNewMedia({
         product_id: "",
-        media_url: "",
+        file_path: "",
         media_type: "image",
-        is_primary: false
+        is_primary: false,
       });
 
       setSuccessMessage("Media added successfully!");
       setTimeout(() => setSuccessMessage(""), 3000);
-
     } catch (err) {
-      console.error("Media addition error:", err);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -615,7 +610,7 @@ const AdminDashboard = () => {
                       required
                     >
                       <option value="">Select Product</option>
-                      {products.map(product => (
+                      {products.map((product) => (
                         <option key={product._id} value={product._id}>
                           {product.name} (ID: {product._id.substring(0, 6)}...)
                         </option>
@@ -623,7 +618,7 @@ const AdminDashboard = () => {
                     </select>
                   </div>
 
-                  {/* Media URL */}
+                  {/* File Path Dropdown */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       File Path *
@@ -634,9 +629,11 @@ const AdminDashboard = () => {
                       onChange={(e) => setNewMedia({ ...newMedia, file_path: e.target.value })}
                       required
                     >
-                      <option value="">Select a 3D Model</option>
-                      {modelFiles.map(path => (
-                        <option key={path} value={path}>{path}</option>
+                      <option value="">Select a File</option>
+                      {modelFiles.map((path) => (
+                        <option key={path} value={path}>
+                          {path}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -654,36 +651,22 @@ const AdminDashboard = () => {
                     >
                       <option value="image">Image</option>
                       <option value="video">Video</option>
-                      <option value="3d">3D Model</option>
+                      <option value="3d_model">3D Model</option>
                     </select>
-                  </div>
-
-                  {/* Primary Media Checkbox */}
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="is_primary"
-                      className="h-4 w-4 text-blue focus:ring-blue border-gray-300 rounded"
-                      checked={newMedia.is_primary}
-                      onChange={(e) => setNewMedia({ ...newMedia, is_primary: e.target.checked })}
-                    />
-                    <label htmlFor="is_primary" className="ml-2 block text-sm text-gray-700">
-                      Set as Primary Media
-                    </label>
                   </div>
                 </div>
                 <div className="mt-6">
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className={`px-6 py-2 bg-blue text-white rounded-lg hover:bg-dark-blue transition ${isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                    className={`px-6 py-2 bg-blue text-white rounded-lg hover:bg-dark-blue transition ${isLoading ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                   >
-                    {isLoading ? 'Adding...' : 'Add Media'}
+                    {isLoading ? "Adding..." : "Add Media"}
                   </button>
                 </div>
               </form>
-            </div>
+            </div>;
 
             {/* Products List */}
             <div className="bg-white rounded-lg shadow overflow-hidden">

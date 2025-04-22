@@ -6,6 +6,15 @@ const ShopByRoom = () => {
   const { category } = useParams();
   const [products, setProducts] = useState([]);
 
+  // Mapping of room categories to their image paths
+  const roomImages = {
+    "Living Room": "/images/categories/living-room.jpg",
+    "Bedroom": "/images/categories/bedroom.jpg",
+    "Bathroom": "/images/categories/bathroom.jpg",
+    "Kitchen": "/images/categories/kitchen.jpg",
+    "More": "/images/categories/more.jpg"
+  };
+
   const subcontent = {
     "Shop by Room": [
       { name: "Living Room", link: "/shop-by-room/living-room" },
@@ -19,6 +28,11 @@ const ShopByRoom = () => {
   const selectedCategory = subcontent["Shop by Room"].find(
     (item) => item.link === `/shop-by-room/${category}`
   );
+
+  // Get the appropriate image based on the selected category
+  const categoryImage = selectedCategory 
+    ? roomImages[selectedCategory.name] 
+    : "/images/categories/default.jpg";
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -49,9 +63,12 @@ const ShopByRoom = () => {
         {/* Full-height image (left column) - only on larger screens */}
         <div className="hidden lg:block lg:col-span-1">
           <img
-            src="https://via.placeholder.com/600x1200"
-            alt="Featured"
+            src={categoryImage}
+            alt={selectedCategory ? selectedCategory.name : "Shop by Room"}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.src = "/images/categories/default.jpg"; // Fallback image if the specified image fails to load
+            }}
           />
         </div>
 

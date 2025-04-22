@@ -67,8 +67,8 @@ const ProductDetailsPage = () => {
       return (
         <div className="relative w-full h-[400px] bg-gray-100 rounded-lg overflow-hidden">
           <img
-            src="/placeholder/image_placeholder.png"
-            alt="Placeholder"
+            src={product.image_url || "/placeholder/image_placeholder.png"}
+            alt="Primary Media"
             className="w-full h-full object-cover"
           />
         </div>
