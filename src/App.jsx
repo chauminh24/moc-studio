@@ -65,9 +65,9 @@ const App = () => {
   };
 
   return (
-    <AuthProvider>
-      <CartProvider>
-        <Router>
+    <Router>
+      <AuthProvider>
+        <CartProvider>
           <ConditionalPageStyle>
             <Routes>
               <Route path="/" element={<Home />} />
@@ -98,9 +98,10 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </ConditionalPageStyle>
-        </Router>
-      </CartProvider>
-    </AuthProvider>
+        </CartProvider>
+      </AuthProvider>
+
+    </Router>
   );
 };
 
