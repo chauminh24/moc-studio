@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+    
 
 const ResetPasswordPage = () => {
-    const { token } = useParams();
-    const navigate = useNavigate();
+    const { token: urlToken } = useParams();
+    const [searchParams] = useSearchParams();
+    const queryToken = searchParams.get('token');
+    
+    const token = urlToken || queryToken;
     
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
