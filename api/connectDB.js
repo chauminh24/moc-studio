@@ -187,6 +187,80 @@ export default async function handler(req, res) {
 
       return res.status(200).json({ message: 'Password reset email sent' });
 
+    }else if (type === 'verify-token') {
+      // Verify password reset token
+      const { token } = req.body;
+    
+      if (!token) {
+        return res.status(400).json({ message: 'Token is required' });
+      }
+    
+      try {
+        // Verify JWT token
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        // Check if user still exists
+        const usersCollection = database.collection("users");
+        const user = await usersCollection.findOne({ _id: new ObjectId(decoded.id) });
+    
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+    
+        return res.status(200).json({ 
+          message: 'Token is valid',
+          email: decoded.email 
+        });
+      } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+          return res.status(401).json({ message: 'Token has expired' });
+        }
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+    } else if (type === 'reset-password') {
+      // Handle password reset
+      const { token, newPassword } = req.body;
+    
+      if (!token || !newPassword) {
+        return res.status(400).json({ message: 'Token and new password are required' });
+      }
+    
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least 8 characters' });
+      }
+    
+      try {
+        // Verify token first
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        const usersCollection = database.collection("users");
+        const user = await usersCollection.findOne({ _id: new ObjectId(decoded.id) });
+    
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+    
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+        // Update password and clear any reset tokens
+        await usersCollection.updateOne(
+          { _id: user._id },
+          { 
+            $set: { 
+              password: hashedPassword,
+              lastPasswordChange: new Date() 
+            }
+          }
+        );
+    
+        return res.status(200).json({ message: 'Password reset successfully' });
+      } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+          return res.status(401).json({ message: 'Token has expired' });
+        }
+        return res.status(401).json({ message: 'Invalid token' });
+      }
     } else if (type === 'interiorConsulting') {
       // Existing logic for interior consulting
       const availabilityCollection = database.collection("consulting_availability");
