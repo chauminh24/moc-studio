@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 
 const ResetPasswordPage = () => {
-    const router = useRouter();
-    const { token } = router.query;
+    const { token } = useParams();
+    const navigate = useNavigate();
     
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -12,6 +11,7 @@ const ResetPasswordPage = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isValidToken, setIsValidToken] = useState(false);
+    const [email, setEmail] = useState('');
 
     // Verify token on component mount
     useEffect(() => {
@@ -21,6 +21,7 @@ const ResetPasswordPage = () => {
     }, [token]);
 
     const verifyToken = async () => {
+        setIsLoading(true);
         try {
             const response = await fetch('/api/connectDB?type=verify-token', {
                 method: 'POST',
@@ -37,8 +38,11 @@ const ResetPasswordPage = () => {
             }
 
             setIsValidToken(true);
+            setEmail(data.email); // Store email for display
         } catch (err) {
             setError(err.message || 'Error verifying token');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -52,7 +56,6 @@ const ResetPasswordPage = () => {
 
         setIsLoading(true);
         setError('');
-        setMessage('');
 
         try {
             const response = await fetch('/api/connectDB?type=reset-password', {
@@ -69,9 +72,12 @@ const ResetPasswordPage = () => {
                 throw new Error(data.message || 'Failed to reset password');
             }
 
-            setMessage('Password reset successfully! You can now login with your new password.');
-            setNewPassword('');
-            setConfirmPassword('');
+            setMessage('Password reset successfully! Redirecting to login...');
+            
+            // Redirect to login after 3 seconds
+            setTimeout(() => {
+                navigate('/login');
+            }, 3000);
         } catch (err) {
             setError(err.message || 'An error occurred');
             console.error('Reset password error:', err);
@@ -94,7 +100,7 @@ const ResetPasswordPage = () => {
                     </div>
                     
                     <div className="text-center text-sm text-gray-600">
-                        <Link href="/forgot-password" className="font-medium text-blue hover:text-light-blue">
+                        <Link to="/forgot-password" className="font-medium text-blue hover:text-light-blue">
                             Request a new reset link
                         </Link>
                     </div>
@@ -109,6 +115,11 @@ const ResetPasswordPage = () => {
             <div className="w-full max-w-md p-6 space-y-8 bg-white shadow-lg">
                 <div className="text-center">
                     <h2 className="mt-6 text-3xl font-bold text-gray-900">Reset Password</h2>
+                    {email && (
+                        <p className="mt-2 text-sm text-gray-600">
+                            For: {email}
+                        </p>
+                    )}
                 </div>
 
                 {error && (
@@ -137,7 +148,7 @@ const ResetPasswordPage = () => {
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="Enter new password"
+                                placeholder="Enter new password (min 8 characters)"
                                 minLength="8"
                             />
                         </div>
@@ -168,14 +179,14 @@ const ResetPasswordPage = () => {
                                 isLoading || !isValidToken ? 'opacity-75 cursor-not-allowed' : ''
                             }`}
                         >
-                            {isLoading ? 'Resetting...' : 'Reset Password'}
+                            {isLoading ? 'Processing...' : 'Reset Password'}
                         </button>
                     </div>
                 </form>
 
                 <div className="text-center text-sm text-gray-600">
                     Remembered your password?{' '}
-                    <Link href="/login" className="font-medium text-blue hover:text-light-blue">
+                    <Link to="/login" className="font-medium text-blue hover:text-light-blue">
                         Sign in here
                     </Link>
                 </div>
