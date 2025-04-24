@@ -190,6 +190,7 @@ export default async function handler(req, res) {
     }else if (type === 'verify-token') {
       // Verify password reset token
       const { token } = req.body;
+      console.log("Received token:", token);
     
       if (!token) {
         return res.status(400).json({ message: 'Token is required' });
@@ -198,6 +199,7 @@ export default async function handler(req, res) {
       try {
         // Verify JWT token
         const decoded = jwt.verify(token, JWT_SECRET);
+        console.log("Decoded token:", decoded);
         
         // Check if user still exists
         const usersCollection = database.collection("users");
