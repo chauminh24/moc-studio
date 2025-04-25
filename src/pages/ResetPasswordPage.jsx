@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
-    
+import { Link, useSearchParams } from 'react-router-dom';
+
 
 const ResetPasswordPage = () => {
-    const { token: urlToken } = useParams();
     const [searchParams] = useSearchParams();
-    const queryToken = searchParams.get('token');
-    
-    const token = urlToken || queryToken;
-    
+    const token = searchParams.get('token'); // Extract token from query parameter
+
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -21,6 +18,8 @@ const ResetPasswordPage = () => {
     useEffect(() => {
         if (token) {
             verifyToken();
+        } else {
+            setError('Invalid or missing token');
         }
     }, [token]);
 
@@ -52,7 +51,7 @@ const ResetPasswordPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (newPassword !== confirmPassword) {
             setError('Passwords do not match');
             return;
@@ -77,7 +76,7 @@ const ResetPasswordPage = () => {
             }
 
             setMessage('Password reset successfully! Redirecting to login...');
-            
+
             // Redirect to login after 3 seconds
             setTimeout(() => {
                 navigate('/login');
@@ -98,11 +97,11 @@ const ResetPasswordPage = () => {
                     <div className="text-center">
                         <h2 className="mt-6 text-3xl font-bold text-gray-900">Invalid Token</h2>
                     </div>
-                    
+
                     <div className="bg-red-50 border-l-4 border-red-500 p-4">
                         <p className="text-sm text-red-700">{error}</p>
                     </div>
-                    
+
                     <div className="text-center text-sm text-gray-600">
                         <Link to="/forgot-password" className="font-medium text-blue hover:text-light-blue">
                             Request a new reset link
@@ -156,7 +155,7 @@ const ResetPasswordPage = () => {
                                 minLength="8"
                             />
                         </div>
-                        
+
                         <div>
                             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                                 Confirm Password
@@ -179,9 +178,8 @@ const ResetPasswordPage = () => {
                         <button
                             type="submit"
                             disabled={isLoading || !isValidToken}
-                            className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue hover:bg-dark-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                                isLoading || !isValidToken ? 'opacity-75 cursor-not-allowed' : ''
-                            }`}
+                            className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue hover:bg-dark-blue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isLoading || !isValidToken ? 'opacity-75 cursor-not-allowed' : ''
+                                }`}
                         >
                             {isLoading ? 'Processing...' : 'Reset Password'}
                         </button>
