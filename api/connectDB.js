@@ -263,6 +263,111 @@ export default async function handler(req, res) {
         }
         return res.status(401).json({ message: 'Invalid token' });
       }
+    }
+    else if (type === 'userOrders') {
+      const { userId } = req.query;
+      
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+    
+      const ordersCollection = database.collection("orders");
+      const orderItemsCollection = database.collection("order_items");
+    
+      // Fetch orders for the user
+      const orders = await ordersCollection
+        .find({ user_id: new ObjectId(userId) })
+        .sort({ placed_at: -1 })
+        .toArray();
+    
+      // Fetch order items for each order
+      const ordersWithItems = await Promise.all(
+        orders.map(async (order) => {
+          const items = await orderItemsCollection
+            .find({ order_id: order._id })
+            .toArray();
+          return { ...order, items };
+        })
+      );
+    
+      return res.status(200).json({ orders: ordersWithItems });
+    }else if (type === 'updateUser') {
+      const { userId, name, currentPassword, newPassword } = req.body;
+    
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+    
+      const usersCollection = database.collection("users");
+      const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+    
+      // Verify current password if changing password
+      if (newPassword) {
+        if (!currentPassword) {
+          return res.status(400).json({ error: 'Current password is required' });
+        }
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isPasswordValid) {
+          return res.status(401).json({ error: 'Current password is incorrect' });
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await usersCollection.updateOne(
+          { _id: new ObjectId(userId) },
+          { $set: { password: hashedPassword, name, updatedAt: new Date() } }
+        );
+      } else {
+        await usersCollection.updateOne(
+          { _id: new ObjectId(userId) },
+          { $set: { name, updatedAt: new Date() } }
+        );
+      }
+    
+      return res.status(200).json({ message: 'User updated successfully' });
+    }else if (type === 'createOrder') {
+      const { orderData } = req.body;
+    
+      if (!orderData || !orderData.items || orderData.items.length === 0) {
+        return res.status(400).json({ error: 'Invalid order data' });
+      }
+    
+      const ordersCollection = database.collection("orders");
+      const orderItemsCollection = database.collection("order_items");
+    
+      // Create the order document
+      const newOrder = {
+        user_id: new ObjectId(orderData.userId),
+        total_price: { $numberDecimal: orderData.totalAmount.toString() },
+        order_status: "pending",
+        shipping_address: orderData.shippingAddress,
+        placed_at: new Date(),
+        estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // +7 days
+      };
+    
+      // Insert the order
+      const orderResult = await ordersCollection.insertOne(newOrder);
+      const orderId = orderResult.insertedId;
+    
+      // Insert order items
+      const orderItems = orderData.items.map(item => ({
+        order_id: orderId,
+        product_id: new ObjectId(item.productId),
+        quantity: item.quantity,
+        price_at_purchase: { $numberDecimal: item.price.$numberDecimal }
+      }));
+    
+      await orderItemsCollection.insertMany(orderItems);
+    
+      // Return the complete order with items
+      const createdOrder = await ordersCollection.findOne({ _id: orderId });
+      const items = await orderItemsCollection.find({ order_id: orderId }).toArray();
+    
+      return res.status(201).json({ 
+        order: { ...createdOrder, items } 
+      });
     } else if (type === 'interiorConsulting') {
       // Existing logic for interior consulting
       const availabilityCollection = database.collection("consulting_availability");
