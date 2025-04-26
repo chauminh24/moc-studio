@@ -10,22 +10,17 @@ const Orders = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
+    if (!user || user.role === 'admin') {
+      navigate('/');
       return;
     }
 
     const fetchOrders = async () => {
       try {
-        const response = await fetch('/api/connectdb?type=adminOrders');
+        const response = await fetch(`/api/connectdb?type=userOrders&userId=${user._id}`);
         if (!response.ok) throw new Error('Failed to fetch orders');
         const data = await response.json();
-        // Filter orders for the current user if not admin
-        if (user.role !== 'admin') {
-          setOrders(data.orders.filter(order => order.userId === user._id));
-        } else {
-          setOrders(data.orders);
-        }
+        setOrders(data.orders);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -45,16 +40,18 @@ const Orders = () => {
     switch (status.toLowerCase()) {
       case 'completed':
         return 'bg-green-100 text-green-800';
-      case 'processing':
+      case 'shipped':
         return 'bg-blue-100 text-blue-800';
-      case 'cancelled':
+      case 'canceled':
         return 'bg-red-100 text-red-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
-  if (!user) return null;
+  if (!user || user.role === 'admin') return null;
 
   return (
     <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-beige">
@@ -83,64 +80,68 @@ const Orders = () => {
             </button>
           </div>
         ) : (
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue uppercase tracking-wider">
-                      Order #
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue uppercase tracking-wider">
-                      Items
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue uppercase tracking-wider">
-                      Total
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-blue uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {orders.map((order) => (
-                    <tr key={order._id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-blue">
-                        #{order.orderNumber}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-blue">
-                        {formatDate(order.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-blue">
-                        {order.items.length} item{order.items.length !== 1 ? 's' : ''}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-blue">
-                        €{order.totalAmount.$numberDecimal}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-blue">
-                        <button
-                          onClick={() => navigate(`/orders/${order._id}`)}
-                          className="text-orange hover:text-dark-orange"
-                        >
-                          View Details
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="space-y-8">
+            {orders.map((order) => (
+              <div key={order._id.toString()} className="bg-white shadow-md rounded-lg overflow-hidden">
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex flex-col sm:flex-row justify-between">
+                    <div className="mb-4 sm:mb-0">
+                      <h2 className="text-lg font-semibold text-blue">
+                        Order #{order._id.toString().slice(-6).toUpperCase()}
+                      </h2>
+                      <p className="text-sm text-gray-500">
+                        Placed on {formatDate(order.placed_at)}
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.order_status)}`}>
+                        {order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="space-y-6">
+                    {order.items.map((item) => (
+                      <div key={item._id.toString()} className="flex flex-col sm:flex-row">
+                        <div className="flex-shrink-0 mb-4 sm:mb-0 sm:mr-6">
+                          <div className="w-20 h-20 bg-gray-200 rounded-md"></div>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-md font-medium text-blue">{item.name || 'Product'}</h3>
+                          <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                          <p className="text-sm text-blue mt-1">
+                            €{typeof item.price_at_purchase === 'object' 
+                              ? item.price_at_purchase.$numberDecimal 
+                              : item.price_at_purchase}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-6 border-t border-gray-200 bg-gray-50">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm text-gray-500">Total</p>
+                      <p className="text-lg font-semibold text-blue">
+                        €{typeof order.total_price === 'object' 
+                          ? order.total_price.$numberDecimal 
+                          : order.total_price}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => navigate(`/orders/${order._id}`)}
+                      className="px-4 py-2 border border-orange text-orange rounded hover:bg-orange hover:text-white"
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

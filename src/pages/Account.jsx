@@ -39,17 +39,32 @@ const Account = () => {
     }
 
     try {
-      await updateUser({
-        name: formData.name,
-        currentPassword: formData.currentPassword,
-        newPassword: formData.newPassword
+      const response = await fetch('/api/connectdb?type=updateUser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user._id,
+          name: formData.name,
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword
+        })
       });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update profile');
+      }
+
+      updateUser({ name: formData.name }); // Update context
       
       setMessage({ text: 'Profile updated successfully', type: 'success' });
       setIsEditing(false);
       setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
     } catch (error) {
-      setMessage({ text: error.message || 'Failed to update profile', type: 'error' });
+      setMessage({ text: error.message, type: 'error' });
     }
   };
 
@@ -76,7 +91,7 @@ const Account = () => {
           <div className="p-6 sm:p-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-blue">Personal Information</h2>
-              {!isEditing && (
+              {!isEditing && user.role !== 'admin' && (
                 <button
                   onClick={() => setIsEditing(true)}
                   className="text-orange hover:text-dark-orange text-sm font-medium"
@@ -97,7 +112,7 @@ const Account = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  disabled={!isEditing}
+                  disabled={!isEditing || user.role === 'admin'}
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange"
                 />
               </div>
@@ -116,7 +131,7 @@ const Account = () => {
                 />
               </div>
 
-              {isEditing && (
+              {isEditing && user.role !== 'admin' && (
                 <>
                   <div className="mb-4">
                     <label className="block text-blue text-sm font-medium mb-2" htmlFor="currentPassword">
@@ -184,17 +199,19 @@ const Account = () => {
           </div>
         </div>
 
-        <div className="mt-8 bg-white shadow-md rounded-lg overflow-hidden">
-          <div className="p-6 sm:p-8">
-            <h2 className="text-xl font-semibold text-blue mb-6">Order History</h2>
-            <button
-              onClick={() => navigate('/orders')}
-              className="text-orange hover:text-dark-orange text-sm font-medium"
-            >
-              View all orders
-            </button>
+        {user.role !== 'admin' && (
+          <div className="mt-8 bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="p-6 sm:p-8">
+              <h2 className="text-xl font-semibold text-blue mb-6">Order History</h2>
+              <button
+                onClick={() => navigate('/orders')}
+                className="text-orange hover:text-dark-orange text-sm font-medium"
+              >
+                View all orders
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

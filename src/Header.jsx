@@ -507,7 +507,7 @@ const Header = () => {
 
           {/* Cart Content */}
           <div
-            className={`fixed inset-y-0 right-0 ${window.innerWidth > 768 ? "w-2/5" : "w-full"} bg-white p-6 z-40 shadow-lg`}
+            className={`fixed inset-y-0 right-0 ${window.innerWidth > 768 ? "w-2/5" : "w-full"} bg-white p-6 z-40 shadow-lg flex flex-col`}
           >
             <button
               onClick={closeCartModal}
@@ -531,29 +531,44 @@ const Header = () => {
             </button>
             <h2 className="text-xl text-blue font-bold mt-10 text-center">Shopping Bag</h2>
             {cart.length > 0 ? (
-              cart.map((item) => (
-                <div key={item._id} className="flex justify-between items-center mb-4">
-                  <div>
-                    <h3 className="text-sm font-medium">{item.name}</h3>
-                    <p className="text-sm">€{item.price.$numberDecimal}</p>
-                    <p className="text-sm">Quantity: {item.quantity}</p>
+              <div className="flex-1 overflow-y-auto">
+                {cart.map((item) => (
+                  <div key={item._id} className="flex justify-between items-center mb-4">
+                    <div>
+                      <h3 className="text-sm font-medium">{item.name}</h3>
+                      <p className="text-sm">€{item.price.$numberDecimal}</p>
+                      <p className="text-sm">Quantity: {item.quantity}</p>
+                    </div>
+                    <button
+                      onClick={() => removeFromCart(item._id)}
+                      className="text-red-500 hover:underline"
+                    >
+                      Remove
+                    </button>
                   </div>
-                  <button
-                    onClick={() => removeFromCart(item._id)}
-                    className="text-red-500 hover:underline"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
               <div className="flex items-center justify-center h-full">
                 <p className="text-blue">Your cart is empty.</p>
               </div>
             )}
 
+            {/* Checkout Button */}
+            {cart.length > 0 && (
+              <div className="mt-auto">
+                <button
+                  onClick={() => {
+                    closeCartModal();
+                    navigate('/checkout');
+                  }}
+                  className="w-full py-3 bg-orange text-white font-bold rounded hover:bg-dark-orange"
+                >
+                  Checkout
+                </button>
+              </div>
+            )}
           </div>
-
         </div>
       )}
 
