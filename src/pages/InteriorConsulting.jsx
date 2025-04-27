@@ -154,14 +154,14 @@ const InteriorConsulting = () => {
       {/* Booking Modal */}
       {showBookingModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-xl font-semibold mb-4 text-center">
+          <div className="bg-white p-6 rounded-lg max-w-3xl w-full mx-4">
+            <h3 className="text-xl font-semibold mb-6 text-center">
               Book Session for {moment(selectedSlot.start).format('LLL')}
             </h3>
 
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block mb-2">Session Type</label>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block mb-2 font-medium">Session Type</label>
                 <select
                   name="sessionType"
                   value={formData.sessionType}
@@ -174,8 +174,8 @@ const InteriorConsulting = () => {
                 </select>
               </div>
 
-              <div className="mb-4">
-                <label className="block mb-2">Design Focus</label>
+              <div>
+                <label className="block mb-2 font-medium">Design Focus</label>
                 <input
                   type="text"
                   name="designFocus"
@@ -186,8 +186,8 @@ const InteriorConsulting = () => {
                 />
               </div>
 
-              <div className="mb-4">
-                <label className="block mb-2">Property Type</label>
+              <div>
+                <label className="block mb-2 font-medium">Property Type</label>
                 <input
                   type="text"
                   name="propertyType"
@@ -198,8 +198,8 @@ const InteriorConsulting = () => {
                 />
               </div>
 
-              <div className="mb-4">
-                <label className="block mb-2">Duration (minutes)</label>
+              <div>
+                <label className="block mb-2 font-medium">Duration (minutes)</label>
                 <input
                   type="number"
                   name="duration"
@@ -213,8 +213,8 @@ const InteriorConsulting = () => {
                 />
               </div>
 
-              <div className="mb-4">
-                <label className="block mb-2">Style Preferences</label>
+              <div className="col-span-1 md:col-span-2">
+                <label className="block mb-2 font-medium">Style Preferences</label>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {[
                     'modern',
@@ -243,8 +243,8 @@ const InteriorConsulting = () => {
                 </div>
               </div>
 
-              <div className="mb-4">
-                <label className="block mb-2">Budget Range</label>
+              <div>
+                <label className="block mb-2 font-medium">Budget Range</label>
                 <select
                   name="budgetRange"
                   value={formData.budgetRange}
@@ -261,8 +261,8 @@ const InteriorConsulting = () => {
                 </select>
               </div>
 
-              <div className="mb-4">
-                <label className="block mb-2">Priority Items</label>
+              <div>
+                <label className="block mb-2 font-medium">Priority Items</label>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {[
                     'seating',
@@ -289,8 +289,8 @@ const InteriorConsulting = () => {
                 </div>
               </div>
 
-              <div className="mb-4">
-                <label className="block mb-2">Special Requirements</label>
+              <div className="col-span-1 md:col-span-2">
+                <label className="block mb-2 font-medium">Special Requirements</label>
                 <textarea
                   name="specialRequirements"
                   value={formData.specialRequirements}
@@ -300,7 +300,7 @@ const InteriorConsulting = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2">
+              <div className="col-span-1 md:col-span-2 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowBookingModal(false)}
