@@ -107,7 +107,7 @@ const Checkout = () => {
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-beige flex flex-col items-center justify-center">
+      <div className="min-h-screen pt-[10em] pb-20 px-4 sm:px-6 lg:px-8 bg-beige flex flex-col items-center justify-center">
         <div className="max-w-md text-center">
           <h1 className="text-3xl font-bold text-blue mb-4">Your cart is empty</h1>
           <p className="text-blue mb-6">Looks like you haven't added any items to your cart yet.</p>
