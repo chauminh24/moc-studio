@@ -76,11 +76,11 @@ const Checkout = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!validateForm()) return;
-
+  
     setIsProcessing(true);
-
+  
     try {
       const orderData = {
         user_id: user?._id || null,
@@ -96,21 +96,23 @@ const Checkout = () => {
         placed_at: new Date(),
         estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // +7 days
       };
+  
       console.log("Order Data:", orderData);
-      const response = await fetch('/api/connectdb?type=createOrder', {
+  
+      const response = await fetch('/api/connectDB?type=createOrder', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ orderData })
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to create order');
       }
-
-      clearCart();
-      navigate('/order-confirmation', { state: { order: orderData } });
+  
+      clearCart(); // Clear the cart after successful order creation
+      navigate('/order-confirmation', { state: { order: orderData } }); // Pass orderData to the confirmation page
     } catch (error) {
       console.error('Checkout error:', error);
       setErrors({ form: error.message });

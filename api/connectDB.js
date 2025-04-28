@@ -192,31 +192,31 @@ export default async function handler(req, res) {
 
       return res.status(200).json({ message: 'Password reset email sent' });
 
-    }else if (type === 'verify-token') {
+    } else if (type === 'verify-token') {
       // Verify password reset token
       const { token } = req.body;
       console.log("Received token:", token);
-    
+
       if (!token) {
         return res.status(400).json({ message: 'Token is required' });
       }
-    
+
       try {
         // Verify JWT token
         const decoded = jwt.verify(token, JWT_SECRET);
         console.log("Decoded token:", decoded);
-        
+
         // Check if user still exists
         const usersCollection = database.collection("users");
         const user = await usersCollection.findOne({ _id: new ObjectId(decoded.id) });
-    
+
         if (!user) {
           return res.status(404).json({ message: 'User not found' });
         }
-    
-        return res.status(200).json({ 
+
+        return res.status(200).json({
           message: 'Token is valid',
-          email: decoded.email 
+          email: decoded.email
         });
       } catch (err) {
         if (err.name === 'TokenExpiredError') {
@@ -227,40 +227,40 @@ export default async function handler(req, res) {
     } else if (type === 'reset-password') {
       // Handle password reset
       const { token, newPassword } = req.body;
-    
+
       if (!token || !newPassword) {
         return res.status(400).json({ message: 'Token and new password are required' });
       }
-    
+
       if (newPassword.length < 8) {
         return res.status(400).json({ message: 'Password must be at least 8 characters' });
       }
-    
+
       try {
         // Verify token first
         const decoded = jwt.verify(token, JWT_SECRET);
-        
+
         const usersCollection = database.collection("users");
         const user = await usersCollection.findOne({ _id: new ObjectId(decoded.id) });
-    
+
         if (!user) {
           return res.status(404).json({ message: 'User not found' });
         }
-    
+
         // Hash the new password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-    
+
         // Update password and clear any reset tokens
         await usersCollection.updateOne(
           { _id: user._id },
-          { 
-            $set: { 
+          {
+            $set: {
               password: hashedPassword,
-              lastPasswordChange: new Date() 
+              lastPasswordChange: new Date()
             }
           }
         );
-    
+
         return res.status(200).json({ message: 'Password reset successfully' });
       } catch (err) {
         if (err.name === 'TokenExpiredError') {
@@ -271,20 +271,20 @@ export default async function handler(req, res) {
     }
     else if (type === 'userOrders') {
       const { userId } = req.query;
-      
+
       if (!userId) {
         return res.status(400).json({ error: 'User ID is required' });
       }
-    
+
       const ordersCollection = database.collection("orders");
       const orderItemsCollection = database.collection("order_items");
-    
+
       // Fetch orders for the user
       const orders = await ordersCollection
         .find({ user_id: new ObjectId(userId) })
         .sort({ placed_at: -1 })
         .toArray();
-    
+
       // Fetch order items for each order
       const ordersWithItems = await Promise.all(
         orders.map(async (order) => {
@@ -294,22 +294,22 @@ export default async function handler(req, res) {
           return { ...order, items };
         })
       );
-    
+
       return res.status(200).json({ orders: ordersWithItems });
-    }else if (type === 'updateUser') {
+    } else if (type === 'updateUser') {
       const { userId, name, currentPassword, newPassword } = req.body;
-    
+
       if (!userId) {
         return res.status(400).json({ error: 'User ID is required' });
       }
-    
+
       const usersCollection = database.collection("users");
       const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
-    
+
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
-    
+
       // Verify current password if changing password
       if (newPassword) {
         if (!currentPassword) {
@@ -330,19 +330,19 @@ export default async function handler(req, res) {
           { $set: { name, updatedAt: new Date() } }
         );
       }
-    
+
       return res.status(200).json({ message: 'User updated successfully' });
     }
     else if (type === 'createOrder') {
       const { orderData } = req.body;
-    
+
       if (!orderData || !orderData.items || orderData.items.length === 0) {
         return res.status(400).json({ error: 'Invalid order data' });
       }
-    
+
       const ordersCollection = database.collection("orders");
       const orderItemsCollection = database.collection("order_items");
-    
+
       const newOrder = {
         user_id: orderData.user_id ? new ObjectId(orderData.user_id) : null, // Allow null for guest users
         total_price: { $numberDecimal: orderData.total_price.toString() },
@@ -352,19 +352,19 @@ export default async function handler(req, res) {
         estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // +7 days
         payment_method: orderData.payment_method || null, // Optional
       };
-    
+
       const orderResult = await ordersCollection.insertOne(newOrder);
       const orderId = orderResult.insertedId;
-    
+
       const orderItems = orderData.items.map(item => ({
         order_id: orderId,
         product_id: new ObjectId(item.product_id),
         quantity: item.quantity,
         price_at_purchase: { $numberDecimal: item.price_at_purchase.toString() },
       }));
-    
+
       await orderItemsCollection.insertMany(orderItems);
-    
+
       return res.status(201).json({ order: { ...newOrder, _id: orderId } });
     } else if (type === 'interiorConsulting') {
       // Existing logic for interior consulting
@@ -382,7 +382,7 @@ export default async function handler(req, res) {
         sessions,
       });
 
-    } 
+    }
     else if (type === 'createConsultingSession') {
       const {
         session_date,
@@ -393,18 +393,18 @@ export default async function handler(req, res) {
         client_requirements,
         status,
       } = req.body;
-    
+
       const sessionsCollection = database.collection("consulting_sessions");
-    
+
       try {
         // Validate required fields
         if (!session_date || !session_type || !status) {
           throw new Error("Missing required fields: session_date, session_type, or status");
         }
-    
+
         // Default designer_id (Admin)
         const defaultDesignerId = new ObjectId("67fcfa22ee72f858ad940af6");
-    
+
         // Create the consulting session
         const newSession = {
           session_date: new Date(session_date),
@@ -418,9 +418,9 @@ export default async function handler(req, res) {
           created_at: new Date(),
           updated_at: new Date(),
         };
-    
+
         const result = await sessionsCollection.insertOne(newSession);
-    
+
         return res.status(201).json({
           success: true,
           session: { ...newSession, _id: result.insertedId },
@@ -435,14 +435,14 @@ export default async function handler(req, res) {
     }
     else if (type === 'mergeCarts') {
       const { userId, localCartItems } = req.body;
-    
+
       if (!userId || !localCartItems) {
         return res.status(400).json({ error: 'User ID and local cart items are required' });
       }
-    
+
       const cartsCollection = database.collection("cart");
       const cartItemsCollection = database.collection("cart_items");
-    
+
       try {
         // Find or create the user's cart
         let cart = await cartsCollection.findOne({ user_id: new ObjectId(userId) });
@@ -453,11 +453,11 @@ export default async function handler(req, res) {
           });
           cart = { _id: result.insertedId };
         }
-    
+
         // Merge local cart items with database cart items
         const dbCartItems = await cartItemsCollection.find({ cart_id: cart._id }).toArray();
         const mergedCartItems = [...dbCartItems];
-    
+
         localCartItems.forEach(localItem => {
           const existingItem = mergedCartItems.find(item => item.product_id.equals(localItem.productId));
           if (existingItem) {
@@ -470,7 +470,7 @@ export default async function handler(req, res) {
             });
           }
         });
-    
+
         // Update the cart_items collection
         await cartItemsCollection.deleteMany({ cart_id: cart._id }); // Clear existing items
         await cartItemsCollection.insertMany(mergedCartItems.map(item => ({
@@ -478,7 +478,7 @@ export default async function handler(req, res) {
           product_id: item.product_id,
           quantity: item.quantity,
         })));
-    
+
         return res.status(200).json({ success: true, cart: mergedCartItems });
       } catch (error) {
         console.error("Error merging carts:", error);
@@ -487,107 +487,125 @@ export default async function handler(req, res) {
     }
     else if (type === 'saveCart') {
       const { userId, cartItems } = req.body;
-  
+
       if (!userId || !cartItems) {
-          return res.status(400).json({ error: 'User ID and cart items are required' });
+        return res.status(400).json({ error: 'User ID and cart items are required' });
       }
-  
+
       // Validate cartItems structure
       if (!Array.isArray(cartItems)) {
-          return res.status(400).json({ error: 'cartItems must be an array' });
+        return res.status(400).json({ error: 'cartItems must be an array' });
       }
-  
+
       for (const item of cartItems) {
-          if (!item.productId || !item.quantity) {
-              return res.status(400).json({ 
-                  error: 'Each cart item must have productId and quantity',
-                  invalidItem: item
-              });
-          }
+        if (!item.productId || !item.quantity) {
+          return res.status(400).json({
+            error: 'Each cart item must have productId and quantity',
+            invalidItem: item
+          });
+        }
       }
-  
+
       const cartsCollection = database.collection("cart");
       const cartItemsCollection = database.collection("cart_items");
-  
+
       try {
-          // Convert userId to ObjectId first to validate it
-          const userIdObject = new ObjectId(userId);
-          
-          // Find or create the user's cart
-          let cart = await cartsCollection.findOne({ user_id: userIdObject });
-          
-          if (!cart) {
-              const result = await cartsCollection.insertOne({
-                  user_id: userIdObject,
-                  created_at: new Date(),
-                  updated_at: new Date()
-              });
-              cart = { _id: result.insertedId };
-          } else {
-              // Update the updated_at timestamp
-              await cartsCollection.updateOne(
-                  { _id: cart._id },
-                  { $set: { updated_at: new Date() } }
-              );
-          }
-  
-          // Format cart items with additional validation
-          const formattedCartItems = cartItems.map(item => {
-              try {
-                  return {
-                      cart_id: cart._id,
-                      product_id: new ObjectId(item.productId),
-                      quantity: parseInt(item.quantity), // Ensure quantity is a number
-                      added_at: new Date()
-                  };
-              } catch (e) {
-                  throw new Error(`Invalid productId format for item: ${JSON.stringify(item)}`);
-              }
+        // Convert userId to ObjectId first to validate it
+        const userIdObject = new ObjectId(userId);
+
+        // Find or create the user's cart
+        let cart = await cartsCollection.findOne({ user_id: userIdObject });
+
+        if (!cart) {
+          const result = await cartsCollection.insertOne({
+            user_id: userIdObject,
+            created_at: new Date(),
+            updated_at: new Date()
           });
-  
-          // Update the cart_items collection more efficiently
-          const bulkOps = [
-              { deleteMany: { filter: { cart_id: cart._id } } // Clear existing items
-      }].concat(
-              formattedCartItems.map(item => ({
-                  insertOne: { document: item }
-              }))
+          cart = { _id: result.insertedId };
+        } else {
+          // Update the updated_at timestamp
+          await cartsCollection.updateOne(
+            { _id: cart._id },
+            { $set: { updated_at: new Date() } }
           );
-  
-          await cartItemsCollection.bulkWrite(bulkOps);
-  
-          // Return the updated cart for frontend synchronization
-          const updatedCartItems = await cartItemsCollection.find({ cart_id: cart._id }).toArray();
-          
-          return res.status(200).json({ 
-              success: true, 
-              message: 'Cart saved successfully',
-              cart: {
-                  _id: cart._id,
-                  user_id: userId,
-                  items: updatedCartItems.map(item => ({
-                      _id: item.product_id, // This matches frontend expectation
-                      quantity: item.quantity
-                  }))
-              }
-          });
-      } catch (error) {
-          console.error("Error saving cart:", error);
-          
-          // More specific error messages
-          if (error.message.includes('ObjectId')) {
-              return res.status(400).json({ 
-                  error: 'Invalid ID format',
-                  details: error.message 
-              });
+        }
+
+        // Format cart items with additional validation
+        const formattedCartItems = cartItems.map(item => {
+          try {
+            return {
+              cart_id: cart._id,
+              product_id: new ObjectId(item.productId),
+              quantity: parseInt(item.quantity), // Ensure quantity is a number
+              added_at: new Date()
+            };
+          } catch (e) {
+            throw new Error(`Invalid productId format for item: ${JSON.stringify(item)}`);
           }
-          
-          return res.status(500).json({ 
-              error: 'Failed to save cart',
-              details: error.message 
+        });
+
+        // Update the cart_items collection more efficiently
+        const bulkOps = [
+          {
+            deleteMany: { filter: { cart_id: cart._id } } // Clear existing items
+          }].concat(
+            formattedCartItems.map(item => ({
+              insertOne: { document: item }
+            }))
+          );
+
+        await cartItemsCollection.bulkWrite(bulkOps);
+
+        // Return the updated cart for frontend synchronization
+        const updatedCartItems = await cartItemsCollection.find({ cart_id: cart._id }).toArray();
+
+        return res.status(200).json({
+          success: true,
+          message: 'Cart saved successfully',
+          cart: {
+            _id: cart._id,
+            user_id: userId,
+            items: updatedCartItems.map(item => ({
+              _id: item.product_id, // This matches frontend expectation
+              quantity: item.quantity
+            }))
+          }
+        });
+      } catch (error) {
+        console.error("Error saving cart:", error);
+
+        // More specific error messages
+        if (error.message.includes('ObjectId')) {
+          return res.status(400).json({
+            error: 'Invalid ID format',
+            details: error.message
           });
+        }
+
+        return res.status(500).json({
+          error: 'Failed to save cart',
+          details: error.message
+        });
       }
-  }
+    }
+    else if (type === 'clearCart') {
+      const { userId } = req.body;
+    
+      if (!userId) {
+        return res.status(400).json({ message: 'User ID is required' });
+      }
+    
+      try {
+        const cartCollection = database.collection('carts');
+        await cartCollection.deleteOne({ userId: new ObjectId(userId) });
+    
+        return res.status(200).json({ message: 'Cart cleared successfully' });
+      } catch (error) {
+        console.error('Error clearing cart:', error);
+        return res.status(500).json({ message: 'Failed to clear cart', error: error.message });
+      }
+    }
     else if (type === 'categoriesAndProducts') {
       // Existing logic for categories and products
       const categories = database.collection("categories");
