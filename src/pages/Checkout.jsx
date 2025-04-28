@@ -85,14 +85,13 @@ const Checkout = () => {
       const orderData = {
         user_id: user?._id || null,
         items: cart.map(item => ({
-          product_id: new ObjectId(item._id),
+          product_id: item._id, // Use item._id directly
           quantity: item.quantity,
           price_at_purchase: item.price
         })),
         total_price: { $numberDecimal: calculateTotal().total },
         order_status: 'pending',
         shipping_address: `${formData.address}, ${formData.city}, ${formData.postalCode}`,
-        payment_method: formData.paymentMethod,
         shipping_method: formData.shippingMethod,
         placed_at: new Date(),
         estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // +7 days

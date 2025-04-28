@@ -9,33 +9,59 @@ const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load cart from local storage or database when component mounts or user changes
+  // Load cart from local storage or database
   useEffect(() => {
     const loadCart = async () => {
       try {
         let cartData = [];
         const localCart = localStorage.getItem("cart");
-  
+
         if (user) {
+          // User is logged in
           if (localCart) {
             // Merge local cart with database cart
-            const response = await axios.post('/api/connectDB?type=mergeCarts', {
-              userId: user._id,
-              localCartItems: JSON.parse(localCart),
-            });
-            cartData = response.data.cart;
-  
-            // Clear local storage after merging
-            localStorage.removeItem("cart");
+            const localCartItems = JSON.parse(localCart);
+            try {
+              const response = await axios.post('/api/connectDB?type=mergeCarts', {
+                userId: user._id,
+                localCartItems: localCartItems.map(item => ({
+                  productId: item._id,
+                  quantity: item.quantity
+                })),
+              });
+              cartData = response.data.cart || [];
+              
+              // Convert back to frontend format if needed
+              if (cartData.length > 0 && !cartData[0]._id) {
+                cartData = cartData.map(item => ({
+                  ...item.productId, // Assuming product details are nested
+                  quantity: item.quantity
+                }));
+              }
+              
+              localStorage.removeItem("cart");
+            } catch (mergeError) {
+              console.error("Merge cart error:", mergeError);
+              cartData = localCartItems;
+            }
           } else {
             // Fetch cart from database
             const response = await axios.get(`/api/connectDB?type=getCart&userId=${user._id}`);
-            cartData = response.data.cart;
+            cartData = response.data.cart || [];
+            
+            // Convert format if needed
+            if (cartData.length > 0 && !cartData[0]._id) {
+              cartData = cartData.map(item => ({
+                ...item.productId,
+                quantity: item.quantity
+              }));
+            }
           }
         } else if (localCart) {
+          // Guest user - use local storage
           cartData = JSON.parse(localCart);
         }
-  
+
         setCart(cartData);
       } catch (error) {
         console.error("Error loading cart:", error);
@@ -45,67 +71,66 @@ const CartProvider = ({ children }) => {
         setIsLoading(false);
       }
     };
-  
+
     loadCart();
   }, [user]);
 
-  // Helper function to merge local and database carts
-  const mergeCarts = (localCart, dbCart) => {
-    const merged = [...dbCart];
-    
-    localCart.forEach(localItem => {
-      const existingItem = merged.find(item => item._id === localItem._id);
-      if (existingItem) {
-        existingItem.quantity += localItem.quantity;
-      } else {
-        merged.push(localItem);
-      }
-    });
-    
-    return merged;
-  };
-
-  // Save cart to appropriate storage whenever it changes
+  // Save cart to appropriate storage
   useEffect(() => {
     if (isLoading) return;
     
     const saveCart = async () => {
       try {
         if (user) {
-          // User is logged in - save to database
+          // Prepare data for database
+          const cartForDB = cart.map(item => ({
+            productId: item._id,
+            quantity: item.quantity
+          }));
+          
           await axios.post('/api/connectDB?type=saveCart', {
             userId: user._id,
-            cartItems: cart.map(item => ({
-              productId: item._id,
-              quantity: item.quantity,
-            })),
+            cartItems: cartForDB
+          }, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
           });
         } else {
-          // User is not logged in - save to local storage
           localStorage.setItem("cart", JSON.stringify(cart));
         }
       } catch (error) {
         console.error("Error saving cart:", error);
-        // Fallback to local storage if there's an error
+        // Fallback to local storage
         localStorage.setItem("cart", JSON.stringify(cart));
+        
+        // Additional error handling
+        if (error.response) {
+          console.error("Server responded with:", error.response.data);
+        } else if (error.request) {
+          console.error("No response received:", error.request);
+        }
       }
     };
-  
-    saveCart();
+
+    // Debounce the save operation
+    const timer = setTimeout(() => {
+      saveCart();
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, [cart, user, isLoading]);
 
   const addToCart = (product) => {
     setCart((prevCart) => {
       const existingProduct = prevCart.find((item) => item._id === product._id);
       if (existingProduct) {
-        // Update quantity if product already exists
         return prevCart.map((item) =>
           item._id === product._id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
-      // Add new product to cart
       return [...prevCart, { ...product, quantity: 1 }];
     });
   };
@@ -129,8 +154,20 @@ const CartProvider = ({ children }) => {
 
   const clearCart = () => {
     setCart([]);
+    if (user) {
+      // Also clear from database
+      axios.post('/api/connectDB?type=clearCart', { userId: user._id })
+        .catch(error => console.error("Error clearing cart:", error));
+    }
     localStorage.removeItem("cart");
   };
+
+  // Calculate total items and price
+  const cartTotalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartTotalPrice = cart.reduce(
+    (sum, item) => sum + (parseFloat(item.price?.$numberDecimal || item.price) * item.quantity),
+    0
+  );
 
   return (
     <CartContext.Provider 
@@ -140,7 +177,9 @@ const CartProvider = ({ children }) => {
         removeFromCart, 
         updateQuantity,
         clearCart,
-        isLoading 
+        isLoading,
+        cartTotalItems,
+        cartTotalPrice
       }}
     >
       {children}
