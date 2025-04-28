@@ -96,7 +96,7 @@ const Checkout = () => {
         placed_at: new Date(),
         estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // +7 days
       };
-
+      console.log("Order Data:", orderData);
       const response = await fetch('/api/connectdb?type=createOrder', {
         method: 'POST',
         headers: {
