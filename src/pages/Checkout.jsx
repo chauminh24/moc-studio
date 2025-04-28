@@ -254,6 +254,7 @@ const Checkout = () => {
                     <option value="DE">Germany</option>
                     <option value="FR">France</option>
                     <option value="IT">Italy</option>
+                    <option value="IE">Ireland</option>
                   </select>
                   {errors.country && <p className="mt-1 text-sm text-red-500">{errors.country}</p>}
                 </div>
