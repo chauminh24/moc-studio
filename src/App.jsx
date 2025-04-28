@@ -18,6 +18,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Account from "./pages/Account";
 import Orders from "./pages/Orders";
 import Checkout from "./pages/Checkout";
+import OrderConfirmation from "./pages/OrderConfirmationPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import NotFound from "./pages/NotFound";
 
@@ -92,6 +93,7 @@ const App = () => {
               <Route path="/account" element={<Account />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/order-confirmation" element={<OrderConfirmation />} />
               <Route path="/about" element={<AboutPage />} />
               <Route
                 path="/admin"

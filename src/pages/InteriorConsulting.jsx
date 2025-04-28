@@ -57,6 +57,7 @@ const InteriorConsulting = () => {
   );
 
   const handleSelectSlot = (slot) => {
+    console.log("Selected Slot:", slot); // Debugging log
     setSelectedSlot(slot);
     setShowBookingModal(true);
   };
