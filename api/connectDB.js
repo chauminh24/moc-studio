@@ -271,31 +271,20 @@ export default async function handler(req, res) {
     }
     else if (type === 'userOrders') {
       const { userId } = req.query;
-
+    
       if (!userId) {
         return res.status(400).json({ error: 'User ID is required' });
       }
-
-      const ordersCollection = database.collection("orders");
-      const orderItemsCollection = database.collection("order_items");
-
-      // Fetch orders for the user
-      const orders = await ordersCollection
-        .find({ user_id: new ObjectId(userId) })
-        .sort({ placed_at: -1 })
-        .toArray();
-
-      // Fetch order items for each order
-      const ordersWithItems = await Promise.all(
-        orders.map(async (order) => {
-          const items = await orderItemsCollection
-            .find({ order_id: order._id })
-            .toArray();
-          return { ...order, items };
-        })
-      );
-
-      return res.status(200).json({ orders: ordersWithItems });
+    
+      try {
+        const ordersCollection = database.collection('orders');
+        const orders = await ordersCollection.find({ user_id: new ObjectId(userId) }).toArray();
+    
+        return res.status(200).json({ orders });
+      } catch (error) {
+        console.error('Error fetching user orders:', error);
+        return res.status(500).json({ error: 'Failed to fetch user orders' });
+      }
     } else if (type === 'updateUser') {
       const { userId, name, currentPassword, newPassword } = req.body;
 
