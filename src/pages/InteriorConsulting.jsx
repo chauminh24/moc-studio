@@ -84,7 +84,7 @@ const InteriorConsulting = () => {
 
     try {
       // Create session
-      const sessionRes = await fetch('/api/consulting_sessions', {
+      const sessionRes = await fetch('/api/connectDB?type=createConsultingSession', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,10 +99,10 @@ const InteriorConsulting = () => {
             style_preferences: formData.stylePreferences,
             budget_range: formData.budgetRange,
             priority_items: formData.priorityItems,
-            special_requirements: formData.specialRequirements
+            special_requirements: formData.specialRequirements,
           },
-          status: 'scheduled'
-        })
+          status: 'scheduled',
+        }),
       });
 
       if (sessionRes.ok) {
@@ -153,20 +153,31 @@ const InteriorConsulting = () => {
 
       {/* Booking Modal */}
       {showBookingModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-3xl w-full mx-4">
-            <h3 className="text-xl font-semibold mb-6 text-center">
-              Book Session for {moment(selectedSlot.start).format('LLL')}
-            </h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 rounded-lg max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-2xl font-bold text-gray-800">
+                Book Session for {moment(selectedSlot.start).format('LLL')}
+              </h3>
+              <button
+                onClick={() => setShowBookingModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block mb-2 font-medium">Session Type</label>
+              {/* Session Type */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Session Type*</label>
                 <select
                   name="sessionType"
                   value={formData.sessionType}
                   onChange={handleFormChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
                   required
                 >
                   <option value="virtual">Virtual Consultation</option>
@@ -174,32 +185,37 @@ const InteriorConsulting = () => {
                 </select>
               </div>
 
-              <div>
-                <label className="block mb-2 font-medium">Design Focus</label>
+              {/* Design Focus */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Design Focus*</label>
                 <input
                   type="text"
                   name="designFocus"
                   value={formData.designFocus}
                   onChange={handleFormChange}
-                  className="w-full p-2 border rounded"
+                  placeholder="e.g., Living room, Kitchen, Office"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
                   required
                 />
               </div>
 
-              <div>
-                <label className="block mb-2 font-medium">Property Type</label>
+              {/* Property Type */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Property Type*</label>
                 <input
                   type="text"
                   name="propertyType"
                   value={formData.propertyType}
                   onChange={handleFormChange}
-                  className="w-full p-2 border rounded"
+                  placeholder="e.g., Apartment, House, Commercial"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
                   required
                 />
               </div>
 
-              <div>
-                <label className="block mb-2 font-medium">Duration (minutes)</label>
+              {/* Duration */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Duration (minutes)*</label>
                 <input
                   type="number"
                   name="duration"
@@ -208,48 +224,44 @@ const InteriorConsulting = () => {
                   min="30"
                   max="240"
                   step="30"
-                  className="w-full p-2 border rounded"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
                   required
                 />
+                <p className="text-xs text-gray-500">Available durations: 30, 60, 90, 120, 150, 180, 210, 240 minutes</p>
               </div>
 
-              <div className="col-span-1 md:col-span-2">
-                <label className="block mb-2 font-medium">Style Preferences</label>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {/* Style Preferences */}
+              <div className="col-span-1 md:col-span-2 space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Style Preferences</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {[
-                    'modern',
-                    'minimalist',
-                    'traditional',
-                    'industrial',
-                    'scandinavian',
-                    'bohemian',
-                    'rustic',
-                    'coastal',
-                    'mid-century',
-                    'contemporary',
+                    'Modern', 'Minimalist', 'Traditional', 'Industrial',
+                    'Scandinavian', 'Bohemian', 'Rustic', 'Coastal',
+                    'Mid-century', 'Contemporary'
                   ].map((style) => (
-                    <label key={style} className="flex items-center">
+                    <label key={style} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50">
                       <input
                         type="checkbox"
                         name="stylePreferences"
-                        value={style}
-                        checked={formData.stylePreferences.includes(style)}
+                        value={style.toLowerCase()}
+                        checked={formData.stylePreferences.includes(style.toLowerCase())}
                         onChange={handleFormChange}
-                        className="mr-2"
+                        className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
                       />
-                      {style}
+                      <span className="text-sm text-gray-700">{style}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div>
-                <label className="block mb-2 font-medium">Budget Range</label>
+              {/* Budget Range */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Budget Range*</label>
                 <select
                   name="budgetRange"
                   value={formData.budgetRange}
                   onChange={handleFormChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
                   required
                 >
                   <option value="">Select budget</option>
@@ -261,56 +273,54 @@ const InteriorConsulting = () => {
                 </select>
               </div>
 
-              <div>
-                <label className="block mb-2 font-medium">Priority Items</label>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {/* Priority Items */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Priority Items</label>
+                <div className="grid grid-cols-2 gap-3">
                   {[
-                    'seating',
-                    'storage',
-                    'lighting',
-                    'flooring',
-                    'wall-treatment',
-                    'window-treatment',
-                    'decor',
-                    'layout',
+                    'Seating', 'Storage', 'Lighting', 'Flooring',
+                    'Wall Treatment', 'Window Treatment', 'Decor', 'Layout'
                   ].map((item) => (
-                    <label key={item} className="flex items-center">
+                    <label key={item} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50">
                       <input
                         type="checkbox"
                         name="priorityItems"
-                        value={item}
-                        checked={formData.priorityItems.includes(item)}
+                        value={item.toLowerCase().replace(' ', '-')}
+                        checked={formData.priorityItems.includes(item.toLowerCase().replace(' ', '-'))}
                         onChange={handleFormChange}
-                        className="mr-2"
+                        className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
                       />
-                      {item}
+                      <span className="text-sm text-gray-700">{item}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div className="col-span-1 md:col-span-2">
-                <label className="block mb-2 font-medium">Special Requirements</label>
+              {/* Special Requirements */}
+              <div className="col-span-1 md:col-span-2 space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Special Requirements</label>
                 <textarea
                   name="specialRequirements"
                   value={formData.specialRequirements}
                   onChange={handleFormChange}
-                  className="w-full p-2 border rounded"
+                  placeholder="Any specific needs or additional information..."
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
                   rows="3"
                 />
               </div>
 
-              <div className="col-span-1 md:col-span-2 flex justify-end gap-2">
+              {/* Form Actions */}
+              <div className="col-span-1 md:col-span-2 flex justify-end gap-4 pt-4">
                 <button
                   type="button"
                   onClick={() => setShowBookingModal(false)}
-                  className="px-4 py-2 border rounded"
+                  className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded"
+                  className="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                 >
                   Book Session
                 </button>

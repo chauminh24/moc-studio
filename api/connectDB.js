@@ -327,47 +327,45 @@ export default async function handler(req, res) {
       }
     
       return res.status(200).json({ message: 'User updated successfully' });
-    }else if (type === 'createOrder') {
+    }     else if (type === 'createOrder') {
       const { orderData } = req.body;
     
-      if (!orderData || !orderData.items || orderData.items.length === 0) {
-        return res.status(400).json({ error: 'Invalid order data' });
+      if (!orderData) {
+        return res.status(400).json({ error: 'Order data is required' });
       }
     
       const ordersCollection = database.collection("orders");
       const orderItemsCollection = database.collection("order_items");
     
-      // Create the order document
-      const newOrder = {
-        user_id: new ObjectId(orderData.userId),
-        total_price: { $numberDecimal: orderData.totalAmount.toString() },
-        order_status: "pending",
-        shipping_address: orderData.shippingAddress,
-        placed_at: new Date(),
-        estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // +7 days
-      };
+      try {
+        // Insert the order
+        const orderResult = await ordersCollection.insertOne({
+          user_id: orderData.user_id ? new ObjectId(orderData.user_id) : null,
+          total_price: orderData.total_price,
+          order_status: 'pending',
+          shipping_address: orderData.shipping_address,
+          placed_at: new Date(orderData.placed_at),
+          estimated_delivery: new Date(orderData.estimated_delivery),
+          shipping_method: orderData.shipping_method,
+        });
     
-      // Insert the order
-      const orderResult = await ordersCollection.insertOne(newOrder);
-      const orderId = orderResult.insertedId;
+        const orderId = orderResult.insertedId;
     
-      // Insert order items
-      const orderItems = orderData.items.map(item => ({
-        order_id: orderId,
-        product_id: new ObjectId(item.productId),
-        quantity: item.quantity,
-        price_at_purchase: { $numberDecimal: item.price.$numberDecimal }
-      }));
+        // Insert order items
+        const orderItems = orderData.items.map(item => ({
+          order_id: orderId,
+          product_id: new ObjectId(item.product_id),
+          quantity: item.quantity,
+          price_at_purchase: item.price_at_purchase,
+        }));
     
-      await orderItemsCollection.insertMany(orderItems);
+        await orderItemsCollection.insertMany(orderItems);
     
-      // Return the complete order with items
-      const createdOrder = await ordersCollection.findOne({ _id: orderId });
-      const items = await orderItemsCollection.find({ order_id: orderId }).toArray();
-    
-      return res.status(201).json({ 
-        order: { ...createdOrder, items } 
-      });
+        return res.status(201).json({ message: 'Order created successfully', orderId });
+      } catch (error) {
+        console.error('Error creating order:', error);
+        return res.status(500).json({ error: 'Failed to create order' });
+      }
     } else if (type === 'interiorConsulting') {
       // Existing logic for interior consulting
       const availabilityCollection = database.collection("consulting_availability");
@@ -384,6 +382,115 @@ export default async function handler(req, res) {
         sessions,
       });
 
+    } else if (type === 'createConsultingSession') {
+      const {
+        session_date,
+        session_type,
+        design_focus,
+        property_type,
+        duration,
+        client_requirements,
+        status,
+      } = req.body;
+    
+      const sessionsCollection = database.collection("consulting_sessions");
+    
+      try {
+        // Validate required fields
+        if (!session_date || !session_type || !status) {
+          throw new Error("Missing required fields: session_date, session_type, or status");
+        }
+    
+        const newSession = {
+          session_date: new Date(session_date),
+          session_type,
+          design_focus,
+          property_type,
+          duration,
+          client_requirements,
+          status,
+          created_at: new Date(),
+          updated_at: new Date(),
+        };
+    
+        const result = await sessionsCollection.insertOne(newSession);
+    
+        return res.status(201).json({
+          success: true,
+          session: { ...newSession, _id: result.insertedId },
+        });
+      } catch (error) {
+        console.error("Error creating consulting session:", error);
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+    } else if (type === 'getCart') {
+      const { userId } = req.query;
+    
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+    
+      const cartCollection = database.collection("cart");
+      const cartItemsCollection = database.collection("cart_items");
+    
+      try {
+        const cart = await cartCollection.findOne({ user_id: new ObjectId(userId) });
+    
+        if (!cart) {
+          return res.status(200).json({ cart: [], cartId: null });
+        }
+    
+        const cartItems = await cartItemsCollection
+          .find({ cart_id: cart._id })
+          .toArray();
+    
+        return res.status(200).json({ cart: cartItems, cartId: cart._id });
+      } catch (error) {
+        console.error("Error fetching cart:", error);
+        return res.status(500).json({ error: "Failed to fetch cart" });
+      }
+    } else if (type === 'updateCart') {
+      const { userId, cartItems } = req.body;
+    
+      if (!userId || !cartItems) {
+        return res.status(400).json({ error: 'User ID and cart items are required' });
+      }
+    
+      const cartCollection = database.collection("cart");
+      const cartItemsCollection = database.collection("cart_items");
+    
+      try {
+        let cart = await cartCollection.findOne({ user_id: new ObjectId(userId) });
+    
+        if (!cart) {
+          const newCart = {
+            user_id: new ObjectId(userId),
+            created_at: new Date(),
+          };
+          const result = await cartCollection.insertOne(newCart);
+          cart = { ...newCart, _id: result.insertedId };
+        }
+    
+        // Clear existing cart items
+        await cartItemsCollection.deleteMany({ cart_id: cart._id });
+    
+        // Insert new cart items
+        const itemsToInsert = cartItems.map((item) => ({
+          cart_id: cart._id,
+          product_id: new ObjectId(item.productId),
+          quantity: item.quantity,
+        }));
+    
+        await cartItemsCollection.insertMany(itemsToInsert);
+    
+        return res.status(200).json({ message: "Cart updated successfully" });
+      } catch (error) {
+        console.error("Error updating cart:", error);
+        return res.status(500).json({ error: "Failed to update cart" });
+      }
     } else if (type === 'categoriesAndProducts') {
       // Existing logic for categories and products
       const categories = database.collection("categories");

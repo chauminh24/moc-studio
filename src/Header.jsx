@@ -1,7 +1,28 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { CartContext } from "./context/CartContext";
 import { AuthContext } from "./context/AuthContext"; // Import AuthContext
+
+// Synchronize cart from backend when user logs in
+useEffect(() => {
+  const fetchCart = async () => {
+    if (user) {
+      const res = await fetch(`/api/connectDB?type=getCart&userId=${user.id}`);
+      const data = await res.json();
+      if (data.cart) {
+        localStorage.setItem("cart", JSON.stringify(data.cart));
+      }
+    }
+  };
+
+  fetchCart();
+}, [user]);
+
+// Initialize cart from local storage on component mount
+useEffect(() => {
+  const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+  setCart(storedCart);
+}, []);
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -63,10 +84,28 @@ const Header = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (user) {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      await fetch('/api/connectDB?type=updateCart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          cartItems: cart.map((item) => ({
+            productId: item.product_id,
+            quantity: item.quantity,
+          })),
+        }),
+      });
+    }
+
+    localStorage.removeItem("cart");
     logout();
     setIsAccountModalOpen(false);
-    navigate("/"); // Redirect to homepage after logout
+    navigate("/");
   };
 
 

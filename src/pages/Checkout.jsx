@@ -24,11 +24,6 @@ const Checkout = () => {
     country: '',
     postalCode: '',
     shippingMethod: 'standard',
-    paymentMethod: 'credit-card',
-    cardNumber: '',
-    cardExpiry: '',
-    cardCvc: '',
-    saveInfo: false
   });
   const [errors, setErrors] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
@@ -41,7 +36,7 @@ const Checkout = () => {
       subtotal: subtotal.toFixed(2),
       shipping: shipping.toFixed(2),
       tax: tax.toFixed(2),
-      total: (subtotal + shipping + tax).toFixed(2)
+      total: (subtotal + shipping + tax).toFixed(2),
     };
   };
 
@@ -55,7 +50,6 @@ const Checkout = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
     if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
     if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
@@ -63,20 +57,12 @@ const Checkout = () => {
     if (!formData.city.trim()) newErrors.city = 'City is required';
     if (!formData.country.trim()) newErrors.country = 'Country is required';
     if (!formData.postalCode.trim()) newErrors.postalCode = 'Postal code is required';
-
-    if (formData.paymentMethod === 'credit-card') {
-      if (!formData.cardNumber.trim()) newErrors.cardNumber = 'Card number is required';
-      if (!formData.cardExpiry.trim()) newErrors.cardExpiry = 'Expiry date is required';
-      if (!formData.cardCvc.trim()) newErrors.cardCvc = 'CVC is required';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     setIsProcessing(true);
@@ -85,17 +71,16 @@ const Checkout = () => {
       const orderData = {
         user_id: user?._id || null,
         items: cart.map(item => ({
-          product_id: new ObjectId(item._id),
+          product_id: item._id,
           quantity: item.quantity,
-          price_at_purchase: item.price
+          price_at_purchase: item.price,
         })),
         total_price: { $numberDecimal: calculateTotal().total },
         order_status: 'pending',
         shipping_address: `${formData.address}, ${formData.city}, ${formData.postalCode}`,
-        payment_method: formData.paymentMethod,
         shipping_method: formData.shippingMethod,
         placed_at: new Date(),
-        estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // +7 days
+        estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // +7 days
       };
 
       const response = await fetch('/api/connectdb?type=createOrder', {
@@ -103,7 +88,7 @@ const Checkout = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ orderData })
+        body: JSON.stringify({ orderData }),
       });
 
       if (!response.ok) {
@@ -344,94 +329,9 @@ const Checkout = () => {
             </div>
             
             {/* Payment Method */}
-            <div className="bg-white shadow-md rounded-lg p-6">
+            <div className="bg-white shadow-md rounded-lg p-6 opacity-50 pointer-events-none">
               <h2 className="text-xl font-semibold text-blue mb-6">Payment Method</h2>
-
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="credit-card"
-                    name="paymentMethod"
-                    value="credit-card"
-                    checked={formData.paymentMethod === 'credit-card'}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-orange focus:ring-orange"
-                  />
-                  <label htmlFor="credit-card" className="ml-3 block text-sm font-medium text-blue">
-                    Credit Card
-                  </label>
-                </div>
-
-                {formData.paymentMethod === 'credit-card' && (
-                  <div className="mt-4 space-y-4 pl-7">
-                    <div>
-                      <label className="block text-blue text-sm font-medium mb-1" htmlFor="cardNumber">
-                        Card Number *
-                      </label>
-                      <input
-                        type="text"
-                        id="cardNumber"
-                        name="cardNumber"
-                        value={formData.cardNumber}
-                        onChange={handleChange}
-                        placeholder="1234 5678 9012 3456"
-                        className={`w-full px-3 py-2 border ${errors.cardNumber ? 'border-red-500' : 'border-gray-300'} rounded focus:outline-none focus:ring-1 focus:ring-orange`}
-                      />
-                      {errors.cardNumber && <p className="mt-1 text-sm text-red-500">{errors.cardNumber}</p>}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-blue text-sm font-medium mb-1" htmlFor="cardExpiry">
-                          Expiry Date *
-                        </label>
-                        <input
-                          type="text"
-                          id="cardExpiry"
-                          name="cardExpiry"
-                          value={formData.cardExpiry}
-                          onChange={handleChange}
-                          placeholder="MM/YY"
-                          className={`w-full px-3 py-2 border ${errors.cardExpiry ? 'border-red-500' : 'border-gray-300'} rounded focus:outline-none focus:ring-1 focus:ring-orange`}
-                        />
-                        {errors.cardExpiry && <p className="mt-1 text-sm text-red-500">{errors.cardExpiry}</p>}
-                      </div>
-                      
-                      <div>
-                        <label className="block text-blue text-sm font-medium mb-1" htmlFor="cardCvc">
-                          CVC *
-                        </label>
-                        <input
-                          type="text"
-                          id="cardCvc"
-                          name="cardCvc"
-                          value={formData.cardCvc}
-                          onChange={handleChange}
-                          placeholder="123"
-                          className={`w-full px-3 py-2 border ${errors.cardCvc ? 'border-red-500' : 'border-gray-300'} rounded focus:outline-none focus:ring-1 focus:ring-orange`}
-                        />
-                        {errors.cardCvc && <p className="mt-1 text-sm text-red-500">{errors.cardCvc}</p>}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="paypal"
-                    name="paymentMethod"
-                    value="paypal"
-                    checked={formData.paymentMethod === 'paypal'}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-orange focus:ring-orange"
-                  />
-                  <label htmlFor="paypal" className="ml-3 block text-sm font-medium text-blue">
-                    PayPal
-                  </label>
-                </div>
-              </div>
+              <p className="text-sm text-gray-500">Payment is currently disabled. Your order will be created with a pending status.</p>
             </div>
           </div>
           
@@ -488,7 +388,7 @@ const Checkout = () => {
                 disabled={isProcessing}
                 className={`w-full mt-6 py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${isProcessing ? 'bg-gray-400' : 'bg-orange hover:bg-dark-orange'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange`}
               >
-                {isProcessing ? 'Processing...' : 'Complete Order'}
+                {isProcessing ? 'Processing...' : 'Place Order'}
               </button>
             </div>
           </div>
