@@ -3,27 +3,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { CartContext } from "./context/CartContext";
 import { AuthContext } from "./context/AuthContext"; // Import AuthContext
 
-// Synchronize cart from backend when user logs in
-useEffect(() => {
-  const fetchCart = async () => {
-    if (user) {
-      const res = await fetch(`/api/connectDB?type=getCart&userId=${user.id}`);
-      const data = await res.json();
-      if (data.cart) {
-        localStorage.setItem("cart", JSON.stringify(data.cart));
-      }
-    }
-  };
-
-  fetchCart();
-}, [user]);
-
-// Initialize cart from local storage on component mount
-useEffect(() => {
-  const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-  setCart(storedCart);
-}, []);
-
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSubcontent, setActiveSubcontent] = useState(null);
@@ -33,9 +12,33 @@ const Header = () => {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { cart, removeFromCart } = useContext(CartContext);
+  const { cart, setCart, removeFromCart } = useContext(CartContext);
   const navigate = useNavigate()
   const location = useLocation();
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      if (user) {
+        try {
+          const res = await fetch(`/api/connectDB?type=getCart&userId=${user.id}`);
+          const data = await res.json();
+          if (data.cart) {
+            localStorage.setItem("cart", JSON.stringify(data.cart));
+          }
+        } catch (error) {
+          console.error("Error fetching cart:", error);
+        }
+      }
+    };
+  
+    fetchCart(); // Ensure the function is invoked
+  }, [user]);
+  
+  // Initialize cart from local storage on component mount
+  useEffect(() => {
+    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCart(storedCart);
+  }, []);
 
   const toggleModal = () => {
     setIsOpen(!isOpen);
