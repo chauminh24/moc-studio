@@ -65,6 +65,7 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
+    localStorage.clear();
     setIsAccountModalOpen(false);
     navigate("/"); // Redirect to homepage after logout
   };

@@ -400,14 +400,19 @@ export default async function handler(req, res) {
           throw new Error("Missing required fields: session_date, session_type, or status");
         }
     
+        // Default designer_id (Admin)
+        const defaultDesignerId = new ObjectId("67fcfa22ee72f858ad940af6");
+    
+        // Create the consulting session
         const newSession = {
           session_date: new Date(session_date),
           session_type,
-          design_focus,
-          property_type,
-          duration,
-          client_requirements,
+          design_focus: design_focus || null,
+          property_type: property_type || null,
+          duration: duration || null,
+          client_requirements: client_requirements || {},
           status,
+          designer_id: defaultDesignerId, // Set default designer_id
           created_at: new Date(),
           updated_at: new Date(),
         };
@@ -424,6 +429,96 @@ export default async function handler(req, res) {
           success: false,
           error: error.message,
         });
+      }
+    }
+    else if (type === 'mergeCarts') {
+      const { userId, localCartItems } = req.body;
+    
+      if (!userId || !localCartItems) {
+        return res.status(400).json({ error: 'User ID and local cart items are required' });
+      }
+    
+      const cartsCollection = database.collection("cart");
+      const cartItemsCollection = database.collection("cart_items");
+    
+      try {
+        // Find or create the user's cart
+        let cart = await cartsCollection.findOne({ user_id: new ObjectId(userId) });
+        if (!cart) {
+          const result = await cartsCollection.insertOne({
+            user_id: new ObjectId(userId),
+            created_at: new Date(),
+          });
+          cart = { _id: result.insertedId };
+        }
+    
+        // Merge local cart items with database cart items
+        const dbCartItems = await cartItemsCollection.find({ cart_id: cart._id }).toArray();
+        const mergedCartItems = [...dbCartItems];
+    
+        localCartItems.forEach(localItem => {
+          const existingItem = mergedCartItems.find(item => item.product_id.equals(localItem.productId));
+          if (existingItem) {
+            existingItem.quantity += localItem.quantity;
+          } else {
+            mergedCartItems.push({
+              cart_id: cart._id,
+              product_id: new ObjectId(localItem.productId),
+              quantity: localItem.quantity,
+            });
+          }
+        });
+    
+        // Update the cart_items collection
+        await cartItemsCollection.deleteMany({ cart_id: cart._id }); // Clear existing items
+        await cartItemsCollection.insertMany(mergedCartItems.map(item => ({
+          cart_id: cart._id,
+          product_id: item.product_id,
+          quantity: item.quantity,
+        })));
+    
+        return res.status(200).json({ success: true, cart: mergedCartItems });
+      } catch (error) {
+        console.error("Error merging carts:", error);
+        return res.status(500).json({ error: 'Failed to merge carts' });
+      }
+    }
+    else if (type === 'saveCart') {
+      const { userId, cartItems } = req.body;
+    
+      if (!userId || !cartItems) {
+        return res.status(400).json({ error: 'User ID and cart items are required' });
+      }
+    
+      const cartsCollection = database.collection("cart");
+      const cartItemsCollection = database.collection("cart_items");
+    
+      try {
+        // Find or create the user's cart
+        let cart = await cartsCollection.findOne({ user_id: new ObjectId(userId) });
+        if (!cart) {
+          const result = await cartsCollection.insertOne({
+            user_id: new ObjectId(userId),
+            created_at: new Date(),
+          });
+          cart = { _id: result.insertedId };
+        }
+    
+        // Format cart items
+        const formattedCartItems = cartItems.map(item => ({
+          cart_id: cart._id,
+          product_id: new ObjectId(item.productId),
+          quantity: item.quantity,
+        }));
+    
+        // Update the cart_items collection
+        await cartItemsCollection.deleteMany({ cart_id: cart._id }); // Clear existing items
+        await cartItemsCollection.insertMany(formattedCartItems);
+    
+        return res.status(200).json({ success: true, message: 'Cart saved successfully' });
+      } catch (error) {
+        console.error("Error saving cart:", error);
+        return res.status(500).json({ error: 'Failed to save cart' });
       }
     }
     else if (type === 'categoriesAndProducts') {
