@@ -64,11 +64,11 @@ const Checkout = () => {
     if (!formData.country.trim()) newErrors.country = 'Country is required';
     if (!formData.postalCode.trim()) newErrors.postalCode = 'Postal code is required';
 
-    if (formData.paymentMethod === 'credit-card') {
-      if (!formData.cardNumber.trim()) newErrors.cardNumber = 'Card number is required';
-      if (!formData.cardExpiry.trim()) newErrors.cardExpiry = 'Expiry date is required';
-      if (!formData.cardCvc.trim()) newErrors.cardCvc = 'CVC is required';
-    }
+    // if (formData.paymentMethod === 'credit-card') {
+    //   if (!formData.cardNumber.trim()) newErrors.cardNumber = 'Card number is required';
+    //   if (!formData.cardExpiry.trim()) newErrors.cardExpiry = 'Expiry date is required';
+    //   if (!formData.cardCvc.trim()) newErrors.cardCvc = 'CVC is required';
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -175,7 +175,7 @@ const Checkout = () => {
                   />
                   {errors.firstName && <p className="mt-1 text-sm text-red-500">{errors.firstName}</p>}
                 </div>
-                
+
                 <div>
                   <label className="block text-blue text-sm font-medium mb-1" htmlFor="lastName">
                     Last Name *
@@ -251,7 +251,7 @@ const Checkout = () => {
                   />
                   {errors.city && <p className="mt-1 text-sm text-red-500">{errors.city}</p>}
                 </div>
-                
+
                 <div className="sm:col-span-1">
                   <label className="block text-blue text-sm font-medium mb-1" htmlFor="country">
                     Country *
@@ -272,7 +272,7 @@ const Checkout = () => {
                   </select>
                   {errors.country && <p className="mt-1 text-sm text-red-500">{errors.country}</p>}
                 </div>
-                
+
                 <div className="sm:col-span-1">
                   <label className="block text-blue text-sm font-medium mb-1" htmlFor="postalCode">
                     Postal Code *
@@ -303,7 +303,7 @@ const Checkout = () => {
                 </label>
               </div>
             </div>
-            
+
             {/* Shipping Method */}
             <div className="bg-white shadow-md rounded-lg p-6">
               <h2 className="text-xl font-semibold text-blue mb-6">Shipping Method</h2>
@@ -324,7 +324,7 @@ const Checkout = () => {
                     <span className="ml-2">(5-7 business days) - €5.00</span>
                   </label>
                 </div>
-                
+
                 <div className="flex items-center">
                   <input
                     type="radio"
@@ -342,99 +342,14 @@ const Checkout = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Payment Method */}
             <div className="bg-white shadow-md rounded-lg p-6">
               <h2 className="text-xl font-semibold text-blue mb-6">Payment Method</h2>
-
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="credit-card"
-                    name="paymentMethod"
-                    value="credit-card"
-                    checked={formData.paymentMethod === 'credit-card'}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-orange focus:ring-orange"
-                  />
-                  <label htmlFor="credit-card" className="ml-3 block text-sm font-medium text-blue">
-                    Credit Card
-                  </label>
-                </div>
-
-                {formData.paymentMethod === 'credit-card' && (
-                  <div className="mt-4 space-y-4 pl-7">
-                    <div>
-                      <label className="block text-blue text-sm font-medium mb-1" htmlFor="cardNumber">
-                        Card Number *
-                      </label>
-                      <input
-                        type="text"
-                        id="cardNumber"
-                        name="cardNumber"
-                        value={formData.cardNumber}
-                        onChange={handleChange}
-                        placeholder="1234 5678 9012 3456"
-                        className={`w-full px-3 py-2 border ${errors.cardNumber ? 'border-red-500' : 'border-gray-300'} rounded focus:outline-none focus:ring-1 focus:ring-orange`}
-                      />
-                      {errors.cardNumber && <p className="mt-1 text-sm text-red-500">{errors.cardNumber}</p>}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-blue text-sm font-medium mb-1" htmlFor="cardExpiry">
-                          Expiry Date *
-                        </label>
-                        <input
-                          type="text"
-                          id="cardExpiry"
-                          name="cardExpiry"
-                          value={formData.cardExpiry}
-                          onChange={handleChange}
-                          placeholder="MM/YY"
-                          className={`w-full px-3 py-2 border ${errors.cardExpiry ? 'border-red-500' : 'border-gray-300'} rounded focus:outline-none focus:ring-1 focus:ring-orange`}
-                        />
-                        {errors.cardExpiry && <p className="mt-1 text-sm text-red-500">{errors.cardExpiry}</p>}
-                      </div>
-                      
-                      <div>
-                        <label className="block text-blue text-sm font-medium mb-1" htmlFor="cardCvc">
-                          CVC *
-                        </label>
-                        <input
-                          type="text"
-                          id="cardCvc"
-                          name="cardCvc"
-                          value={formData.cardCvc}
-                          onChange={handleChange}
-                          placeholder="123"
-                          className={`w-full px-3 py-2 border ${errors.cardCvc ? 'border-red-500' : 'border-gray-300'} rounded focus:outline-none focus:ring-1 focus:ring-orange`}
-                        />
-                        {errors.cardCvc && <p className="mt-1 text-sm text-red-500">{errors.cardCvc}</p>}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="paypal"
-                    name="paymentMethod"
-                    value="paypal"
-                    checked={formData.paymentMethod === 'paypal'}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-orange focus:ring-orange"
-                  />
-                  <label htmlFor="paypal" className="ml-3 block text-sm font-medium text-blue">
-                    PayPal
-                  </label>
-                </div>
-              </div>
+              <p className="text-sm text-gray-500">Payment method will be processed later.</p>
             </div>
           </div>
-          
+
           {/* Right column - Order Summary */}
           <div className="mt-8 lg:mt-0">
             <div className="bg-white shadow-md rounded-lg p-6 sticky top-4">
@@ -466,17 +381,17 @@ const Checkout = () => {
                   <span className="text-sm text-blue">Subtotal</span>
                   <span className="text-sm text-blue">€{totals.subtotal}</span>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span className="text-sm text-blue">Shipping</span>
                   <span className="text-sm text-blue">€{totals.shipping}</span>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span className="text-sm text-blue">Tax</span>
                   <span className="text-sm text-blue">€{totals.tax}</span>
                 </div>
-                
+
                 <div className="flex justify-between border-t border-gray-200 pt-3 mt-3">
                   <span className="text-base font-medium text-blue">Total</span>
                   <span className="text-base font-medium text-blue">€{totals.total}</span>

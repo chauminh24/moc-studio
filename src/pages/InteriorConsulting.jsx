@@ -320,7 +320,7 @@ const InteriorConsulting = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                  className="px-6 py-2 bg-orange hover:bg-dark-orange text-white rounded-lg transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                 >
                   Book Session
                 </button>

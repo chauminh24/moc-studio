@@ -327,7 +327,8 @@ export default async function handler(req, res) {
       }
     
       return res.status(200).json({ message: 'User updated successfully' });
-    }else if (type === 'createOrder') {
+    }
+    else if (type === 'createOrder') {
       const { orderData } = req.body;
     
       if (!orderData || !orderData.items || orderData.items.length === 0) {
@@ -339,12 +340,13 @@ export default async function handler(req, res) {
     
       // Create the order document
       const newOrder = {
-        user_id: new ObjectId(orderData.userId),
-        total_price: { $numberDecimal: orderData.totalAmount.toString() },
+        user_id: orderData.user_id ? new ObjectId(orderData.user_id) : null,
+        total_price: { $numberDecimal: orderData.total_price.toString() },
         order_status: "pending",
-        shipping_address: orderData.shippingAddress,
+        shipping_address: orderData.shipping_address,
         placed_at: new Date(),
-        estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // +7 days
+        estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // +7 days
+        payment_method: orderData.payment_method || null, // Optional
       };
     
       // Insert the order
@@ -354,20 +356,14 @@ export default async function handler(req, res) {
       // Insert order items
       const orderItems = orderData.items.map(item => ({
         order_id: orderId,
-        product_id: new ObjectId(item.productId),
+        product_id: new ObjectId(item.product_id),
         quantity: item.quantity,
-        price_at_purchase: { $numberDecimal: item.price.$numberDecimal }
+        price_at_purchase: { $numberDecimal: item.price_at_purchase.toString() },
       }));
     
       await orderItemsCollection.insertMany(orderItems);
     
-      // Return the complete order with items
-      const createdOrder = await ordersCollection.findOne({ _id: orderId });
-      const items = await orderItemsCollection.find({ order_id: orderId }).toArray();
-    
-      return res.status(201).json({ 
-        order: { ...createdOrder, items } 
-      });
+      return res.status(201).json({ order: { ...newOrder, _id: orderId } });
     } else if (type === 'interiorConsulting') {
       // Existing logic for interior consulting
       const availabilityCollection = database.collection("consulting_availability");
