@@ -129,8 +129,12 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         message: 'Login successful',
-        user: { id: user._id, email: user.email, name: user.name, role: user.role },
-        token,
+        user: {
+          user_id: user._id, // Return _id as user_id
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        },        token,
       });
     } else if (type === 'forgot-password') {
       // Handle forgot password
