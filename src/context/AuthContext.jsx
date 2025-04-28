@@ -6,17 +6,6 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    // Load user data from localStorage on app load
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const userData = JSON.parse(storedUser);
-      setUser(userData);
-      // Check if user is admin
-      setIsAdmin(userData.role === "admin");
-    }
-  }, []);
-
   const login = (userData, token) => {
     if (!userData._id) {
       console.error("User data is missing _id:", userData);
@@ -27,6 +16,19 @@ const AuthProvider = ({ children }) => {
     setUser(userData);
     setIsAdmin(userData.role === "admin");
   };
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      if (!userData._id) {
+        console.error("Stored user data is missing _id:", userData);
+        return;
+      }
+      setUser(userData);
+      setIsAdmin(userData.role === "admin");
+    }
+  }, []);
 
   const logout = () => {
     localStorage.removeItem("user");

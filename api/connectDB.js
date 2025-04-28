@@ -130,11 +130,12 @@ export default async function handler(req, res) {
       return res.status(200).json({
         message: 'Login successful',
         user: {
-          user_id: user._id, // Return _id as user_id
+          _id: user._id, // Return _id as expected by the frontend
           email: user.email,
           name: user.name,
           role: user.role,
-        },        token,
+        },
+        token,
       });
     } else if (type === 'forgot-password') {
       // Handle forgot password
@@ -342,9 +343,8 @@ export default async function handler(req, res) {
       const ordersCollection = database.collection("orders");
       const orderItemsCollection = database.collection("order_items");
     
-      // Create the order document
       const newOrder = {
-        user_id: orderData.user_id ? new ObjectId(orderData.user_id) : null,
+        user_id: orderData.user_id ? new ObjectId(orderData.user_id) : null, // Allow null for guest users
         total_price: { $numberDecimal: orderData.total_price.toString() },
         order_status: "pending",
         shipping_address: orderData.shipping_address,
@@ -353,11 +353,9 @@ export default async function handler(req, res) {
         payment_method: orderData.payment_method || null, // Optional
       };
     
-      // Insert the order
       const orderResult = await ordersCollection.insertOne(newOrder);
       const orderId = orderResult.insertedId;
     
-      // Insert order items
       const orderItems = orderData.items.map(item => ({
         order_id: orderId,
         product_id: new ObjectId(item.product_id),
