@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { CartContext } from "./context/CartContext";
 import { AuthContext } from "./context/AuthContext"; // Import AuthContext
@@ -12,33 +12,9 @@ const Header = () => {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { cart, setCart, removeFromCart } = useContext(CartContext);
+  const { cart, removeFromCart } = useContext(CartContext);
   const navigate = useNavigate()
   const location = useLocation();
-
-  useEffect(() => {
-    const fetchCart = async () => {
-      if (user) {
-        try {
-          const res = await fetch(`/api/connectDB?type=getCart&userId=${user.id}`);
-          const data = await res.json();
-          if (data.cart) {
-            localStorage.setItem("cart", JSON.stringify(data.cart));
-          }
-        } catch (error) {
-          console.error("Error fetching cart:", error);
-        }
-      }
-    };
-  
-    fetchCart(); // Ensure the function is invoked
-  }, [user]);
-  
-  // Initialize cart from local storage on component mount
-  useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCart(storedCart);
-  }, []);
 
   const toggleModal = () => {
     setIsOpen(!isOpen);
@@ -87,28 +63,10 @@ const Header = () => {
     }
   };
 
-  const handleLogout = async () => {
-    if (user) {
-      const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      await fetch('/api/connectDB?type=updateCart', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          cartItems: cart.map((item) => ({
-            productId: item.product_id,
-            quantity: item.quantity,
-          })),
-        }),
-      });
-    }
-
-    localStorage.removeItem("cart");
+  const handleLogout = () => {
     logout();
     setIsAccountModalOpen(false);
-    navigate("/");
+    navigate("/"); // Redirect to homepage after logout
   };
 
 

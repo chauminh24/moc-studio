@@ -327,45 +327,47 @@ export default async function handler(req, res) {
       }
     
       return res.status(200).json({ message: 'User updated successfully' });
-    }     else if (type === 'createOrder') {
+    } else if (type === 'createOrder') {
       const { orderData } = req.body;
     
-      if (!orderData) {
-        return res.status(400).json({ error: 'Order data is required' });
+      if (!orderData || !orderData.items || orderData.items.length === 0) {
+        return res.status(400).json({ error: 'Invalid order data' });
       }
     
       const ordersCollection = database.collection("orders");
       const orderItemsCollection = database.collection("order_items");
     
-      try {
-        // Insert the order
-        const orderResult = await ordersCollection.insertOne({
-          user_id: orderData.user_id ? new ObjectId(orderData.user_id) : null,
-          total_price: orderData.total_price,
-          order_status: 'pending',
-          shipping_address: orderData.shipping_address,
-          placed_at: new Date(orderData.placed_at),
-          estimated_delivery: new Date(orderData.estimated_delivery),
-          shipping_method: orderData.shipping_method,
-        });
+      // Create the order document
+      const newOrder = {
+        user_id: new ObjectId(orderData.userId),
+        total_price: { $numberDecimal: orderData.totalAmount.toString() },
+        order_status: "pending",
+        shipping_address: orderData.shippingAddress,
+        placed_at: new Date(),
+        estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // +7 days
+      };
     
-        const orderId = orderResult.insertedId;
+      // Insert the order
+      const orderResult = await ordersCollection.insertOne(newOrder);
+      const orderId = orderResult.insertedId;
     
-        // Insert order items
-        const orderItems = orderData.items.map(item => ({
-          order_id: orderId,
-          product_id: new ObjectId(item.product_id),
-          quantity: item.quantity,
-          price_at_purchase: item.price_at_purchase,
-        }));
+      // Insert order items
+      const orderItems = orderData.items.map(item => ({
+        order_id: orderId,
+        product_id: new ObjectId(item.productId),
+        quantity: item.quantity,
+        price_at_purchase: { $numberDecimal: item.price.$numberDecimal }
+      }));
     
-        await orderItemsCollection.insertMany(orderItems);
+      await orderItemsCollection.insertMany(orderItems);
     
-        return res.status(201).json({ message: 'Order created successfully', orderId });
-      } catch (error) {
-        console.error('Error creating order:', error);
-        return res.status(500).json({ error: 'Failed to create order' });
-      }
+      // Return the complete order with items
+      const createdOrder = await ordersCollection.findOne({ _id: orderId });
+      const items = await orderItemsCollection.find({ order_id: orderId }).toArray();
+    
+      return res.status(201).json({ 
+        order: { ...createdOrder, items } 
+      });
     } else if (type === 'interiorConsulting') {
       // Existing logic for interior consulting
       const availabilityCollection = database.collection("consulting_availability");
@@ -452,7 +454,7 @@ export default async function handler(req, res) {
         console.error("Error fetching cart:", error);
         return res.status(500).json({ error: "Failed to fetch cart" });
       }
-    } else if (type === 'updateCart') {
+    } else if (type === 'saveCart') {
       const { userId, cartItems } = req.body;
     
       if (!userId || !cartItems) {
@@ -486,10 +488,66 @@ export default async function handler(req, res) {
     
         await cartItemsCollection.insertMany(itemsToInsert);
     
-        return res.status(200).json({ message: "Cart updated successfully" });
+        return res.status(200).json({ message: "Cart saved successfully" });
       } catch (error) {
-        console.error("Error updating cart:", error);
-        return res.status(500).json({ error: "Failed to update cart" });
+        console.error("Error saving cart:", error);
+        return res.status(500).json({ error: "Failed to save cart" });
+      }
+    } // Additional backend endpoint for merging carts
+    else if (type === 'mergeCarts') {
+      const { userId, localCartItems } = req.body;
+    
+      if (!userId || !localCartItems) {
+        return res.status(400).json({ error: 'User ID and local cart items are required' });
+      }
+    
+      const cartCollection = database.collection("cart");
+      const cartItemsCollection = database.collection("cart_items");
+    
+      try {
+        let cart = await cartCollection.findOne({ user_id: new ObjectId(userId) });
+    
+        if (!cart) {
+          const newCart = {
+            user_id: new ObjectId(userId),
+            created_at: new Date(),
+          };
+          const result = await cartCollection.insertOne(newCart);
+          cart = { ...newCart, _id: result.insertedId };
+        }
+    
+        // Get current cart items
+        const currentItems = await cartItemsCollection
+          .find({ cart_id: cart._id })
+          .toArray();
+    
+        // Merge items
+        const mergedItems = [...currentItems];
+        
+        for (const localItem of localCartItems) {
+          const existingItem = mergedItems.find(
+            item => item.product_id.toString() === localItem.productId
+          );
+          
+          if (existingItem) {
+            existingItem.quantity += localItem.quantity;
+          } else {
+            mergedItems.push({
+              cart_id: cart._id,
+              product_id: new ObjectId(localItem.productId),
+              quantity: localItem.quantity
+            });
+          }
+        }
+    
+        // Update database with merged cart
+        await cartItemsCollection.deleteMany({ cart_id: cart._id });
+        await cartItemsCollection.insertMany(mergedItems);
+    
+        return res.status(200).json({ cart: mergedItems, cartId: cart._id });
+      } catch (error) {
+        console.error("Error merging carts:", error);
+        return res.status(500).json({ error: "Failed to merge carts" });
       }
     } else if (type === 'categoriesAndProducts') {
       // Existing logic for categories and products
