@@ -384,7 +384,53 @@ export default async function handler(req, res) {
         sessions,
       });
 
-    } else if (type === 'categoriesAndProducts') {
+    } 
+    else if (type === 'createConsultingSession') {
+      const {
+        session_date,
+        session_type,
+        design_focus,
+        property_type,
+        duration,
+        client_requirements,
+        status,
+      } = req.body;
+    
+      const sessionsCollection = database.collection("consulting_sessions");
+    
+      try {
+        // Validate required fields
+        if (!session_date || !session_type || !status) {
+          throw new Error("Missing required fields: session_date, session_type, or status");
+        }
+    
+        const newSession = {
+          session_date: new Date(session_date),
+          session_type,
+          design_focus,
+          property_type,
+          duration,
+          client_requirements,
+          status,
+          created_at: new Date(),
+          updated_at: new Date(),
+        };
+    
+        const result = await sessionsCollection.insertOne(newSession);
+    
+        return res.status(201).json({
+          success: true,
+          session: { ...newSession, _id: result.insertedId },
+        });
+      } catch (error) {
+        console.error("Error creating consulting session:", error);
+        return res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+      }
+    }
+    else if (type === 'categoriesAndProducts') {
       // Existing logic for categories and products
       const categories = database.collection("categories");
       const products = database.collection("products");
