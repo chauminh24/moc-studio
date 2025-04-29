@@ -90,10 +90,12 @@ const Checkout = () => {
           email: formData.email,
           phone: formData.phone,
         },
+        shipping_method: formData.shippingMethod,
         payment_method: formData.paymentMethod,
         placed_at: new Date(),
         estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       };
+      
       
 
       const response = await fetch('/api/connectDB?type=createOrder', {
