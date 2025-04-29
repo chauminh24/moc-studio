@@ -25,16 +25,14 @@ const Checkout = () => {
     postalCode: '',
     shippingMethod: 'standard',
     paymentMethod: 'credit-card',
-    cardNumber: '',
-    cardExpiry: '',
-    cardCvc: '',
     saveInfo: false
   });
+
   const [errors, setErrors] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
 
   const calculateTotal = () => {
-    const subtotal = cart.reduce((sum, item) => sum + (parseFloat(item.price.$numberDecimal) * item.quantity), 0);
+    const subtotal = cart.reduce((sum, item) => sum + (parseFloat(item.price?.$numberDecimal || item.price) * item.quantity), 0);
     const shipping = formData.shippingMethod === 'express' ? 15 : 5;
     const tax = subtotal * 0.1; // 10% tax
     return {
@@ -55,7 +53,6 @@ const Checkout = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
     if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
     if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
@@ -63,59 +60,62 @@ const Checkout = () => {
     if (!formData.city.trim()) newErrors.city = 'City is required';
     if (!formData.country.trim()) newErrors.country = 'Country is required';
     if (!formData.postalCode.trim()) newErrors.postalCode = 'Postal code is required';
-
-    // if (formData.paymentMethod === 'credit-card') {
-    //   if (!formData.cardNumber.trim()) newErrors.cardNumber = 'Card number is required';
-    //   if (!formData.cardExpiry.trim()) newErrors.cardExpiry = 'Expiry date is required';
-    //   if (!formData.cardCvc.trim()) newErrors.cardCvc = 'CVC is required';
-    // }
-
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
     if (!validateForm()) return;
-  
     setIsProcessing(true);
-  
+
     try {
       const orderData = {
         user_id: user?._id || null,
         items: cart.map(item => ({
-          product_id: item._id, // Use item._id directly
+          product_id: item._id,
+          name: item.name,
           quantity: item.quantity,
-          price_at_purchase: item.price
+          price: parseFloat(item.price?.$numberDecimal || item.price)
         })),
-        total_price: { $numberDecimal: calculateTotal().total },
+        total: parseFloat(calculateTotal().total),
         order_status: 'pending',
-        shipping_address: `${formData.address}, ${formData.city}, ${formData.postalCode}`,
+        shipping_info: {
+          address: formData.address,
+          city: formData.city,
+          postalCode: formData.postalCode,
+          country: formData.country
+        },
         shipping_method: formData.shippingMethod,
-        placed_at: new Date(),
-        estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // +7 days
+        contact_info: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone
+        },
+        placed_at: new Date().toISOString(),
+        estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       };
-  
-      console.log("Order Data:", orderData);
-  
-      const response = await fetch('/api/connectDB?type=createOrder', {
+
+      // Simulate API call - replace with your actual API endpoint
+      const response = await fetch('/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ orderData })
+        body: JSON.stringify(orderData)
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to create order');
       }
-  
-      clearCart(); // Clear the cart after successful order creation
-      navigate('/order-confirmation', { state: { order: orderData } }); // Pass orderData to the confirmation page
+
+      clearCart();
+      navigate('/order-confirmation', { state: { order: orderData } });
     } catch (error) {
       console.error('Checkout error:', error);
-      setErrors({ form: error.message });
+      setErrors({ form: 'There was an error processing your order. Please try again.' });
     } finally {
       setIsProcessing(false);
     }
