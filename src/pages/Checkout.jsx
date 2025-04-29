@@ -98,13 +98,12 @@ const Checkout = () => {
         estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       };
 
-      // Simulate API call - replace with your actual API endpoint
-      const response = await fetch('/api/orders', {
+      const response = await fetch('/api/connectDB?type=createOrder', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(orderData)
+        body: JSON.stringify({ orderData }),
       });
 
       if (!response.ok) {
