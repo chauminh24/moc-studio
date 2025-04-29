@@ -75,28 +75,26 @@ const Checkout = () => {
         user_id: user?._id || null,
         items: cart.map(item => ({
           product_id: item._id,
-          name: item.name,
           quantity: item.quantity,
-          price: parseFloat(item.price?.$numberDecimal || item.price)
+          price_at_purchase: parseFloat(item.price?.$numberDecimal || item.price),
         })),
-        total: parseFloat(calculateTotal().total),
+        total_price: parseFloat(calculateTotal().total),
         order_status: 'pending',
-        shipping_info: {
+        shipping_address: {
           address: formData.address,
           city: formData.city,
           postalCode: formData.postalCode,
-          country: formData.country
-        },
-        shipping_method: formData.shippingMethod,
-        contact_info: {
+          country: formData.country,
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
-          phone: formData.phone
+          phone: formData.phone,
         },
-        placed_at: new Date().toISOString(),
-        estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        payment_method: formData.paymentMethod,
+        placed_at: new Date(),
+        estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       };
+      
 
       const response = await fetch('/api/connectDB?type=createOrder', {
         method: 'POST',
