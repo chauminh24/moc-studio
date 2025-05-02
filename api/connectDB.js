@@ -347,8 +347,8 @@ export default async function handler(req, res) {
     
       try {
         const orderResult = await ordersCollection.insertOne(newOrder);
-        console.log("✅ Order inserted with ID:", orderResult.insertedId);
-      } catch (error) {
+        const orderId = orderResult.insertedId; // ✅ FIXED
+        console.log("✅ Order inserted with ID:", orderId);      } catch (error) {
         console.error("❌ Failed to insert order:", error);
         return res.status(500).json({ error: "Insert failed", details: error.message });
       }
