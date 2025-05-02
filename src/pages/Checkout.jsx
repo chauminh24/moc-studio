@@ -111,7 +111,7 @@ const Checkout = () => {
       }
 
       clearCart();
-      navigate('/order-confirmation', { state: { order: orderData } });
+      navigate('/order-confirmation');
     } catch (error) {
       console.error('Checkout error:', error);
       setErrors({ form: 'There was an error processing your order. Please try again.' });
