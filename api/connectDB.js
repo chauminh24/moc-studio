@@ -345,16 +345,19 @@ export default async function handler(req, res) {
         estimated_delivery: new Date(orderData.estimated_delivery),
       };
     
+      let orderId; // ✅ declare here
+    
       try {
         const orderResult = await ordersCollection.insertOne(newOrder);
-        const orderId = orderResult.insertedId; // ✅ FIXED
-        console.log("✅ Order inserted with ID:", orderId);      } catch (error) {
+        orderId = orderResult.insertedId; // ✅ assign here
+        console.log("✅ Order inserted with ID:", orderId);
+      } catch (error) {
         console.error("❌ Failed to insert order:", error);
         return res.status(500).json({ error: "Insert failed", details: error.message });
       }
     
       const orderItems = orderData.items.map(item => ({
-        order_id: orderId,
+        order_id: orderId, // ✅ now works
         product_id: new ObjectId(item.product_id),
         quantity: parseInt(item.quantity),
         price_at_purchase: Decimal128.fromString(item.price_at_purchase.toString()),
@@ -366,6 +369,7 @@ export default async function handler(req, res) {
     
       return res.status(201).json({ order: { ...newOrder, _id: orderId } });
     }
+    
      else if (type === 'interiorConsulting') {
       // Existing logic for interior consulting
       const availabilityCollection = database.collection("consulting_availability");
