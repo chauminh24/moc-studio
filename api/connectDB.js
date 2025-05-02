@@ -324,38 +324,44 @@ export default async function handler(req, res) {
     }
     else if (type === 'createOrder') {
       const { orderData } = req.body;
-
+    
+      console.log("Received orderData:", JSON.stringify(orderData, null, 2));
+    
       if (!orderData || !orderData.items || orderData.items.length === 0) {
         return res.status(400).json({ error: 'Invalid order data' });
       }
-
+    
       const ordersCollection = database.collection("orders");
       const orderItemsCollection = database.collection("order_items");
-
+    
       const newOrder = {
-        user_id: orderData.user_id ? new ObjectId(orderData.user_id) : null, // Allow null for guest users
-        total_price: { $numberDecimal: orderData.total_price.toString() },
+        user_id: orderData.user_id ? new ObjectId(orderData.user_id) : null,
+        total_price: Decimal128.fromString(orderData.total_price.toString()),
         order_status: "pending",
         shipping_address: orderData.shipping_address,
-        placed_at: new Date(),
-        estimated_delivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // +7 days
-        payment_method: orderData.payment_method || null, // Optional
+        shipping_method: orderData.shipping_method || null,
+        payment_method: orderData.payment_method || null,
+        placed_at: new Date(orderData.placed_at),
+        estimated_delivery: new Date(orderData.estimated_delivery),
       };
-
+    
       const orderResult = await ordersCollection.insertOne(newOrder);
       const orderId = orderResult.insertedId;
-
+    
       const orderItems = orderData.items.map(item => ({
         order_id: orderId,
         product_id: new ObjectId(item.product_id),
-        quantity: item.quantity,
-        price_at_purchase: { $numberDecimal: item.price_at_purchase.toString() },
+        quantity: parseInt(item.quantity),
+        price_at_purchase: Decimal128.fromString(item.price_at_purchase.toString()),
       }));
-
+    
+      console.log("Prepared orderItems:", orderItems);
+    
       await orderItemsCollection.insertMany(orderItems);
-
+    
       return res.status(201).json({ order: { ...newOrder, _id: orderId } });
-    } else if (type === 'interiorConsulting') {
+    }
+     else if (type === 'interiorConsulting') {
       // Existing logic for interior consulting
       const availabilityCollection = database.collection("consulting_availability");
       const projectsCollection = database.collection("interior_projects");
