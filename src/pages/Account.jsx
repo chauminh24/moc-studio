@@ -74,7 +74,7 @@ const Account = () => {
   }
 
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-beige">
+    <div className="min-h-screen pt-[10em] pb-20 px-4 sm:px-6 lg:px-8 bg-beige">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-blue mb-2">MY ACCOUNT</h1>

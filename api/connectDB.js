@@ -271,21 +271,40 @@ export default async function handler(req, res) {
     }
     else if (type === 'userOrders') {
       const { userId } = req.query;
-    
-      if (!userId) {
-        return res.status(400).json({ error: 'User ID is required' });
+
+      if (!userId || !ObjectId.isValid(userId)) {
+        return res.status(400).json({ error: 'Valid user ID is required' });
       }
-    
+
       try {
         const ordersCollection = database.collection('orders');
-        const orders = await ordersCollection.find({ user_id: new ObjectId(userId) }).toArray();
-    
-        return res.status(200).json({ orders });
+        const orderItemsCollection = database.collection('order_items');
+
+        const orders = await ordersCollection
+          .find({ user_id: new ObjectId(userId) })
+          .sort({ placed_at: -1 })
+          .toArray();
+
+        // Fetch items for each order
+        const orderIds = orders.map(order => order._id);
+        const items = await orderItemsCollection
+          .find({ order_id: { $in: orderIds } })
+          .toArray();
+
+        // Attach items to orders
+        const ordersWithItems = orders.map(order => ({
+          ...order,
+          items: items.filter(item => item.order_id.toString() === order._id.toString())
+        }));
+
+        return res.status(200).json({ orders: ordersWithItems });
       } catch (error) {
         console.error('Error fetching user orders:', error);
         return res.status(500).json({ error: 'Failed to fetch user orders' });
       }
-    } else if (type === 'updateUser') {
+    }
+
+    else if (type === 'updateUser') {
       const { userId, name, currentPassword, newPassword } = req.body;
 
       if (!userId) {
@@ -324,16 +343,16 @@ export default async function handler(req, res) {
     }
     else if (type === 'createOrder') {
       const { orderData } = req.body;
-    
+
       console.log("Received orderData:", JSON.stringify(orderData, null, 2));
-    
+
       if (!orderData || !orderData.items || orderData.items.length === 0) {
         return res.status(400).json({ error: 'Invalid order data' });
       }
-    
+
       const ordersCollection = database.collection("orders");
       const orderItemsCollection = database.collection("order_items");
-    
+
       const newOrder = {
         user_id: orderData.user_id ? new ObjectId(orderData.user_id) : null,
         total_price: Decimal128.fromString(orderData.total_price.toString()),
@@ -344,9 +363,9 @@ export default async function handler(req, res) {
         placed_at: new Date(orderData.placed_at),
         estimated_delivery: new Date(orderData.estimated_delivery),
       };
-    
+
       let orderId; // ✅ declare here
-    
+
       try {
         const orderResult = await ordersCollection.insertOne(newOrder);
         orderId = orderResult.insertedId; // ✅ assign here
@@ -355,22 +374,22 @@ export default async function handler(req, res) {
         console.error("❌ Failed to insert order:", error);
         return res.status(500).json({ error: "Insert failed", details: error.message });
       }
-    
+
       const orderItems = orderData.items.map(item => ({
         order_id: orderId, // ✅ now works
         product_id: new ObjectId(item.product_id),
         quantity: parseInt(item.quantity),
         price_at_purchase: Decimal128.fromString(item.price_at_purchase.toString()),
       }));
-    
+
       console.log("Prepared orderItems:", orderItems);
-    
+
       await orderItemsCollection.insertMany(orderItems);
-    
+
       return res.status(201).json({ order: { ...newOrder, _id: orderId } });
     }
-    
-     else if (type === 'interiorConsulting') {
+
+    else if (type === 'interiorConsulting') {
       // Existing logic for interior consulting
       const availabilityCollection = database.collection("consulting_availability");
       const projectsCollection = database.collection("interior_projects");
@@ -476,7 +495,7 @@ export default async function handler(req, res) {
 
     else if (type === 'adminOrders') {
       const ordersCollection = database.collection("orders");
-      const orders = await ordersCollection.find({}).sort({ createdAt: -1 }).toArray();
+      const orders = await ordersCollection.find({}).sort({ placed_at: -1 }).toArray();
       return res.status(200).json({ orders });
     }
 

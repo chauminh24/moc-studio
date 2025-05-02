@@ -166,13 +166,13 @@ const AdminDashboard = () => {
     setIsLoading(true);
     setError(null);
     setSuccessMessage("");
-  
+
     try {
       // Validate form data
       if (!newMedia.product_id || !newMedia.file_path) {
         throw new Error("Product and file path are required");
       }
-  
+
       const response = await fetch("/api/connectDB?type=addProductMedia", {
         method: "POST",
         headers: {
@@ -185,18 +185,18 @@ const AdminDashboard = () => {
           },
         }),
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.error || data.message || "Failed to add media");
       }
-  
+
       // Refresh media list
       const mediaResponse = await fetch("/api/connectDB?type=adminMedia");
       const newMediaData = await mediaResponse.json();
       setMedia(newMediaData.media);
-  
+
       // Reset form and show success
       setNewMedia({
         product_id: "",
@@ -204,7 +204,7 @@ const AdminDashboard = () => {
         media_type: "image",
         is_primary: false,
       });
-  
+
       setSuccessMessage("Media added successfully!");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
@@ -465,17 +465,17 @@ const AdminDashboard = () => {
                           {order._id.substring(0, 8)}...
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {order.customer.name} ({order.customer.email})
+                          {order.shipping_address.firstName} {order.shipping_address.lastName} ({order.shipping_address.email})
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(order.createdAt).toLocaleDateString()}
+                          {new Date(order.placed_at).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          €{order.total.$numberDecimal}
+                          €{order.total_price?.$numberDecimal || order.total_price}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <select
-                            value={order.status}
+                            value={order.order_status}
                             onChange={(e) => updateOrderStatus(order._id, e.target.value)}
                             className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue focus:border-blue sm:text-sm rounded-md"
                           >
@@ -495,6 +495,7 @@ const AdminDashboard = () => {
                           </Link>
                         </td>
                       </tr>
+
                     ))
                   ) : (
                     <tr>

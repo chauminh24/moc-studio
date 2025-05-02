@@ -7,7 +7,7 @@ const OrderConfirmation = () => {
   const order = state?.order;
 
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-beige">
+    <div className="min-h-screen pt-[10em] pb-20 px-4 sm:px-6 lg:px-8 bg-beige">
       <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-8 text-center">
         <div className="mb-6">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-green-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -38,7 +38,7 @@ const OrderConfirmation = () => {
             Continue Shopping
           </button>
           <button
-            onClick={() => navigate('/account/orders')}
+            onClick={() => navigate('/orders')}
             className="px-6 py-2 border border-blue text-blue rounded hover:bg-blue-50"
           >
             View My Orders

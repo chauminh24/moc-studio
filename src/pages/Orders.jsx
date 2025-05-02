@@ -10,7 +10,7 @@ const Orders = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!user || user.role === 'admin') {
+    if (!user || !user._id || user.role === 'admin') {
       navigate('/');
       return;
     }
@@ -82,12 +82,12 @@ const Orders = () => {
         ) : (
           <div className="space-y-8">
             {orders.map((order) => (
-              <div key={order._id.toString()} className="bg-white shadow-md rounded-lg overflow-hidden">
+              <div key={order._id} className="bg-white shadow-md rounded-lg overflow-hidden">
                 <div className="p-6 border-b border-gray-200">
                   <div className="flex flex-col sm:flex-row justify-between">
                     <div className="mb-4 sm:mb-0">
                       <h2 className="text-lg font-semibold text-blue">
-                        Order #{order._id.toString().slice(-6).toUpperCase()}
+                        Order #{order._id.slice(-6).toUpperCase()}
                       </h2>
                       <p className="text-sm text-gray-500">
                         Placed on {formatDate(order.placed_at)}
@@ -101,10 +101,11 @@ const Orders = () => {
                   </div>
                 </div>
 
+                {/* Order Items */}
                 <div className="p-6">
                   <div className="space-y-6">
-                    {order.items.map((item) => (
-                      <div key={item._id.toString()} className="flex flex-col sm:flex-row">
+                    {order.items?.map((item, index) => (
+                      <div key={index} className="flex flex-col sm:flex-row">
                         <div className="flex-shrink-0 mb-4 sm:mb-0 sm:mr-6">
                           <div className="w-20 h-20 bg-gray-200 rounded-md"></div>
                         </div>
@@ -122,6 +123,7 @@ const Orders = () => {
                   </div>
                 </div>
 
+                {/* Total & Action */}
                 <div className="p-6 border-t border-gray-200 bg-gray-50">
                   <div className="flex justify-between items-center">
                     <div>
