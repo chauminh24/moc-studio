@@ -345,8 +345,13 @@ export default async function handler(req, res) {
         estimated_delivery: new Date(orderData.estimated_delivery),
       };
     
-      const orderResult = await ordersCollection.insertOne(newOrder);
-      const orderId = orderResult.insertedId;
+      try {
+        const orderResult = await ordersCollection.insertOne(newOrder);
+        console.log("✅ Order inserted with ID:", orderResult.insertedId);
+      } catch (error) {
+        console.error("❌ Failed to insert order:", error);
+        return res.status(500).json({ error: "Insert failed", details: error.message });
+      }
     
       const orderItems = orderData.items.map(item => ({
         order_id: orderId,
