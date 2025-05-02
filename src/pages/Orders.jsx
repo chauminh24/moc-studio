@@ -17,7 +17,7 @@ const Orders = () => {
 
     const fetchOrders = async () => {
       try {
-        const response = await fetch(`/api/connectdb?type=userOrders&userId=${user._id}`);
+        const response = await fetch(`/api/connectDB?type=userOrders&userId=${user._id}`);
         if (!response.ok) throw new Error('Failed to fetch orders');
         const data = await response.json();
         setOrders(data.orders);
