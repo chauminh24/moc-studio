@@ -16,6 +16,8 @@ const Header = () => {
   const navigate = useNavigate()
   const location = useLocation();
 
+  const isHomePage = location.pathname === "/";
+
   const toggleModal = () => {
     setIsOpen(!isOpen);
     setActiveSubcontent(null); // Reset subcontent when modal is toggled
@@ -217,7 +219,11 @@ const Header = () => {
 
 
   return (
-    <header className="fixed w-full z-10">
+    <header
+      className={`fixed w-full z-10 ${
+        isHomePage ? "bg-transparent" : "bg-white"
+      }`}
+    >
       <div className="w-full h-[1rem] bg-blue mb-4"></div>
 
       {/* Top Row: Toggle, Logo, Search, Login, Shopping Bag */}

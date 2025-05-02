@@ -9,6 +9,10 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [showTooltip, setShowTooltip] = useState(false);
+
+
   useEffect(() => {
     if (!user || !user._id || user.role === 'admin') {
       navigate('/');
@@ -30,6 +34,16 @@ const Orders = () => {
 
     fetchOrders();
   }, [user, navigate]);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setCursorPosition({ x: e.clientX, y: e.clientY });
+    };
+  
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+  
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -54,7 +68,7 @@ const Orders = () => {
   if (!user || user.role === 'admin') return null;
 
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-beige">
+    <div className="min-h-screen pt-[10em] pb-20 px-4 sm:px-6 lg:px-8 bg-beige">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-blue mb-2">MY ORDERS</h1>
@@ -113,8 +127,8 @@ const Orders = () => {
                           <h3 className="text-md font-medium text-blue">{item.name || 'Product'}</h3>
                           <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
                           <p className="text-sm text-blue mt-1">
-                            €{typeof item.price_at_purchase === 'object' 
-                              ? item.price_at_purchase.$numberDecimal 
+                            €{typeof item.price_at_purchase === 'object'
+                              ? item.price_at_purchase.$numberDecimal
                               : item.price_at_purchase}
                           </p>
                         </div>
@@ -129,17 +143,20 @@ const Orders = () => {
                     <div>
                       <p className="text-sm text-gray-500">Total</p>
                       <p className="text-lg font-semibold text-blue">
-                        €{typeof order.total_price === 'object' 
-                          ? order.total_price.$numberDecimal 
+                        €{typeof order.total_price === 'object'
+                          ? order.total_price.$numberDecimal
                           : order.total_price}
                       </p>
                     </div>
                     <button
-                      onClick={() => navigate(`/orders/${order._id}`)}
-                      className="px-4 py-2 border border-orange text-orange rounded hover:bg-orange hover:text-white"
+                      disabled
+                      onMouseEnter={() => setShowTooltip(true)}
+                      onMouseLeave={() => setShowTooltip(false)}
+                      className="px-4 py-2 border border-orange text-orange rounded cursor-not-allowed bg-opacity-50"
                     >
                       View Details
                     </button>
+
                   </div>
                 </div>
               </div>
@@ -147,7 +164,20 @@ const Orders = () => {
           </div>
         )}
       </div>
+      {showTooltip && (
+        <div
+          className="fixed z-50 pointer-events-none bg-orange text-white px-3 py-1 rounded-full text-sm whitespace-nowrap"
+          style={{
+            left: `${cursorPosition.x + 20}px`,
+            top: `${cursorPosition.y + 20}px`
+          }}
+        >
+          COMING SOON
+        </div>
+      )}
+
     </div>
+
   );
 };
 

@@ -16,6 +16,7 @@
 @theme {
   --color-*: initial;
   --color-white: #fff;
+  --color-transparent: transparent;
   --color-orange: #FE6C23;
   --color-light-orange: #FF884D;
   --color-dark-orange: #FF6F3C;
