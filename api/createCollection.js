@@ -9,9 +9,9 @@ async function run() {
     const db = client.db("moc-studio");
 
 
-    // Drop old collections
-    await db.collection("orders").drop().catch(() => { });
-    await db.collection("order_items").drop().catch(() => { });
+    // // Drop old collections
+    // await db.collection("orders").drop().catch(() => { });
+    // await db.collection("order_items").drop().catch(() => { });
 
     // Create new orders collection
     await db.createCollection("orders", {
